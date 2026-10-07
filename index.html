@@ -3,417 +3,560 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111111">
-<meta name="description" content="yoon57296 — Ideas into real things. 스크롤로 탐색하는 실험적인 개발 포트폴리오 시연품.">
-<title>yoon57296 — Make it real.</title>
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="yoon57296 — 호기심을 실제로 작동하는 것으로 만드는 1인 디지털 스튜디오. 스크롤로 탐색하는 실험적인 개발 포트폴리오.">
+<title>yoon. — making curious things that work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,800;125,900&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
-:root{--ink:#111;--paper:#eeede7;--orange:#ff5c28;--line:#ffffff26;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+:root{--bg:#000;--fg:#e6e6e6;--dim:#8a8a8a;--mute:#4d4d4d;--line:#1f1f1f;--cell:#0a0a0a;--orange:#ff4d00;--mono:"Geist Mono",ui-monospace,SFMono-Regular,Consolas,monospace;--gut:16px}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:76px}
-body{margin:0;background:var(--ink);color:var(--paper);font-family:"Space Grotesk",Arial,"Malgun Gothic",sans-serif;overflow-x:clip}
+html{scroll-behavior:smooth;scroll-padding-top:56px}
+body{margin:0;background:var(--bg);color:var(--fg);font:500 13px/1.35 "Geist",Arial,"Malgun Gothic",sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-button{font:inherit;cursor:pointer}
-button,a{-webkit-tap-highlight-color:transparent}
-a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--orange);outline-offset:6px}
-::selection{background:var(--orange);color:var(--ink)}
-.skip{position:fixed;top:-100px;left:20px;z-index:20;background:var(--paper);color:var(--ink);padding:15px}.skip:focus{top:80px}
-.nav{position:fixed;z-index:10;inset:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:22px 3%;background:#111e;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
-.brand{font-weight:700;font-size:21px;letter-spacing:-1px}.brand sup{color:var(--orange);font-size:13px;margin-left:3px}
-.nav-links{display:flex;align-items:center;gap:28px;font:11px var(--mono);letter-spacing:.04em}
-.nav-links a:hover{color:var(--orange)}
-.motion{border:1px solid #777;border-radius:30px;padding:8px 12px;background:transparent;color:inherit;font:10px var(--mono)}
-.motion::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--orange);margin-right:7px}
-.micro{font:11px/1.6 var(--mono);letter-spacing:.04em;text-transform:uppercase}
-.hero{position:relative;min-height:100svh;padding:128px 3% 32px;display:flex;flex-direction:column;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 49.9%,#ffffff05 50%,transparent 50.1%),linear-gradient(0deg,transparent 49.9%,#ffffff05 50%,transparent 50.1%);background-size:90px 90px;opacity:.55}
-.hero-kicker{position:relative;display:flex;justify-content:space-between;color:#aaa}
-.hero-kicker span:first-child::before{content:"+";color:var(--orange);margin-right:14px}
-.hero h1{position:relative;z-index:2;margin:42px 0 0;font-family:Arial,Helvetica,sans-serif;font-weight:900;letter-spacing:-.075em;line-height:.79;pointer-events:none}
-.hero h1 span{display:block;font-size:clamp(105px,23vw,340px)}
-.hero h1 .outline{font-size:clamp(85px,18vw,275px);color:transparent;-webkit-text-stroke:1.5px var(--paper);margin-top:19px}
-.hero-art{position:absolute;width:55%;height:76%;right:-6%;top:12%;z-index:1;pointer-events:none}
-.hero-art canvas{width:100%;height:100%;display:block}
-.hero-art::after{content:"FIG. 001 / IDEAS IN ORBIT";position:absolute;right:18%;bottom:0;font:9px var(--mono);color:#aaa}
-.hero-bottom{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:24px;margin-top:auto;padding-top:58px}
-.hero-note{font-size:15px;line-height:1.8;color:#b9b9b3;margin:0;max-width:300px}
-.hero-tags{display:flex;gap:8px;flex-wrap:wrap}
-.hero-tags span{padding:7px 10px;border:1px solid #555;border-radius:30px;font:9px var(--mono)}
-.scroll-link{width:67px;height:67px;border:1px solid #777;border-radius:50%;display:grid;place-items:center;font-size:27px;transition:background .2s,color .2s}
-.scroll-link:hover{background:var(--orange);color:var(--ink);border-color:var(--orange)}
-.ticker{overflow:hidden;background:var(--orange);color:var(--ink);padding:16px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
-.ticker-track{display:flex;width:max-content;gap:44px;font-weight:700;font-size:22px;letter-spacing:-.04em;animation:marquee 25s linear infinite}
-.ticker-track span::after{content:"✳";margin-left:44px}
-@keyframes marquee{to{transform:translateX(-50%)}}
-.manifesto{position:relative;background:var(--paper);color:var(--ink);padding:80px 3%}
-.manifesto-inner{min-height:75svh;display:flex;flex-direction:column;justify-content:center}
-.section-label{display:flex;justify-content:space-between;border-top:1px solid currentColor;padding-top:15px}
-.manifesto h2{font-size:clamp(50px,9.5vw,140px);line-height:.95;letter-spacing:-.065em;margin:70px 0 30px;font-weight:700}
-.discipline{display:flex;align-items:center;gap:18px;min-height:1.15em}
-.discipline .star{color:var(--orange);font-size:.65em;display:inline-block}
-.discipline-word{color:var(--orange)}
-.manifesto-bottom{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:30px;margin-top:28px}
-.manifesto-copy{max-width:450px;font-size:17px;line-height:1.9;margin:0}
-.chapter-list{display:flex;gap:22px;flex-wrap:wrap;color:#777}
-.chapter-list span.active{color:var(--ink);text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:8px}
-.showcase{position:relative}
-.showcase-header{background:var(--ink);padding:72px 3% 35px}
-.showcase-header h2{font-size:clamp(45px,8vw,110px);letter-spacing:-.065em;line-height:.95;margin:24px 0}
-.showcase-header .header-bottom{display:flex;justify-content:space-between;color:#aaa;gap:20px}
-.showcase-pin{position:relative}
-.project-track{display:flex;flex-direction:column}
-.project{position:relative;min-height:calc(100svh - 68px);padding:34px 3%;display:grid;grid-template-columns:1.03fr 1fr;gap:6%;align-items:center;overflow:hidden}
-.project-one{background:#dcded6;color:var(--ink)}
-.project-two{background:#171917;color:var(--paper)}
-.project-three{background:var(--orange);color:var(--ink)}
-.project-meta{position:absolute;top:28px;left:3%;right:3%;display:flex;justify-content:space-between}
-.project-info{z-index:2;padding-top:45px}
-.project-info h3{font-size:clamp(60px,8.2vw,125px);line-height:.87;letter-spacing:-.07em;margin:22px 0 28px;font-weight:700}
-.project-info p{font-size:15px;line-height:1.9;max-width:340px}
-.tags{display:flex;gap:12px;flex-wrap:wrap;font:10px var(--mono);margin-top:26px}
-.tags span{border-top:1px solid currentColor;padding-top:8px}
-.case-button{display:inline-flex;align-items:center;justify-content:space-between;gap:40px;margin-top:32px;padding:15px 0;border:0;border-bottom:1px solid currentColor;background:transparent;color:inherit;font-size:12px}
-.case-button span{font-size:22px}
-.project-number{position:absolute;bottom:17px;right:3%;font-size:clamp(70px,12vw,170px);letter-spacing:-.08em;opacity:.13;line-height:1}
-.project-visual{height:min(65vh,600px);position:relative;display:grid;place-items:center}
-.neural{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 20px 25px #1112);transform:rotate(-12deg)}
-.neural .orbit{fill:none;stroke:#363b34;stroke-width:1;opacity:.6}
-.neural .core{fill:var(--orange)}
-.neural .connector{fill:none;stroke:#555;stroke-width:.7;opacity:.4}
-.neural .dot{fill:#111}
-.neural .halo{fill:none;stroke:var(--orange);stroke-width:1;stroke-dasharray:4 7}
-.neural text{font:10px var(--mono);fill:#333}
-.system-board{width:100%;aspect-ratio:1;position:relative;background:repeating-linear-gradient(0deg,transparent 0 39px,#ffffff0a 40px),repeating-linear-gradient(90deg,transparent 0 39px,#ffffff0a 40px);border:1px solid #ffffff16;transform:perspective(800px) rotateY(-15deg) rotateX(14deg)}
-.system-board svg{position:absolute;inset:0;width:100%;height:100%}
-.system-board svg path{stroke:#9daf96;fill:none;stroke-width:1}
-.system-node{position:absolute;width:30%;height:20%;border:1px solid #82927e;background:#20251e;display:flex;flex-direction:column;justify-content:space-between;padding:13px;font:9px var(--mono);box-shadow:8px 8px 0 #0004}
-.system-node strong{font-size:clamp(12px,2vw,27px);font-family:"Space Grotesk",sans-serif}
-.system-node:nth-of-type(1){top:12%;left:10%}.system-node:nth-of-type(2){top:41%;left:55%;color:var(--orange);border-color:var(--orange)}.system-node:nth-of-type(3){top:70%;left:10%}
-.system-label{position:absolute;right:20px;bottom:20px;color:#aaa;font:9px var(--mono)}
-.cube-scene{width:230px;height:230px;perspective:900px}
-.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-24deg) rotateY(35deg)}
-.cube-face{position:absolute;inset:0;border:2px solid #111;background:#ff642fcc;display:grid;place-items:center;font-size:130px;font-weight:700;backface-visibility:hidden}
-.cube-front{transform:translateZ(115px)}.cube-back{transform:rotateY(180deg) translateZ(115px)}.cube-right{transform:rotateY(90deg) translateZ(115px)}.cube-left{transform:rotateY(-90deg) translateZ(115px)}.cube-top{transform:rotateX(90deg) translateZ(115px)}.cube-bottom{transform:rotateX(-90deg) translateZ(115px)}
-.cube-orbit{position:absolute;width:90%;aspect-ratio:1;border:1px solid #1115;border-radius:50%;transform:rotateX(65deg);pointer-events:none}
-.project-progress{display:none}
-.process{padding:100px 3%;background:var(--paper);color:var(--ink)}
-.process-top{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:35px 0 60px}
-.process h2{font-size:clamp(45px,6.7vw,96px);line-height:.96;letter-spacing:-.06em;margin:0}
-.process-top p{max-width:400px;line-height:1.9;font-size:16px;margin:0;align-self:end}
-.process-list{display:grid;grid-template-columns:repeat(4,1fr);gap:25px}
-.process-step{border-top:1px solid #1115;padding-top:15px}
-.process-step .micro{color:#666}.process-step h3{font-size:23px;letter-spacing:-.04em;margin:28px 0 12px}.process-step p{font-size:13px;line-height:1.9;color:#666;margin:0}
-.repository-section{padding:80px 3%;background:var(--ink)}
-.repository-title{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:30px 0}
-.repository-title h2{font-size:clamp(37px,6vw,80px);margin:0;letter-spacing:-.055em}
-.repository-title a{font:11px var(--mono);border-bottom:1px solid #777;padding-bottom:8px}
-.repo-row{display:grid;grid-template-columns:50px 1fr auto;align-items:center;gap:18px;padding:25px 0;border-top:1px solid #ffffff30}
-.repo-row h3{font-size:23px;letter-spacing:-.03em;margin:0 0 7px}.repo-row p{margin:0;color:#aaa;font-size:13px;line-height:1.7}.repo-row .arrow{font-size:24px;color:var(--orange)}
-#repo-status{color:#999;line-height:1.9;max-width:700px;font-size:14px}
-.contact{padding:75px 3% 25px;background:var(--orange);color:var(--ink)}
-.contact h2{font-size:clamp(85px,18.5vw,280px);line-height:.83;letter-spacing:-.075em;margin:45px 0}
-.contact-link{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--ink);padding:20px 0;font-size:clamp(20px,3vw,40px);letter-spacing:-.035em}
-.contact-link span:last-child{font-size:55px}
-.footer{display:flex;justify-content:space-between;gap:20px;padding-top:42px}
-dialog{background:var(--paper);color:var(--ink);border:0;max-width:760px;width:calc(100% - 32px);max-height:85svh;padding:36px;border-radius:0}
-dialog::backdrop{background:#000b;backdrop-filter:blur(8px)}
-.dialog-top{display:flex;justify-content:space-between;gap:20px;align-items:center}
-.dialog-close{border:1px solid #1116;background:transparent;border-radius:50%;width:42px;height:42px;font-size:22px}
-dialog h2{font-size:clamp(35px,7vw,65px);letter-spacing:-.055em;line-height:1;margin:25px 0 15px}
-dialog .demo-note{font-size:13px;line-height:1.9;color:#666;border-bottom:1px solid #1113;padding-bottom:20px}
-.case-stage{display:grid;grid-template-columns:115px 1fr;gap:20px;border-top:1px solid #1113;padding-top:18px;margin-top:22px}
-.case-stage h3{margin:0;font-size:15px}.case-stage p{margin:0;font-size:14px;line-height:1.9}
-.motion-ready .manifesto{height:210svh;padding:0 3%}
-.motion-ready .manifesto-inner{position:sticky;top:68px;height:calc(100svh - 68px);min-height:0}
-.motion-ready .showcase-pin{height:340svh}
-.motion-ready .project-window{position:sticky;top:68px;height:calc(100svh - 68px);overflow:hidden}
-.motion-ready .project-track{flex-direction:row;width:300%;height:100%;will-change:transform}
-.motion-ready .project{flex:0 0 33.333333%;height:100%;min-height:0;padding-left:1%;padding-right:1%}
-.motion-ready .project-meta{left:3%;right:3%}
-.motion-ready .project-progress{position:absolute;display:flex;left:3%;bottom:23px;width:200px;gap:8px;z-index:3}
-.project-progress i{height:3px;background:#7776;flex:1}.project-progress i.active{background:var(--orange)}
-.no-motion .ticker-track{animation:none}
-.no-motion .hero-art{opacity:.8}
-@media(min-width:1600px){.hero h1 span{font-size:23vw}.hero h1 .outline{font-size:18vw}}
-@media(max-width:760px){
-.nav{padding:18px 5%}.brand{font-size:18px}.nav-links{gap:15px}.nav-links .desktop-link{display:none}.motion{font-size:9px}
-.hero{padding:112px 5% 28px;min-height:90svh}.hero h1{margin-top:85px}.hero h1 span{font-size:27vw}.hero h1 .outline{font-size:22vw;margin-top:15px}
-.hero-kicker{font-size:9px}.hero-kicker span:last-child{display:none}.hero-art{width:90%;height:58%;top:15%;right:-27%;opacity:.72}
-.hero-bottom{grid-template-columns:1fr auto;gap:20px;padding-top:85px}.hero-tags{display:none}.hero-note{font-size:13px;max-width:250px}.scroll-link{width:52px;height:52px}
-.hero-art::after{display:none}.ticker-track{font-size:16px}.ticker{padding:13px 0}
-.manifesto{padding:60px 5%}.manifesto h2{font-size:12vw;margin:55px 0 24px}.manifesto-bottom{grid-template-columns:1fr}.manifesto-copy{font-size:14px}.chapter-list{gap:14px;font-size:9px}
-.motion-ready .manifesto{height:175svh;padding:0 5%}.motion-ready .manifesto-inner{top:63px;height:calc(100svh - 63px)}
-.section-label{font-size:9px}.showcase-header{padding:60px 5% 30px}.showcase-header h2{font-size:15vw}.header-bottom{font-size:9px}
-.project{grid-template-columns:1fr;gap:0;padding:50px 5% 55px;align-content:start;min-height:860px}
-.project-info{padding-top:22px}.project-info h3{font-size:17vw;margin:20px 0}.project-info p{font-size:13px;max-width:360px}.case-button{margin-top:18px;padding:10px 0}.tags{margin-top:16px}
-.project-visual{height:330px;margin-top:30px;max-width:440px;width:100%;justify-self:center}.project-meta{left:5%;right:5%;font-size:9px}
-.project-number{font-size:100px;bottom:20px}.cube-scene{width:180px;height:180px}.cube-face{font-size:100px}.cube-front{transform:translateZ(90px)}.cube-back{transform:rotateY(180deg) translateZ(90px)}.cube-right{transform:rotateY(90deg) translateZ(90px)}.cube-left{transform:rotateY(-90deg) translateZ(90px)}.cube-top{transform:rotateX(90deg) translateZ(90px)}.cube-bottom{transform:rotateX(-90deg) translateZ(90px)}
-.motion-ready .showcase-pin{height:auto}.motion-ready .project-window{position:relative;top:0;height:auto;overflow:visible}
-.motion-ready .project-track{width:auto;height:auto;flex-direction:column;transform:none!important;will-change:auto}
-.motion-ready .project{flex:auto;height:auto;min-height:850px;padding-left:5%;padding-right:5%}.motion-ready .project-progress{display:none}
-.process{padding:65px 5%}.process-top{grid-template-columns:1fr;gap:24px;margin-bottom:40px}.process h2{font-size:13vw}.process-top p{font-size:14px}.process-list{grid-template-columns:1fr 1fr;gap:30px 20px}.process-step h3{margin-top:18px;font-size:21px}
-.repository-section{padding:65px 5%}.repository-title{align-items:start;flex-direction:column}.repository-title h2{font-size:12vw}.repo-row{grid-template-columns:25px 1fr auto;gap:12px}.repo-row h3{font-size:18px}
-.contact{padding:60px 5% 25px}.contact h2{font-size:23vw}.contact-link{font-size:20px}.footer{font-size:9px;flex-wrap:wrap}
-dialog{padding:24px}.case-stage{grid-template-columns:1fr;gap:8px}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+a:focus-visible,button:focus-visible{outline:2px solid var(--orange);outline-offset:4px}
+::selection{background:var(--orange);color:#000}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.02em;text-transform:uppercase}
+.dim{color:var(--dim)}
+.orange{color:var(--orange)}
+sup.count{font:400 9px var(--mono);color:var(--dim);margin-left:2px;vertical-align:super}
+.skip{position:fixed;top:-100px;left:16px;z-index:50;background:var(--fg);color:#000;padding:10px 14px}.skip:focus{top:60px}
+
+/* NAV */
+.nav{position:fixed;inset:0 0 auto;z-index:30;height:44px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 var(--gut);background:#000c;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.logo{font-weight:600;font-size:17px;letter-spacing:-.04em}
+.logo span{color:var(--orange)}
+.nav-links{display:flex;gap:22px;font-size:12px}
+.nav-links a{color:var(--fg);transition:color .15s}
+.nav-links a:hover,.nav-links a.active{color:var(--orange)}
+.nav-right{display:flex;justify-content:flex-end;align-items:center;gap:18px;font-size:12px}
+.online{display:inline-flex;align-items:center;gap:6px}
+.online::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.clock{color:var(--dim);font-family:var(--mono);font-size:11px}
+.motion-btn{font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--line);padding:4px 7px}
+.motion-btn:hover{color:var(--fg);border-color:var(--mute)}
+.menu-btn{display:none}
+.menu{position:fixed;inset:44px 0 0;z-index:29;background:#000;padding:24px var(--gut);display:flex;flex-direction:column;gap:4px;transform:translateY(-8px);opacity:0;visibility:hidden;transition:opacity .2s,transform .2s,visibility .2s}
+.menu.open{opacity:1;visibility:visible;transform:none}
+.menu a{font-size:44px;font-weight:600;letter-spacing:-.05em;line-height:1.05}
+.menu a:hover{color:var(--orange)}
+.menu .mono{margin-top:auto}
+
+/* HERO */
+.hero{padding:44px var(--gut) 0}
+.stage{position:relative;height:min(78svh,820px);min-height:420px;border-bottom:1px solid var(--line);overflow:hidden;background:radial-gradient(ellipse at 50% 60%,#140700 0,#000 65%)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 2px,#0000002e 3px);mix-blend-mode:multiply}
+.hud{position:absolute;z-index:2;font-family:var(--mono);font-size:10px;color:var(--dim);text-transform:uppercase;line-height:1.6;pointer-events:none}
+.hud b{color:var(--fg);font-weight:500}
+.hud.tl{top:14px;left:0}.hud.tr{top:14px;right:0;text-align:right}.hud.bl{bottom:14px;left:0}.hud.br{bottom:14px;right:0;text-align:right}
+.mode{position:absolute;z-index:3;left:50%;bottom:14px;transform:translateX(-50%);display:flex;padding:3px;background:#000;border:1px solid #2a2a2a;border-radius:20px;font-family:var(--mono);font-size:10px}
+.mode button{padding:5px 10px;border-radius:20px;color:var(--fg);transition:background .2s,color .2s}
+.mode button[aria-pressed="true"]{color:var(--orange);background:#1a0a02}
+.headline{display:grid;grid-template-columns:minmax(0,1fr);padding:22px 0 0}
+.headline h1{margin:0;font-weight:600;font-size:clamp(38px,6.8vw,98px);line-height:.94;letter-spacing:-.055em;max-width:15ch}
+.headline p{margin:18px 0 0;max-width:420px;font-size:14px;line-height:1.4;font-weight:600}
+.headline .ko{font-weight:500;color:var(--dim);font-size:13px;margin-top:8px}
+
+/* SECTION HEAD */
+section{padding:0 var(--gut)}
+.sec-title{font-weight:600;font-size:clamp(34px,4.6vw,64px);letter-spacing:-.05em;line-height:1;margin:0;padding:100px 0 16px;color:#bdbdbd}
+.sec-sub{display:flex;justify-content:space-between;gap:16px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+
+/* GRID OF INTERESTS */
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.grid-cell{position:relative;aspect-ratio:16/8;border:1px solid var(--line);background:var(--cell);display:grid;place-items:center;overflow:hidden;transition:border-color .2s}
+.grid-cell span{font-weight:600;font-size:clamp(14px,1.5vw,21px);letter-spacing:-.03em;display:flex;align-items:center;gap:8px;transition:color .2s,transform .3s}
+.grid-cell i{font-style:normal;font-family:var(--mono);font-size:.75em;color:var(--dim);transition:color .2s}
+.grid-cell small{position:absolute;top:6px;left:8px;font:400 9px var(--mono);color:var(--mute)}
+.grid-cell:hover{border-color:var(--orange)}
+.grid-cell:hover span{color:var(--orange);transform:scale(1.04)}
+.grid-cell:hover i{color:var(--orange)}
+
+/* PROJECTS */
+.project{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,1.8fr) minmax(0,2fr);gap:8px;padding:8px 0 64px;border-top:1px solid var(--line)}
+.project+.project{margin-top:0}
+.p-media{position:relative;aspect-ratio:16/9;border:1px solid var(--line);background:#050505;overflow:hidden;cursor:pointer}
+.p-media canvas{width:100%;height:100%;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.p-media:hover canvas{transform:scale(1.03)}
+.p-media .badge{position:absolute;top:10px;left:10px;font:400 9px var(--mono);background:#000;border:1px solid #2a2a2a;padding:3px 6px;color:var(--dim)}
+.p-media .open{position:absolute;right:10px;bottom:10px;font:500 10px var(--mono);background:var(--orange);color:#000;padding:5px 8px;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
+.p-media:hover .open,.p-media:focus-visible .open{opacity:1;transform:none}
+.p-desc{display:flex;flex-direction:column;justify-content:space-between;gap:20px;font-size:13px;font-weight:600;line-height:1.25}
+.p-desc p{margin:0}
+.p-desc .ko{font-weight:500;color:var(--dim);margin-top:10px}
+.p-tags{display:flex;flex-direction:column;gap:2px;font-size:12px}
+.p-title{text-align:right;font-weight:600;font-size:clamp(22px,2.2vw,32px);letter-spacing:-.04em;margin:0;line-height:1}
+.p-title button:hover{color:var(--orange)}
+
+/* REPOS */
+.repo-row{display:grid;grid-template-columns:48px minmax(0,2fr) minmax(0,3fr) 90px 24px;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);transition:padding .2s,color .2s}
+.repo-row:hover{color:var(--orange);padding-left:8px}
+.repo-row h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.03em}
+.repo-row p{margin:0;color:var(--dim);font-size:12px}
+.repo-row .arrow{text-align:right}
+#repo-status{color:var(--dim);font-size:13px;max-width:640px;line-height:1.6;padding:14px 0}
+
+/* CAPABILITIES */
+.statement{font-weight:600;font-size:clamp(34px,5.6vw,80px);letter-spacing:-.055em;line-height:.95;color:#bdbdbd;margin:0;padding-top:120px;max-width:17ch}
+.statement em{font-style:normal;color:var(--fg)}
+.caps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:56px 0 0 8%}
+.cap h3{margin:0 0 14px;font-size:14px;font-weight:600}
+.cap p{margin:0 0 12px;font-size:13px;line-height:1.3;font-weight:600;color:#cfcfcf}
+.cap .ko{color:var(--dim);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips span{font:500 10px var(--mono);background:#1a1a1a;color:#bdbdbd;padding:2px 5px}
+
+/* CONTACT */
+.contact{margin:140px var(--gut) 0;padding:0}
+.contact-box{position:relative;margin-left:8%;padding:28px 0 24px;overflow:hidden}
+.contact-box canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
+.contact-box>*{position:relative}
+.contact h2{margin:6px 0 0;font-weight:600;font-size:clamp(36px,5vw,72px);letter-spacing:-.055em;line-height:.95;color:#bdbdbd}
+.contact .mail{display:inline-block;margin-top:14px;font-weight:600;font-size:clamp(28px,5vw,72px);letter-spacing:-.055em;line-height:1;transition:color .2s}
+.contact .mail:hover{color:var(--orange)}
+
+/* FOOTER */
+footer{padding:120px var(--gut) 16px}
+.wordmark{font-family:"Archivo",sans-serif;font-stretch:125%;font-weight:900;font-size:min(16.2vw,260px);line-height:.8;letter-spacing:-.02em;color:#c8c8c8;white-space:nowrap;padding-bottom:12px;border-bottom:1px solid var(--line);user-select:none}
+.wordmark span{color:var(--orange)}
+.foot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:end;padding-top:140px}
+.foot-note{max-width:300px;font-weight:600;line-height:1.25}
+.foot-note .ko{display:block;color:var(--dim);font-weight:500;margin-top:8px}
+.foot-links{display:flex;flex-direction:column}
+.foot-links a{font-weight:600;font-size:clamp(24px,2.4vw,34px);letter-spacing:-.04em;line-height:1.05;width:max-content}
+.foot-links a:hover{color:var(--orange)}
+.foot-meta{text-align:right;font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:6px}
+.foot-meta a{color:var(--fg)}
+.foot-meta a:hover{color:var(--orange)}
+
+/* DIALOG */
+dialog{background:#0a0a0a;color:var(--fg);border:1px solid #2a2a2a;max-width:720px;width:calc(100% - 32px);max-height:85svh;padding:28px}
+dialog::backdrop{background:#000c;backdrop-filter:blur(6px)}
+.d-top{display:flex;justify-content:space-between;align-items:center}
+.d-close{width:32px;height:32px;border:1px solid #2a2a2a;font-size:18px}
+.d-close:hover{border-color:var(--orange);color:var(--orange)}
+dialog h2{margin:22px 0 10px;font-size:clamp(32px,6vw,56px);letter-spacing:-.05em;line-height:1;font-weight:600}
+.d-note{color:var(--dim);font-size:12px;line-height:1.6;padding-bottom:16px;border-bottom:1px solid var(--line);margin:0}
+.d-stage{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.d-stage h3{margin:0;font:500 11px var(--mono);text-transform:uppercase;color:var(--orange)}
+.d-stage p{margin:0;font-size:14px;line-height:1.6}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.no-motion .reveal{opacity:1;transform:none;transition:none}
+.no-motion .online::before{animation:none}
+
+@media(max-width:900px){
+.grid{grid-template-columns:repeat(3,1fr)}
+.project{grid-template-columns:1fr 1fr;padding-bottom:48px}
+.p-media{grid-column:1/-1;order:0}.p-desc{order:2}.p-title{order:1;text-align:left;grid-column:1/-1;padding-top:6px}
+.caps{grid-template-columns:1fr 1fr;padding-left:0}
+.contact-box{margin-left:0}
+.repo-row{grid-template-columns:32px minmax(0,1fr) 24px}.repo-row p.desc,.repo-row .lang{display:none}
 }
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ticker-track{animation:none}*{transition:none!important}}
+@media(max-width:700px){
+.nav{grid-template-columns:1fr auto}.nav-links,.clock,.online,.motion-btn{display:none}
+.menu-btn{display:block;font-size:12px}
+.stage{height:62svh;min-height:380px}
+.hud.tr,.hud.br{display:none}
+.grid{grid-template-columns:repeat(2,1fr)}
+.project{grid-template-columns:1fr}
+.p-desc{gap:14px}
+.caps{grid-template-columns:1fr;gap:32px}
+.sec-sub .hide-sm{display:none}
+.foot{grid-template-columns:1fr;padding-top:64px}.foot-meta{text-align:left}
+.d-stage{grid-template-columns:1fr;gap:6px}
+dialog{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <a class="skip" href="#work">프로젝트로 바로가기</a>
+
 <header class="nav">
-<a class="brand" href="#top" aria-label="yoon57296 첫 화면">yoon57296<sup>✳</sup></a>
-<nav class="nav-links" aria-label="주요 메뉴">
-<a href="#work">WORK <span style="color:#888">(03)</span></a><a class="desktop-link" href="#process">PROCESS</a><a class="desktop-link" href="#lab">GITHUB ↗</a>
-<button class="motion" id="motion-toggle" type="button" aria-pressed="true">MOTION ON</button>
-</nav>
+  <a class="logo" href="#top" aria-label="yoon57296 홈">yoon<span>.</span></a>
+  <nav class="nav-links" aria-label="주요 메뉴">
+    <a href="#top" data-scramble>Home</a>
+    <a href="#work" data-scramble>Work<sup class="count">(03)</sup></a>
+    <a href="#focus" data-scramble>Focus</a>
+    <a href="#lab" data-scramble>Lab<sup class="count" id="repo-count"></sup></a>
+    <a href="https://github.com/yoon57296" data-scramble>GitHub ↗</a>
+  </nav>
+  <div class="nav-right">
+    <span class="online">Online <sup class="count">(SEOUL)</sup></span>
+    <span class="clock" id="clock" aria-label="서울 현재 시각">--:--:--</span>
+    <button class="motion-btn" id="motion-toggle" type="button" aria-pressed="true">MOTION ON</button>
+    <a href="#contact" data-scramble>Contact</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
 </header>
-<main>
-<section class="hero" id="top" aria-labelledby="hero-title">
-<div class="hero-kicker micro"><span>Independent ideas. Working things.</span><span>PORTFOLIO PROTOTYPE / VOL. 001</span></div>
-<div class="hero-art" aria-hidden="true"><canvas id="sculpture"></canvas></div>
-<h1 id="hero-title"><span>MAKE</span><span class="outline">IT REAL.</span></h1>
-<div class="hero-bottom">
-<p class="hero-note">생각을 코드로 꺼내고,<br>만드는 과정을 이야기합니다.<br><span class="micro" style="color:#777">SOFTWARE / AI / EXPERIMENTS</span></p>
-<div class="hero-tags"><span>CURIOUS BY DEFAULT</span><span>BUILT TO EXPLORE</span></div>
-<a class="scroll-link" href="#about" aria-label="스크롤 이야기를 시작하기">↓</a>
+<div class="menu" id="menu" aria-hidden="true">
+  <a href="#top">Home</a><a href="#work">Work</a><a href="#focus">Focus</a><a href="#lab">Lab</a><a href="#contact">Contact</a>
+  <button class="motion-btn" id="motion-toggle-m" type="button" style="align-self:flex-start;margin-top:20px">MOTION ON</button>
+  <span class="mono dim">yoon57296.github.io</span>
 </div>
-</section>
-<div class="ticker" aria-hidden="true"><div class="ticker-track"><span>THINK IT</span><span>BUILD IT</span><span>BREAK IT</span><span>MAKE IT BETTER</span><span>THINK IT</span><span>BUILD IT</span><span>BREAK IT</span><span>MAKE IT BETTER</span></div></div>
-<section class="manifesto" id="about" aria-labelledby="manifesto-title">
-<div class="manifesto-inner">
-<div class="section-label micro"><span>01 / THE MINDSET</span><span>SCROLL TO EXPLORE ↓</span></div>
-<h2 id="manifesto-title">WHAT AM I<br>BUILDING?<br><span class="discipline"><span class="star" aria-hidden="true">✳</span><span class="discipline-word" id="discipline-word">IDEAS.</span></span></h2>
-<div class="manifesto-bottom"><p class="manifesto-copy">하나의 분야보다, 하나의 문제에서 시작합니다.<br>디자인에서 코드로. 코드에서 AI와 시스템으로.<br>만들어 보면서, 다음 질문을 찾습니다.</p>
-<div class="chapter-list micro" aria-label="탐색 분야"><span class="active">01 DESIGN</span><span>02 CODE</span><span>03 AI</span><span>04 SYSTEMS</span></div></div>
-</div>
-</section>
-<section class="showcase" id="work" aria-labelledby="work-title">
-<div class="showcase-header"><div class="section-label micro"><span>02 / SELECTED EXPLORATIONS</span><span>CONCEPT SHOWCASE</span></div><h2 id="work-title">LESS TALK.<br>MORE MAKING.</h2><div class="header-bottom micro"><span>아래 3개 장면은 포트폴리오 연출을 위한 데모입니다.</span><span>SCROLL THROUGH →</span></div></div>
-<div class="showcase-pin" id="showcase-pin"><div class="project-window"><div class="project-track" id="project-track">
-<article class="project project-one">
-<div class="project-meta micro"><span>CONCEPT 01 / AI & MACHINE LEARNING</span><span>DEMO — NOT A REAL PROJECT</span></div>
-<div class="project-info"><div class="micro">PATTERNS INTO POSSIBILITIES</div><h3>NEURAL<br>FIELD.</h3><p>보이지 않는 연결을 눈에 보이는 형태로.<br>AI 프로젝트의 실험과 발견을 담을 첫 번째 장면.</p><div class="tags"><span>AI / ML</span><span>VISUAL THINKING</span><span>EXPERIMENT</span></div><button class="case-button" type="button" data-case="0">시연 구성 살펴보기 <span>↗</span></button></div>
-<div class="project-visual" aria-hidden="true">
-<svg class="neural" viewBox="0 0 500 500"><defs><radialGradient id="core-light"><stop stop-color="#ff9c61"/><stop offset="1" stop-color="#ff5c28"/></radialGradient></defs>
-<g class="neural-shape"><ellipse class="orbit" cx="250" cy="250" rx="205" ry="74"/><ellipse class="orbit" cx="250" cy="250" rx="205" ry="74" transform="rotate(30 250 250)"/><ellipse class="orbit" cx="250" cy="250" rx="205" ry="74" transform="rotate(60 250 250)"/><ellipse class="orbit" cx="250" cy="250" rx="205" ry="74" transform="rotate(90 250 250)"/><ellipse class="orbit" cx="250" cy="250" rx="205" ry="74" transform="rotate(120 250 250)"/><ellipse class="orbit" cx="250" cy="250" rx="205" ry="74" transform="rotate(150 250 250)"/>
-<path class="connector" d="M45 250L250 45L455 250L250 455Z M105 105L395 105L395 395L105 395Z M45 250H455 M250 45V455 M105 105L395 395 M395 105L105 395"/>
-<circle class="halo" cx="250" cy="250" r="230"/><circle cx="250" cy="250" r="62" fill="url(#core-light)"/>
-<g class="dot"><circle cx="45" cy="250" r="5"/><circle cx="455" cy="250" r="5"/><circle cx="250" cy="45" r="5"/><circle cx="250" cy="455" r="5"/><circle cx="105" cy="105" r="4"/><circle cx="395" cy="395" r="4"/></g></g>
-<text x="18" y="480">INPUT → CONNECTION → OUTPUT</text></svg>
-</div><span class="project-number" aria-hidden="true">01</span>
-</article>
-<article class="project project-two">
-<div class="project-meta micro"><span>CONCEPT 02 / SYSTEMS & CS</span><span>DEMO — NOT A REAL PROJECT</span></div>
-<div class="project-info"><div class="micro" style="color:#a9bba0">COMPLEXITY, CONNECTED.</div><h3>SYSTEM<br>FLOW.</h3><p>복잡한 구조를, 명확한 흐름으로.<br>설계의 이유와 문제 해결 과정을 담을 두 번째 장면.</p><div class="tags"><span>SYSTEM DESIGN</span><span>ARCHITECTURE</span><span>CS</span></div><button class="case-button" type="button" data-case="1">시연 구성 살펴보기 <span>↗</span></button></div>
-<div class="project-visual" aria-hidden="true"><div class="system-board"><svg viewBox="0 0 500 500"><path d="M200 110H350V205 M275 255H125V350"/><path d="M180 115H340V195 M270 265H140V345" stroke-dasharray="4 8"/></svg><div class="system-node"><span>01 / SOURCE</span><strong>INPUT</strong><span>REQUEST IN</span></div><div class="system-node"><span>02 / ENGINE</span><strong>PROCESS</strong><span>MAKE IT WORK</span></div><div class="system-node"><span>03 / DESTINATION</span><strong>OUTPUT</strong><span>RESULT OUT</span></div><span class="system-label">A CLEAR PATH THROUGH COMPLEXITY.</span></div></div><span class="project-number" aria-hidden="true">02</span>
-</article>
-<article class="project project-three">
-<div class="project-meta micro"><span>CONCEPT 03 / CREATIVE DEVELOPMENT</span><span>DEMO — NOT A REAL PROJECT</span></div>
-<div class="project-info"><div class="micro">A LITTLE LESS EXPECTED.</div><h3>PLAY<br>GROUND.</h3><p>호기심을 직접 만질 수 있게.<br>작은 인터랙션과 새로운 시도를 담을 세 번째 장면.</p><div class="tags"><span>INTERACTION</span><span>CREATIVE CODE</span><span>WEB</span></div><button class="case-button" type="button" data-case="2">시연 구성 살펴보기 <span>↗</span></button></div>
-<div class="project-visual" aria-hidden="true"><div class="cube-orbit"></div><div class="cube-scene"><div class="cube" id="play-cube"><div class="cube-face cube-front">✳</div><div class="cube-face cube-back">?</div><div class="cube-face cube-right">+</div><div class="cube-face cube-left">↗</div><div class="cube-face cube-top">✳</div><div class="cube-face cube-bottom">+</div></div></div></div><span class="project-number" aria-hidden="true">03</span>
-</article>
-</div><div class="project-progress" aria-hidden="true"><i class="active"></i><i></i><i></i></div></div></div>
-</section>
-<section class="process" id="process" aria-labelledby="process-title"><div class="section-label micro"><span>03 / BEHIND THE WORK</span><span>THE REASON MATTERS.</span></div>
-<div class="process-top"><h2 id="process-title">GOOD WORK.<br>CLEAR THINKING.</h2><p>화면은 첫인상을 만듭니다.<br>그 다음은 생각의 과정입니다.<br>프로젝트의 문제, 선택, 실험, 결과가 읽히도록.</p></div>
-<div class="process-list"><div class="process-step"><span class="micro">01 / ASK</span><h3>Problem</h3><p>무엇이 불편했는가?<br>해결해야 할 문제와 제약을 정의합니다.</p></div><div class="process-step"><span class="micro">02 / CHOOSE</span><h3>Approach</h3><p>왜 이 방법인가?<br>선택의 근거와 대안을 설명합니다.</p></div><div class="process-step"><span class="micro">03 / TRY</span><h3>Experiment</h3><p>어떻게 확인했는가?<br>가설을 세우고 직접 검증합니다.</p></div><div class="process-step"><span class="micro">04 / LEARN</span><h3>Result</h3><p>무엇을 배웠는가?<br>결과와 다음 개선점을 기록합니다.</p></div></div>
-</section>
-<section class="repository-section" id="lab" aria-labelledby="repo-title"><div class="section-label micro"><span>04 / THE ACTUAL CODE</span><span>LIVE FROM GITHUB</span></div><div class="repository-title"><h2 id="repo-title">CURRENTLY BUILDING.</h2><a href="https://github.com/yoon57296">GITHUB PROFILE ↗</a></div><p id="repo-status" role="status">공개 저장소를 확인하고 있습니다.</p><div id="repositories"></div></section>
-<section class="contact" id="contact" aria-labelledby="contact-title"><div class="section-label micro"><span>05 / WHAT'S NEXT?</span><span>STAY CURIOUS.</span></div><h2 id="contact-title">LET'S<br>BUILD.</h2><a class="contact-link" href="https://github.com/yoon57296"><span>다음 이야기는 GitHub에서.</span><span aria-hidden="true">↗</span></a><footer class="footer micro"><span>© <span id="year"></span> YOON57296</span><span>PORTFOLIO / INTERACTION PROTOTYPE</span><a href="#top">BACK TO TOP ↑</a></footer></section>
+
+<main id="top">
+  <div class="hero">
+    <div class="stage" id="stage">
+      <canvas id="hero-canvas" aria-hidden="true"></canvas>
+      <div class="hud tl">FIG. 001 — <b>IDEAS IN ORBIT</b><br>RENDER / <span id="hud-mode">DITHER 4×4</span></div>
+      <div class="hud tr">X <b id="hud-x">+0.000</b> &nbsp;Y <b id="hud-y">+0.000</b><br>ROT <b id="hud-r">000.0°</b></div>
+      <div class="hud bl">37.5665° N<br>126.9780° E</div>
+      <div class="hud br">FPS <b id="hud-fps">--</b><br>BUILT FROM SCRATCH</div>
+      <div class="mode" role="group" aria-label="렌더링 모드">
+        <button type="button" data-mode="human" aria-pressed="true">HUMAN</button>
+        <button type="button" data-mode="machine" aria-pressed="false">MACHINE</button>
+      </div>
+    </div>
+    <div class="headline">
+      <h1 class="reveal">A one-person studio making curious things that actually work</h1>
+      <p class="reveal">I turn half-formed ideas into real software — through design, code, AI and a lot of experiments.<span class="ko" style="display:block">생각을 코드로 꺼내고, 만드는 과정을 기록합니다.<br>디자인에서 코드로, 코드에서 AI와 시스템으로.</span></p>
+    </div>
+  </div>
+
+  <section id="focus" aria-labelledby="focus-title">
+    <h2 class="sec-title reveal" id="focus-title">Driven by Curiosity</h2>
+    <div class="sec-sub mono dim"><span>01 / Things I explore</span><span class="hide-sm">Hover to light up</span></div>
+    <div class="grid" id="interest-grid"></div>
+  </section>
+
+  <section id="work" aria-labelledby="work-title">
+    <h2 class="sec-title reveal" id="work-title">Featured Projects</h2>
+    <div class="sec-sub mono dim"><span>02 / Selected explorations</span><span class="hide-sm">아래 3개는 연출용 데모입니다</span></div>
+    <div id="projects"></div>
+  </section>
+
+  <section id="lab" aria-labelledby="lab-title">
+    <h2 class="sec-title reveal" id="lab-title">Currently Building</h2>
+    <div class="sec-sub mono dim"><span>03 / Live from GitHub</span><a href="https://github.com/yoon57296" class="hide-sm">github.com/yoon57296 ↗</a></div>
+    <p id="repo-status" role="status">공개 저장소를 불러오는 중…</p>
+    <div id="repositories"></div>
+  </section>
+
+  <section aria-labelledby="cap-title">
+    <h2 class="statement reveal" id="cap-title">I'm here to build the <em>extraordinary.</em> No shortcuts, just curious, carefully-engineered work that leaves a mark.</h2>
+    <div class="caps">
+      <div class="cap reveal"><h3>Websites &amp; Interaction</h3><p>Pages that feel alive — scroll stories, motion and small details people remember.</p><p class="ko">스크롤과 모션으로 이야기하는 웹 경험.</p><div class="chips"><span>HTML/CSS</span><span>JavaScript</span><span>Canvas</span><span>Motion</span></div></div>
+      <div class="cap reveal"><h3>Visual Design</h3><p>Bold typography, strict grids and a clear visual system behind every screen.</p><p class="ko">타이포그래피와 그리드로 만드는 시각 체계.</p><div class="chips"><span>Typography</span><span>Layout</span><span>UI</span></div></div>
+      <div class="cap reveal"><h3>AI Experiments</h3><p>Testing what models can do, then shaping it into something people can touch.</p><p class="ko">모델을 실험하고, 만질 수 있는 형태로.</p><div class="chips"><span>ML</span><span>Prototyping</span><span>Evaluation</span></div></div>
+      <div class="cap reveal"><h3>Systems &amp; CS</h3><p>Understanding how things work underneath — and explaining why each choice was made.</p><p class="ko">구조를 이해하고, 선택의 이유를 설명합니다.</p><div class="chips"><span>Architecture</span><span>Algorithms</span><span>Tooling</span></div></div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact" aria-labelledby="contact-title">
+    <div class="contact-box">
+      <canvas id="contact-canvas" aria-hidden="true"></canvas>
+      <span class="dim">Contact</span>
+      <h2 id="contact-title">Let's make something<br>real together.</h2>
+      <a class="mail" href="https://github.com/yoon57296">github/yoon57296 ↗</a>
+    </div>
+  </section>
 </main>
-<dialog id="case-dialog" aria-labelledby="case-title"><div class="dialog-top"><span class="micro">CONCEPT CASE STUDY / DEMO</span><button class="dialog-close" type="button" aria-label="상세 설명 닫기">×</button></div><h2 id="case-title"></h2><p class="demo-note">실제 프로젝트 실적이 아닌 시연용 구성입니다. 실제 포트폴리오에서는 이 자리에 프로젝트 소개, 본인의 역할, 검증 자료를 넣습니다.</p><div id="case-content"></div></dialog>
+
+<footer>
+  <div class="wordmark" aria-hidden="true">YOON<span>.</span><span id="yy" style="color:inherit">26</span></div>
+  <div class="foot">
+    <p class="foot-note">Ready to see what's next? Follow along on GitHub — new experiments land there first.<span class="ko">새로운 실험은 GitHub에 가장 먼저 올라옵니다.</span></p>
+    <nav class="foot-links" aria-label="푸터 메뉴">
+      <a href="#top">Home</a><a href="#work">Work<sup class="count">(03)</sup></a><a href="#focus">Focus</a><a href="#lab">Lab</a><a href="https://github.com/yoon57296">GitHub ↗</a><a href="#contact">Contact</a>
+    </nav>
+    <div class="foot-meta"><span><a href="https://github.com/yoon57296">GitHub</a> , <a href="#top">Back to top ↑</a></span><span>© <span id="year">2026</span> yoon57296 — all experiments reserved</span></div>
+  </div>
+</footer>
+
+<dialog id="case-dialog" aria-labelledby="case-title">
+  <div class="d-top"><span class="mono dim">Concept case study / Demo</span><button class="d-close" type="button" aria-label="닫기">×</button></div>
+  <h2 id="case-title"></h2>
+  <p class="d-note">실제 프로젝트 실적이 아닌 시연용 구성입니다. 실제 포트폴리오에서는 이 자리에 프로젝트 소개, 본인의 역할, 검증 자료를 넣습니다.</p>
+  <div id="case-content"></div>
+</dialog>
+
 <script>
 'use strict';
-const clamp = value => Math.max(0, Math.min(1, value));
-const sectionProgress = (scroll, top, height, viewport) => clamp((scroll - top) / Math.max(1, height - viewport));
-const showcaseProgress = progress => {
-  const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
-  return progress < .5 ? .5 * smooth((progress - .12) / .32) : .5 + .5 * smooth((progress - .56) / .32);
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+let motion = !reduce.matches;
+
+/* ---------- Dither / ASCII surface renderer ---------- */
+const BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5].map(v => (v + .5) / 16);
+const RAMP = ' .:-=+*#%@';
+const TAU = Math.PI * 2;
+
+function buildMesh(fn, U, V) {
+  const n = U * V, pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), e = 1e-3;
+  let k = 0;
+  for (let i = 0; i < U; i++) for (let j = 0; j < V; j++, k += 3) {
+    const u = i / U, v = j / V, p = fn(u, v), pu = fn(u + e, v), pv = fn(u, v + e);
+    const a = [pu[0]-p[0], pu[1]-p[1], pu[2]-p[2]], b = [pv[0]-p[0], pv[1]-p[1], pv[2]-p[2]];
+    let nx = a[1]*b[2]-a[2]*b[1], ny = a[2]*b[0]-a[0]*b[2], nz = a[0]*b[1]-a[1]*b[0];
+    const l = Math.hypot(nx, ny, nz) || 1;
+    pos[k] = p[0]; pos[k+1] = p[1]; pos[k+2] = p[2];
+    nor[k] = nx/l; nor[k+1] = ny/l; nor[k+2] = nz/l;
+  }
+  return { pos, nor, n };
+}
+const shapes = {
+  knot: buildMesh((u, v) => {
+    const c = t => { const r = 2 + .6 * Math.cos(3*t); return [r*Math.cos(2*t), r*Math.sin(2*t), .85*Math.sin(3*t)]; };
+    const t = u * TAU, p = c(t), q = c(t + .001);
+    const T = [q[0]-p[0], q[1]-p[1], q[2]-p[2]], tl = Math.hypot(...T); T[0]/=tl; T[1]/=tl; T[2]/=tl;
+    const nl = Math.hypot(T[0], T[1]), N = [-T[1]/nl, T[0]/nl, 0];
+    const B = [T[1]*N[2]-T[2]*N[1], T[2]*N[0]-T[0]*N[2], T[0]*N[1]-T[1]*N[0]];
+    const ph = v * TAU, r = .42, cs = Math.cos(ph)*r, sn = Math.sin(ph)*r;
+    return [p[0]+N[0]*cs+B[0]*sn, p[1]+N[1]*cs+B[1]*sn, p[2]+N[2]*cs+B[2]*sn];
+  }, 720, 56),
+  blob: buildMesh((u, v) => {
+    const th = u * TAU, ph = v * Math.PI, r = 2.2 + .28*Math.sin(5*th)*Math.sin(4*ph) + .18*Math.cos(7*ph);
+    return [r*Math.sin(ph)*Math.cos(th), r*Math.cos(ph), r*Math.sin(ph)*Math.sin(th)];
+  }, 260, 140),
+  box: buildMesh((u, v) => {
+    const th = u * TAU, ph = v * Math.PI, x = Math.sin(ph)*Math.cos(th), y = Math.cos(ph), z = Math.sin(ph)*Math.sin(th);
+    const k = 2 / Math.pow(x**8 + y**8 + z**8, 1 / 8);
+    return [x*k, y*k, z*k];
+  }, 320, 160),
+  ring: buildMesh((u, v) => {
+    const th = u * TAU, ph = v * TAU, R = 2 + .35*Math.sin(3*th), r = .7 + .15*Math.sin(6*th);
+    return [(R + r*Math.cos(ph))*Math.cos(th), r*Math.sin(ph) + .4*Math.sin(2*th), (R + r*Math.cos(ph))*Math.sin(th)];
+  }, 360, 90)
 };
-const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-let motionEnabled = !motionPreference.matches;
-const motionButton = document.getElementById('motion-toggle');
-const manifesto = document.getElementById('about');
-const showcase = document.getElementById('showcase-pin');
-const track = document.getElementById('project-track');
-const word = document.getElementById('discipline-word');
-const chapters = [...document.querySelectorAll('.chapter-list span')];
-const indicators = [...document.querySelectorAll('.project-progress i')];
-const cube = document.getElementById('play-cube');
-const neural = document.querySelector('.neural-shape');
-const canvas = document.getElementById('sculpture');
-const context = canvas.getContext('2d');
-let dimensions = { width: 1, height: 1 };
-let geometry = { manifestoTop: 0, manifestoHeight: 1, showcaseTop: 0, showcaseHeight: 1, heroHeight: 1 };
-let scrollDirty = true;
-let pointer = { x: 0, y: 0 };
-let previousTime = 0;
-let animationFrame = 0;
-let angle = 0;
 
-function measure() {
-  const scroll = window.scrollY;
-  geometry = {
-    manifestoTop: manifesto.getBoundingClientRect().top + scroll,
-    manifestoHeight: manifesto.offsetHeight,
-    showcaseTop: showcase.getBoundingClientRect().top + scroll,
-    showcaseHeight: showcase.offsetHeight,
-    heroHeight: document.querySelector('.hero').offsetHeight
-  };
-  const bounds = canvas.getBoundingClientRect();
-  dimensions = { width: bounds.width, height: bounds.height };
-  const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
-  canvas.width = Math.round(bounds.width * ratio);
-  canvas.height = Math.round(bounds.height * ratio);
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
-  scrollDirty = true;
-}
-function renderScroll() {
-  const progress = sectionProgress(window.scrollY, geometry.manifestoTop - 68, geometry.manifestoHeight, innerHeight - 68);
-  const chapter = Math.min(3, Math.floor(progress * 4));
-  word.textContent = motionEnabled ? ['DESIGN.', 'CODE.', 'AI.', 'SYSTEMS.'][chapter] : 'IDEAS.';
-  chapters.forEach((item, index) => item.classList.toggle('active', motionEnabled && index === chapter));
-  document.querySelector('.star').style.transform = 'rotate(' + (motionEnabled ? progress * 180 : 0) + 'deg)';
-  const workProgress = showcaseProgress(sectionProgress(window.scrollY, geometry.showcaseTop - 68, geometry.showcaseHeight, innerHeight - 68));
-  const horizontal = motionEnabled && innerWidth > 760;
-  track.style.transform = horizontal ? 'translate3d(' + (-workProgress * 66.6666667) + '%,0,0)' : '';
-  indicators.forEach((item, index) => item.classList.toggle('active', index === Math.min(2, Math.round(workProgress * 2))));
-  neural.style.transform = motionEnabled ? 'rotate(' + (workProgress * 90) + 'deg)' : '';
-  neural.style.transformOrigin = '250px 250px';
-  cube.style.transform = 'rotateX(-24deg) rotateY(' + (motionEnabled ? 35 + workProgress * 160 : 35) + 'deg)';
-  scrollDirty = false;
-}
-const mesh = [];
-// A small parametric knot keeps the prototype self-contained.
-const centerAt = t => [(2 + .6 * Math.cos(3 * t)) * Math.cos(2 * t), (2 + .6 * Math.cos(3 * t)) * Math.sin(2 * t), .85 * Math.sin(3 * t)];
-for (let i = 0; i < 80; i++) {
-  const t = i / 80 * Math.PI * 2;
-  const center = centerAt(t);
-  const next = centerAt(t + .001);
-  const tangent = next.map((v, axis) => v - center[axis]);
-  const normalLength = Math.hypot(tangent[0], tangent[1]);
-  const normal = [-tangent[1] / normalLength, tangent[0] / normalLength, 0];
-  const tangentLength = Math.hypot(...tangent);
-  const unit = tangent.map(v => v / tangentLength);
-  const binormal = [unit[1] * normal[2] - unit[2] * normal[1], unit[2] * normal[0] - unit[0] * normal[2], unit[0] * normal[1] - unit[1] * normal[0]];
-  const ring = [];
-  for (let j = 0; j < 10; j++) {
-    const phase = j / 10 * Math.PI * 2;
-    ring.push(center.map((v, axis) => v + .34 * (normal[axis] * Math.cos(phase) + binormal[axis] * Math.sin(phase))));
+class Renderer {
+  constructor(canvas, shape, opt = {}) {
+    this.c = canvas; this.ctx = canvas.getContext('2d'); this.shape = shape;
+    this.cell = opt.cell || 4; this.zoom = opt.zoom || .17; this.tilt = opt.tilt ?? .55;
+    this.speed = opt.speed ?? 1; this.mode = 'human'; this.angle = opt.start || 0;
+    this.px = 0; this.py = 0; this.tx = 0; this.ty = 0; this.visible = true; this.alpha = opt.alpha ?? 1;
+    this.resize();
   }
-  mesh.push(ring);
-}
-function drawSculpture() {
-  const width = dimensions.width, height = dimensions.height;
-  context.clearRect(0, 0, width, height);
-  const ax = .7 + pointer.y * .2, ay = angle + pointer.x * .2;
-  const scale = Math.min(width, height) * .15;
-  const points = mesh.map(ring => ring.map(([x, y, z]) => {
-    const rx = x * Math.cos(ay) + z * Math.sin(ay);
-    const rz = -x * Math.sin(ay) + z * Math.cos(ay);
-    const ry = y * Math.cos(ax) - rz * Math.sin(ax);
-    const depth = y * Math.sin(ax) + rz * Math.cos(ax);
-    const perspective = 7 / (7 - depth);
-    return [width * .49 + rx * scale * perspective, height * .49 + ry * scale * perspective, depth];
-  }));
-  const segments = [];
-  points.forEach((ring, i) => ring.forEach((point, j) => {
-    segments.push([point, ring[(j + 1) % 10]]);
-    segments.push([point, points[(i + 1) % 80][j]]);
-  }));
-  segments.sort((a, b) => (a[0][2] + a[1][2]) - (b[0][2] + b[1][2]));
-  for (const [a, b] of segments) {
-    const depth = (a[2] + b[2]) / 2;
-    const light = clamp((depth + 3.4) / 6.8);
-    context.strokeStyle = 'rgba(' + (170 + Math.round(light * 75)) + ',' + (163 + Math.round(light * 70)) + ',' + (150 + Math.round(light * 64)) + ',' + (.14 + light * .73) + ')';
-    context.lineWidth = .45 + light * .7;
-    context.beginPath(); context.moveTo(a[0], a[1]); context.lineTo(b[0], b[1]); context.stroke();
+  resize() {
+    const r = this.c.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    this.w = Math.max(1, r.width); this.h = Math.max(1, r.height);
+    this.c.width = Math.round(this.w * dpr); this.c.height = Math.round(this.h * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.layout();
+  }
+  layout() {
+    const cell = this.mode === 'machine' ? Math.max(8, this.cell * 2.4) : this.cell;
+    this.cs = cell; this.cols = Math.ceil(this.w / cell); this.rows = Math.ceil(this.h / cell);
+    this.z = new Float32Array(this.cols * this.rows); this.l = new Float32Array(this.cols * this.rows);
+  }
+  setMode(m) { this.mode = m; this.layout(); }
+  draw(dt) {
+    if (motion) this.angle += dt * .00022 * this.speed;
+    this.px += (this.tx - this.px) * .06; this.py += (this.ty - this.py) * .06;
+    const { pos, nor, n } = this.shape, cols = this.cols, rows = this.rows, cs = this.cs, z = this.z, L = this.l;
+    z.fill(-1e9); L.fill(0);
+    const ay = this.angle + this.px * .8, ax = this.tilt + this.py * .5;
+    const cy = Math.cos(ay), sy = Math.sin(ay), cx = Math.cos(ax), sx = Math.sin(ax);
+    const scale = Math.min(this.w, this.h) * this.zoom, ox = this.w / 2, oy = this.h / 2, f = 8;
+    const lx = -.45, ly = -.6, lz = .66;
+    for (let k = 0; k < n * 3; k += 3) {
+      let x = pos[k], y = pos[k+1], q = pos[k+2];
+      const rx = x*cy + q*sy, rz = -x*sy + q*cy, ry = y*cx - rz*sx, d = y*sx + rz*cx;
+      const p = f / (f - d), ix = ((ox + rx*scale*p) / cs) | 0, iy = ((oy + ry*scale*p) / cs) | 0;
+      if (ix < 0 || iy < 0 || ix >= cols || iy >= rows) continue;
+      const id = iy * cols + ix;
+      if (d <= z[id]) continue;
+      z[id] = d;
+      x = nor[k]; y = nor[k+1]; q = nor[k+2];
+      const nx = x*cy + q*sy, nz0 = -x*sy + q*cy, ny = y*cx - nz0*sx, nz = y*sx + nz0*cx;
+      let lum = nx*lx + ny*ly + nz*lz; lum = Math.abs(lum) * .85 + .08 + (d + 3) * .03;
+      L[id] = lum > 1 ? 1 : lum;
+    }
+    const ctx = this.ctx; ctx.clearRect(0, 0, this.w, this.h); ctx.globalAlpha = this.alpha;
+    if (this.mode === 'human') {
+      const hot = new Path2D(), cool = new Path2D(), s = cs - 1;
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        const v = L[j*cols + i]; if (!v) continue;
+        if (v > BAYER[(j & 3) * 4 + (i & 3)]) (v > .72 ? cool : hot).rect(i*cs, j*cs, s, s);
+      }
+      ctx.fillStyle = '#ff4d00'; ctx.fill(hot); ctx.fillStyle = '#e6e6e6'; ctx.fill(cool);
+    } else {
+      ctx.font = '500 ' + Math.round(cs * 1.15) + 'px "Geist Mono",monospace'; ctx.textBaseline = 'top';
+      for (const [col, lo, hi] of [['#ff4d00', 0, .62], ['#e6e6e6', .62, 1.01]]) {
+        ctx.fillStyle = col;
+        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+          const v = L[j*cols + i]; if (!v || v < lo || v >= hi) continue;
+          ctx.fillText(RAMP[Math.min(9, 1 + (v * 9) | 0)], i*cs, j*cs);
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
   }
 }
-function frame(time) {
-  animationFrame = 0;
-  if (scrollDirty) renderScroll();
-  const heroVisible = window.scrollY < geometry.heroHeight;
-  if (heroVisible && time - previousTime > 32) {
-    if (motionEnabled) angle += Math.min(time - previousTime, 60) * .0002;
-    previousTime = time;
-    drawSculpture();
-  }
-  if (motionEnabled && heroVisible && !document.hidden) animationFrame = requestAnimationFrame(frame);
-}
-function requestFrame() { if (!animationFrame && !document.hidden) animationFrame = requestAnimationFrame(frame); }
-function setMotion(enabled) {
-  motionEnabled = enabled;
-  document.body.classList.toggle('motion-ready', enabled);
-  document.body.classList.toggle('no-motion', !enabled);
-  motionButton.textContent = enabled ? 'MOTION ON' : 'MOTION OFF';
-  motionButton.setAttribute('aria-pressed', String(enabled));
-  measure(); renderScroll(); drawSculpture(); requestFrame();
-}
-motionButton.addEventListener('click', () => setMotion(!motionEnabled));
-motionPreference.addEventListener('change', event => setMotion(!event.matches));
-addEventListener('scroll', () => { scrollDirty = true; requestFrame(); }, { passive: true });
-addEventListener('resize', () => { measure(); requestFrame(); });
-document.addEventListener('visibilitychange', requestFrame);
-document.querySelector('.hero').addEventListener('pointermove', event => {
-  if (!motionEnabled || event.pointerType === 'touch') return;
-  pointer = { x: event.clientX / innerWidth - .5, y: event.clientY / innerHeight - .5 }; requestFrame();
-}, { passive: true });
-setMotion(motionEnabled);
-document.fonts.ready.then(() => { measure(); requestFrame(); });
 
-const caseStudies = [
-  { title: 'NEURAL FIELD.', steps: ['AI의 동작과 실험 과정을, 처음 보는 사람에게 어떻게 설명할까?', '입력과 연결, 출력을 하나의 시각적 구조로 묶고 핵심 질문을 먼저 보여줍니다.', '이 시연에서는 SVG 연결망과 스크롤 연동 회전으로 탐색 장면을 구성했습니다.', '실제 프로젝트에서는 데이터, baseline, 평가 지표와 오차 분석을 이 자리에 기록합니다.'] },
-  { title: 'SYSTEM FLOW.', steps: ['시스템의 구성 요소가 많아질 때, 설계의 이유를 어떻게 전달할까?', 'Input → Process → Output 흐름으로 구조를 단순화하고 각 선택의 근거를 설명합니다.', '이 시연에서는 구조도와 깊이감을 이용해 시스템 프로젝트의 소개 화면을 구성했습니다.', '실제 프로젝트에서는 부하 테스트, 장애 사례와 개선 전후의 검증 자료를 이 자리에 기록합니다.'] },
-  { title: 'PLAY GROUND.', steps: ['스크롤을 단순한 이동이 아닌, 탐색하는 경험으로 만들 수 있을까?', '큰 타이포그래피와 오브젝트를 묶고, 스크롤 위치에 따라 장면을 전환합니다.', '이 페이지 자체가 시연입니다. 회전하는 Canvas 오브젝트, 가로 쇼케이스, CSS 3D 큐브를 구현했습니다.', '사용자는 상세 설명을 클릭해서 읽고, 모션을 끄거나 모바일에서 세로로 탐색할 수 있습니다.'] }
+/* ---------- Hero ---------- */
+const stage = $('#stage');
+const hero = new Renderer($('#hero-canvas'), shapes.knot, { cell: innerWidth < 700 ? 3 : 4, zoom: innerWidth < 700 ? .14 : .155 });
+stage.addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch') return;
+  const r = stage.getBoundingClientRect();
+  hero.tx = (e.clientX - r.left) / r.width - .5; hero.ty = (e.clientY - r.top) / r.height - .5;
+  $('#hud-x').textContent = (hero.tx >= 0 ? '+' : '') + hero.tx.toFixed(3);
+  $('#hud-y').textContent = (hero.ty <= 0 ? '+' : '') + (-hero.ty).toFixed(3);
+});
+stage.addEventListener('pointerleave', () => { hero.tx = 0; hero.ty = 0; });
+$$('.mode button').forEach(b => b.addEventListener('click', () => {
+  $$('.mode button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  hero.setMode(b.dataset.mode);
+  $('#hud-mode').textContent = b.dataset.mode === 'human' ? 'DITHER 4×4' : 'ASCII 10-STEP';
+}));
+
+/* ---------- Interest grid ---------- */
+const interests = [['AI','✳'],['Machine Learning','∿'],['Design','◐'],['Creative Code','{ }'],['Systems','⌘'],['Web','↗'],['3D & Motion','◇'],['Typography','Aa'],['Interaction','⊹'],['Data','▤'],['Open Source','⑂'],['Experiments','?']];
+$('#interest-grid').append(...interests.map(([name, icon], i) => {
+  const d = document.createElement('div'); d.className = 'grid-cell reveal';
+  d.style.transitionDelay = (i % 6) * 40 + 'ms';
+  d.innerHTML = '<small>' + String(i + 1).padStart(2, '0') + '</small><span><i></i></span>';
+  d.querySelector('i').textContent = icon; d.querySelector('span').append(' ' + name);
+  return d;
+}));
+
+/* ---------- Projects ---------- */
+const projects = [
+  { title: 'Neural Field', shape: 'blob', desc: 'Making invisible connections visible — a scene for AI experiments and the moments of discovery along the way.', ko: '보이지 않는 연결을 눈에 보이는 형태로.', tags: ['AI / ML', 'Visual Thinking', 'Experiment'],
+    steps: ['AI의 동작과 실험 과정을, 처음 보는 사람에게 어떻게 설명할까?', '입력과 연결, 출력을 하나의 시각적 구조로 묶고 핵심 질문을 먼저 보여줍니다.', '이 시연에서는 유기적인 형태를 ASCII 문자로 렌더링해 탐색 장면을 구성했습니다.', '실제 프로젝트에서는 데이터, baseline, 평가 지표와 오차 분석을 이 자리에 기록합니다.'] },
+  { title: 'System Flow', shape: 'box', desc: 'Complex structures, clear flows. A place for architecture decisions and the reasoning behind every trade-off.', ko: '복잡한 구조를, 명확한 흐름으로.', tags: ['System Design', 'Architecture', 'CS'],
+    steps: ['시스템의 구성 요소가 많아질 때, 설계의 이유를 어떻게 전달할까?', 'Input → Process → Output 흐름으로 구조를 단순화하고 각 선택의 근거를 설명합니다.', '이 시연에서는 단단한 큐브 형태를 디더링 픽셀로 렌더링해 시스템 프로젝트를 표현했습니다.', '실제 프로젝트에서는 부하 테스트, 장애 사례와 개선 전후의 검증 자료를 이 자리에 기록합니다.'] },
+  { title: 'Playground', shape: 'ring', desc: 'Curiosity you can touch. Small interactions, odd ideas and new attempts — this very page included.', ko: '호기심을 직접 만질 수 있게.', tags: ['Interaction', 'Creative Code', 'Web'],
+    steps: ['스크롤을 단순한 이동이 아닌, 탐색하는 경험으로 만들 수 있을까?', '큰 타이포그래피, 엄격한 그리드, 살아 있는 오브젝트를 조합합니다.', '이 페이지 자체가 시연입니다. 라이브러리 없이 직접 만든 3D 디더/ASCII 렌더러가 모든 비주얼을 그립니다.', '사용자는 HUMAN/MACHINE 모드를 바꾸거나 모션을 끌 수 있고, 모바일에서도 그대로 탐색할 수 있습니다.'] }
 ];
-const dialog = document.getElementById('case-dialog');
-document.querySelectorAll('[data-case]').forEach(button => button.addEventListener('click', () => {
-  const study = caseStudies[Number(button.dataset.case)];
-  document.getElementById('case-title').textContent = study.title;
-  const content = document.getElementById('case-content');
-  content.replaceChildren();
-  ['Problem', 'Approach', 'Experiment', 'Result'].forEach((stage, index) => {
-    const row = document.createElement('section'); row.className = 'case-stage';
-    const heading = document.createElement('h3'); heading.textContent = stage;
-    const text = document.createElement('p'); text.textContent = study.steps[index];
-    row.append(heading, text); content.append(row);
-  });
-  dialog.showModal();
-}));
-document.querySelectorAll('[data-case]').forEach(button => button.addEventListener('focus', () => {
-  if (!motionEnabled || innerWidth <= 760) return;
-  const bounds = button.getBoundingClientRect();
-  if (bounds.left < 0 || bounds.right > innerWidth) {
-    window.scrollTo({ top: geometry.showcaseTop - 68 + Number(button.dataset.case) / 2 * (geometry.showcaseHeight - (innerHeight - 68)), behavior: 'instant' });
-  }
-}));
-document.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
-dialog.addEventListener('click', event => {
-  const bounds = dialog.getBoundingClientRect();
-  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
+const projectRenderers = [];
+projects.forEach((p, i) => {
+  const a = document.createElement('article'); a.className = 'project reveal';
+  a.innerHTML = '<div class="p-media" role="button" tabindex="0"><canvas aria-hidden="true"></canvas><span class="badge">CONCEPT 0' + (i + 1) + ' / DEMO</span><span class="open">VIEW CASE ↗</span></div>' +
+    '<div class="p-desc"><div><p class="en"></p><p class="ko"></p></div><div class="p-tags"></div></div><h3 class="p-title"><button type="button"></button></h3>';
+  $('.p-media', a).setAttribute('aria-label', p.title + ' 케이스 스터디 열기');
+  $('.en', a).textContent = p.desc; $('.ko', a).textContent = p.ko;
+  $('.p-tags', a).append(...p.tags.map(t => Object.assign(document.createElement('span'), { textContent: t })));
+  $('.p-title button', a).textContent = p.title;
+  $('#projects').append(a);
+  const r = new Renderer($('canvas', a), shapes[p.shape], { cell: 4, zoom: .16, start: i * 1.7, speed: .8, tilt: .4 + i * .15 });
+  if (i === 0) r.setMode('machine');
+  r.visible = false; projectRenderers.push(r);
+  const open = () => openCase(p);
+  $('.p-media', a).addEventListener('click', open);
+  $('.p-media', a).addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  $('.p-title button', a).addEventListener('click', open);
+  a.addEventListener('pointermove', e => { const b = a.getBoundingClientRect(); r.tx = (e.clientX - b.left) / b.width - .5; r.ty = (e.clientY - b.top) / b.height - .5; });
+  a.addEventListener('pointerleave', () => { r.tx = 0; r.ty = 0; });
 });
 
-document.getElementById('year').textContent = new Date().getFullYear();
-const repoStatus = document.getElementById('repo-status');
-const repositoryList = document.getElementById('repositories');
-fetch('https://api.github.com/users/yoon57296/repos?per_page=100&sort=updated')
-.then(response => { if (!response.ok) throw new Error(String(response.status)); return response.json(); })
-.then(repos => {
-  const projects = repos.filter(repo => !repo.fork && !repo.archived && repo.name !== 'yoon57296.github.io').slice(0, 8);
-  repoStatus.textContent = projects.length ? '' : '아직 공개 프로젝트가 없습니다. 위의 쇼케이스는 연출 시연이며, 실제 공개 저장소가 추가되면 이곳에 자동으로 표시됩니다.';
-  projects.forEach((repo, index) => {
-    const link = document.createElement('a'); link.className = 'repo-row'; link.href = repo.html_url;
-    const number = document.createElement('span'); number.className = 'micro'; number.textContent = String(index + 1).padStart(2, '0');
-    const info = document.createElement('div');
-    const title = document.createElement('h3'); title.textContent = repo.name;
-    const description = document.createElement('p'); description.textContent = repo.description || repo.language || 'GitHub에서 프로젝트 살펴보기';
-    const arrow = document.createElement('span'); arrow.className = 'arrow'; arrow.textContent = '↗'; arrow.setAttribute('aria-hidden', 'true');
-    info.append(title, description); link.append(number, info, arrow); repositoryList.append(link);
+const dialog = $('#case-dialog');
+function openCase(p) {
+  $('#case-title').textContent = p.title + '.';
+  const c = $('#case-content'); c.replaceChildren();
+  ['Problem', 'Approach', 'Experiment', 'Result'].forEach((s, i) => {
+    const row = document.createElement('section'); row.className = 'd-stage';
+    row.append(Object.assign(document.createElement('h3'), { textContent: '0' + (i + 1) + ' ' + s }), Object.assign(document.createElement('p'), { textContent: p.steps[i] }));
+    c.append(row);
   });
-})
-.catch(() => { repoStatus.textContent = 'GitHub 저장소를 불러오지 못했습니다. 위의 GitHub 링크에서 공개 코드를 확인할 수 있습니다.'; });
+  dialog.showModal();
+}
+$('.d-close').addEventListener('click', () => dialog.close());
+dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+
+/* ---------- Contact backdrop ---------- */
+const contact = new Renderer($('#contact-canvas'), shapes.knot, { cell: 5, zoom: .22, speed: .5, alpha: .5 });
+contact.setMode('machine'); contact.visible = false;
+
+/* ---------- Visibility + loop ---------- */
+const all = [hero, ...projectRenderers, contact];
+const io = new IntersectionObserver(es => es.forEach(e => {
+  const r = all.find(x => x.c === e.target || x.c.parentElement === e.target);
+  if (r) { r.visible = e.isIntersecting; if (r.visible) start(); }
+}), { rootMargin: '100px' });
+all.forEach(r => io.observe(r.c));
+const revealIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); } }), { threshold: .12 });
+$$('.reveal').forEach(el => revealIO.observe(el));
+
+let last = 0, raf = 0, fpsT = 0, fpsN = 0;
+function loop(t) {
+  raf = 0;
+  const dt = Math.min(64, t - (last || t)); last = t;
+  let any = false;
+  for (const r of all) if (r.visible) { r.draw(dt); any = true; }
+  fpsN++; if (t - fpsT > 500) { $('#hud-fps').textContent = Math.round(fpsN * 1000 / (t - fpsT)); fpsT = t; fpsN = 0; }
+  $('#hud-r').textContent = ((hero.angle * 180 / Math.PI) % 360).toFixed(1).padStart(5, '0') + '°';
+  if (any && !document.hidden && (motion || Math.abs(hero.tx - hero.px) > .001)) raf = requestAnimationFrame(loop);
+}
+function start() { if (!raf && !document.hidden) { last = 0; raf = requestAnimationFrame(loop); } }
+document.addEventListener('visibilitychange', start);
+stage.addEventListener('pointermove', start);
+addEventListener('resize', () => { all.forEach(r => r.resize()); all.forEach(r => r.draw(0)); start(); });
+document.fonts.ready.then(() => all.forEach(r => r.draw(0)));
+
+/* ---------- Motion toggle ---------- */
+function setMotion(on) {
+  motion = on;
+  document.body.classList.toggle('no-motion', !on);
+  $$('.motion-btn').forEach(b => { b.textContent = on ? 'MOTION ON' : 'MOTION OFF'; b.setAttribute('aria-pressed', String(on)); });
+  all.forEach(r => r.draw(0)); start();
+}
+$$('.motion-btn').forEach(b => b.addEventListener('click', () => setMotion(!motion)));
+reduce.addEventListener('change', e => setMotion(!e.matches));
+setMotion(motion);
+
+/* ---------- Nav: scramble, clock, menu, active ---------- */
+const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&*+=-_/';
+$$('[data-scramble]').forEach(a => {
+  const node = a.firstChild, text = node.textContent; let busy = false;
+  a.addEventListener('mouseenter', () => {
+    if (!motion || busy) return; busy = true; let f = 0;
+    const tick = () => {
+      node.textContent = [...text].map((c, i) => i < f / 2 || c === ' ' ? c : CH[(Math.random() * CH.length) | 0]).join('');
+      if (++f <= text.length * 2) requestAnimationFrame(tick); else { node.textContent = text; busy = false; }
+    };
+    tick();
+  });
+});
+const clock = $('#clock');
+const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+const tickClock = () => { clock.textContent = fmt.format(new Date()) + ' KST'; };
+tickClock(); setInterval(tickClock, 1000);
+const menu = $('#menu'), menuBtn = $('#menu-btn');
+const setMenu = open => { menu.classList.toggle('open', open); menu.setAttribute('aria-hidden', String(!open)); menuBtn.setAttribute('aria-expanded', String(open)); menuBtn.textContent = open ? 'Close' : 'Menu'; };
+menuBtn.addEventListener('click', () => setMenu(!menu.classList.contains('open')));
+$$('#menu a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+const navMap = $$('.nav-links a[href^="#"]');
+const secIO = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  navMap.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+}), { rootMargin: '-45% 0px -50% 0px' });
+['focus', 'work', 'lab', 'contact'].forEach(id => secIO.observe(document.getElementById(id)));
+
+/* ---------- Year + GitHub repos ---------- */
+const y = new Date().getFullYear();
+$('#year').textContent = y; $('#yy').textContent = String(y).slice(-2);
+const repoStatus = $('#repo-status'), list = $('#repositories');
+fetch('https://api.github.com/users/yoon57296/repos?per_page=100&sort=updated')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(repos => {
+    const items = repos.filter(r => !r.fork && !r.archived && r.name !== 'yoon57296.github.io').slice(0, 8);
+    $('#repo-count').textContent = '(' + String(items.length).padStart(2, '0') + ')';
+    repoStatus.textContent = items.length ? '' : '아직 공개 프로젝트가 없습니다. 위의 쇼케이스는 연출 시연이며, 공개 저장소가 추가되면 이곳에 자동으로 표시됩니다.';
+    if (items.length) repoStatus.hidden = true;
+    items.forEach((r, i) => {
+      const a = document.createElement('a'); a.className = 'repo-row'; a.href = r.html_url;
+      const n = Object.assign(document.createElement('span'), { className: 'mono dim', textContent: String(i + 1).padStart(2, '0') });
+      const h = Object.assign(document.createElement('h3'), { textContent: r.name });
+      const p = Object.assign(document.createElement('p'), { className: 'desc', textContent: r.description || 'GitHub에서 프로젝트 살펴보기' });
+      const l = Object.assign(document.createElement('span'), { className: 'mono dim lang', textContent: r.language || '—' });
+      const ar = Object.assign(document.createElement('span'), { className: 'arrow', textContent: '↗' }); ar.setAttribute('aria-hidden', 'true');
+      a.append(n, h, p, l, ar); list.append(a);
+    });
+  })
+  .catch(() => { repoStatus.textContent = 'GitHub 저장소를 불러오지 못했습니다. github.com/yoon57296 에서 공개 코드를 확인할 수 있습니다.'; });
 </script>
 </body>
 </html>
