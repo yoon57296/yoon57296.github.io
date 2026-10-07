@@ -3,277 +3,210 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0a0c0b">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="yoon57296 — 호기심을 실제로 작동하는 것으로 만드는 1인 디지털 스튜디오. 스크롤로 탐색하는 실험적인 개발 포트폴리오.">
-<title>yoon. — making curious things that work</title>
+<meta name="description" content="yoon/lab — 궁금한 것에서 시작해 작동하는 것으로. 생각을 키우고 실험하는 yoon57296의 개발 실험실.">
+<title>yoon/lab — ideas grow when you poke them</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,800;125,900&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#000;--fg:#e6e6e6;--dim:#8a8a8a;--mute:#4d4d4d;--line:#1f1f1f;--cell:#0a0a0a;--orange:#ff4d00;--mono:"Geist Mono",ui-monospace,SFMono-Regular,Consolas,monospace;--gut:16px}
+:root{--bg:#0a0c0b;--panel:#0f1311;--fg:#e4ebe6;--dim:#7f8a84;--mute:#3a433f;--line:#1c2320;--acc:#b8ff4a;--mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;--serif:"Instrument Serif",Georgia,serif;--gut:clamp(16px,3vw,40px)}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:56px}
-body{margin:0;background:var(--bg);color:var(--fg);font:500 13px/1.35 "Geist",Arial,"Malgun Gothic",sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;scroll-padding-top:60px}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 15px/1.7 "IBM Plex Sans KR",system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
-a:focus-visible,button:focus-visible{outline:2px solid var(--orange);outline-offset:4px}
-::selection{background:var(--orange);color:#000}
-.mono{font-family:var(--mono);font-size:11px;letter-spacing:.02em;text-transform:uppercase}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a:focus-visible,button:focus-visible,canvas:focus-visible{outline:2px solid var(--acc);outline-offset:4px}
+::selection{background:var(--acc);color:var(--bg)}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
 .dim{color:var(--dim)}
-.orange{color:var(--orange)}
-sup.count{font:400 9px var(--mono);color:var(--dim);margin-left:2px;vertical-align:super}
-.skip{position:fixed;top:-100px;left:16px;z-index:50;background:var(--fg);color:#000;padding:10px 14px}.skip:focus{top:60px}
+em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--acc);letter-spacing:0}
+.skip{position:fixed;top:-100px;left:16px;z-index:50;background:var(--acc);color:var(--bg);padding:10px 14px}.skip:focus{top:64px}
 
 /* NAV */
-.nav{position:fixed;inset:0 0 auto;z-index:30;height:44px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 var(--gut);background:#000c;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.logo{font-weight:600;font-size:17px;letter-spacing:-.04em}
-.logo span{color:var(--orange)}
-.nav-links{display:flex;gap:22px;font-size:12px}
-.nav-links a{color:var(--fg);transition:color .15s}
-.nav-links a:hover,.nav-links a.active{color:var(--orange)}
-.nav-right{display:flex;justify-content:flex-end;align-items:center;gap:18px;font-size:12px}
-.online{display:inline-flex;align-items:center;gap:6px}
-.online::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange);animation:pulse 2s infinite}
-@keyframes pulse{50%{opacity:.35}}
-.clock{color:var(--dim);font-family:var(--mono);font-size:11px}
-.motion-btn{font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--line);padding:4px 7px}
-.motion-btn:hover{color:var(--fg);border-color:var(--mute)}
-.menu-btn{display:none}
-.menu{position:fixed;inset:44px 0 0;z-index:29;background:#000;padding:24px var(--gut);display:flex;flex-direction:column;gap:4px;transform:translateY(-8px);opacity:0;visibility:hidden;transition:opacity .2s,transform .2s,visibility .2s}
-.menu.open{opacity:1;visibility:visible;transform:none}
-.menu a{font-size:44px;font-weight:600;letter-spacing:-.05em;line-height:1.05}
-.menu a:hover{color:var(--orange)}
-.menu .mono{margin-top:auto}
+.nav{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 var(--gut);background:linear-gradient(#0a0c0bf2,#0a0c0b00)}
+.logo{font-family:var(--mono);font-size:14px;font-weight:500}
+.logo span{color:var(--acc)}
+.nav nav{display:flex;align-items:center;gap:24px}
+.nav nav a{font-family:var(--mono);font-size:12px;color:var(--dim);transition:color .15s}
+.nav nav a:hover,.nav nav a.active{color:var(--fg)}
+.nav nav a.active::before{content:"● ";color:var(--acc)}
+.chip-btn{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;transition:color .15s,border-color .15s}
+.chip-btn:hover{color:var(--fg);border-color:var(--mute)}
 
 /* HERO */
-.hero{padding:44px var(--gut) 0}
-.stage{position:relative;height:min(78svh,820px);min-height:420px;border-bottom:1px solid var(--line);overflow:hidden;background:radial-gradient(ellipse at 50% 60%,#140700 0,#000 65%)}
-.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 2px,#0000002e 3px);mix-blend-mode:multiply}
-.hud{position:absolute;z-index:2;font-family:var(--mono);font-size:10px;color:var(--dim);text-transform:uppercase;line-height:1.6;pointer-events:none}
+.hero{position:relative;height:100svh;min-height:560px;overflow:hidden;background:radial-gradient(circle at 60% 45%,#12180f 0,var(--bg) 60%)}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#ffffff10 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+#hero-graph{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:crosshair}
+.hud{position:absolute;z-index:2;font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.7;pointer-events:none}
 .hud b{color:var(--fg);font-weight:500}
-.hud.tl{top:14px;left:0}.hud.tr{top:14px;right:0;text-align:right}.hud.bl{bottom:14px;left:0}.hud.br{bottom:14px;right:0;text-align:right}
-.mode{position:absolute;z-index:3;left:50%;bottom:14px;transform:translateX(-50%);display:flex;padding:3px;background:#000;border:1px solid #2a2a2a;border-radius:20px;font-family:var(--mono);font-size:10px}
-.mode button{padding:5px 10px;border-radius:20px;color:var(--fg);transition:background .2s,color .2s}
-.mode button[aria-pressed="true"]{color:var(--orange);background:#1a0a02}
-.headline{display:grid;grid-template-columns:minmax(0,1fr);padding:22px 0 0}
-.headline h1{margin:0;font-weight:600;font-size:clamp(38px,6.8vw,98px);line-height:.94;letter-spacing:-.055em;max-width:15ch}
-.headline p{margin:18px 0 0;max-width:420px;font-size:14px;line-height:1.4;font-weight:600}
-.headline .ko{font-weight:500;color:var(--dim);font-size:13px;margin-top:8px}
+.hud-top{top:72px;left:var(--gut);right:var(--gut);display:flex;justify-content:space-between}
+.hero-copy{position:absolute;z-index:2;left:var(--gut);bottom:40px;max-width:min(680px,calc(100% - 2*var(--gut)));pointer-events:none}
+.hero-copy h1{margin:0;font-weight:500;font-size:clamp(40px,6.4vw,92px);line-height:1;letter-spacing:-.035em}
+.hero-copy h1 em{font-size:1.08em}
+.hero-copy p{margin:18px 0 0;max-width:430px;color:#b9c3bd;font-size:15px}
+.hero-tools{position:absolute;z-index:3;right:var(--gut);bottom:40px;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.hint{margin:0;font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right;line-height:1.8}
+.hint kbd{font:inherit;color:var(--acc)}
 
-/* SECTION HEAD */
-section{padding:0 var(--gut)}
-.sec-title{font-weight:600;font-size:clamp(34px,4.6vw,64px);letter-spacing:-.05em;line-height:1;margin:0;padding:100px 0 16px;color:#bdbdbd}
-.sec-sub{display:flex;justify-content:space-between;gap:16px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+/* SECTIONS */
+section{padding:120px var(--gut) 0}
+.label{display:flex;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:48px}
+.label span:first-child::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-right:10px;vertical-align:1px}
+h2{margin:0;font-weight:500;font-size:clamp(34px,4.6vw,64px);line-height:1.05;letter-spacing:-.03em}
 
-/* GRID OF INTERESTS */
-.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-.grid-cell{position:relative;aspect-ratio:16/8;border:1px solid var(--line);background:var(--cell);display:grid;place-items:center;overflow:hidden;transition:border-color .2s}
-.grid-cell span{font-weight:600;font-size:clamp(14px,1.5vw,21px);letter-spacing:-.03em;display:flex;align-items:center;gap:8px;transition:color .2s,transform .3s}
-.grid-cell i{font-style:normal;font-family:var(--mono);font-size:.75em;color:var(--dim);transition:color .2s}
-.grid-cell small{position:absolute;top:6px;left:8px;font:400 9px var(--mono);color:var(--mute)}
-.grid-cell:hover{border-color:var(--orange)}
-.grid-cell:hover span{color:var(--orange);transform:scale(1.04)}
-.grid-cell:hover i{color:var(--orange)}
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px}
+.about p{margin:0 0 18px;color:#b9c3bd;font-size:16px;max-width:520px}
+.about p strong{color:var(--fg);font-weight:500}
+.fields{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.fields span{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:20px;padding:5px 12px;color:var(--dim)}
 
-/* PROJECTS */
-.project{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,1.8fr) minmax(0,2fr);gap:8px;padding:8px 0 64px;border-top:1px solid var(--line)}
-.project+.project{margin-top:0}
-.p-media{position:relative;aspect-ratio:16/9;border:1px solid var(--line);background:#050505;overflow:hidden;cursor:pointer}
-.p-media canvas{width:100%;height:100%;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.p-media:hover canvas{transform:scale(1.03)}
-.p-media .badge{position:absolute;top:10px;left:10px;font:400 9px var(--mono);background:#000;border:1px solid #2a2a2a;padding:3px 6px;color:var(--dim)}
-.p-media .open{position:absolute;right:10px;bottom:10px;font:500 10px var(--mono);background:var(--orange);color:#000;padding:5px 8px;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
-.p-media:hover .open,.p-media:focus-visible .open{opacity:1;transform:none}
-.p-desc{display:flex;flex-direction:column;justify-content:space-between;gap:20px;font-size:13px;font-weight:600;line-height:1.25}
-.p-desc p{margin:0}
-.p-desc .ko{font-weight:500;color:var(--dim);margin-top:10px}
-.p-tags{display:flex;flex-direction:column;gap:2px;font-size:12px}
-.p-title{text-align:right;font-weight:600;font-size:clamp(22px,2.2vw,32px);letter-spacing:-.04em;margin:0;line-height:1}
-.p-title button:hover{color:var(--orange)}
+/* EXPERIMENTS */
+.exp{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);padding:36px 0;border-top:1px solid var(--line)}
+.exp:last-child{border-bottom:1px solid var(--line)}
+.exp-meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:22px}
+.exp-meta .status{color:var(--acc)}
+.exp h3{margin:0 0 18px;font-weight:500;font-size:clamp(30px,3.6vw,48px);letter-spacing:-.03em;line-height:1.05}
+.exp dl{margin:0;display:grid;grid-template-columns:86px 1fr;gap:10px 16px;font-size:14px;max-width:520px}
+.exp dt{font-family:var(--mono);font-size:11px;color:var(--dim);text-transform:uppercase;padding-top:3px}
+.exp dd{margin:0;color:#c6d0ca}
+.open-case{margin-top:28px;font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--acc);padding-bottom:3px;transition:color .15s}
+.open-case:hover{color:var(--acc)}
+.exp-visual{position:relative;min-height:300px;border:1px solid var(--line);border-radius:4px;background:var(--panel);overflow:hidden}
+.exp-visual::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#ffffff0c 1px,transparent 1px);background-size:20px 20px}
+.exp-visual canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.exp-visual .mono{position:absolute;left:12px;bottom:10px;color:var(--mute)}
 
-/* REPOS */
-.repo-row{display:grid;grid-template-columns:48px minmax(0,2fr) minmax(0,3fr) 90px 24px;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);transition:padding .2s,color .2s}
-.repo-row:hover{color:var(--orange);padding-left:8px}
-.repo-row h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.03em}
-.repo-row p{margin:0;color:var(--dim);font-size:12px}
-.repo-row .arrow{text-align:right}
-#repo-status{color:var(--dim);font-size:13px;max-width:640px;line-height:1.6;padding:14px 0}
+/* METHOD */
+.method{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:56px}
+.method::before{content:"";position:absolute;top:6px;left:6px;right:6px;height:1px;background:linear-gradient(90deg,var(--acc),var(--mute))}
+.step{position:relative;padding-top:34px}
+.step::before{content:"";position:absolute;top:0;left:0;width:13px;height:13px;border-radius:50%;background:var(--bg);border:1px solid var(--acc)}
+.step:first-child::before{background:var(--acc)}
+.step h3{margin:6px 0 8px;font-weight:500;font-size:22px;letter-spacing:-.02em}
+.step p{margin:0;color:var(--dim);font-size:14px}
 
-/* CAPABILITIES */
-.statement{font-weight:600;font-size:clamp(34px,5.6vw,80px);letter-spacing:-.055em;line-height:.95;color:#bdbdbd;margin:0;padding-top:120px;max-width:17ch}
-.statement em{font-style:normal;color:var(--fg)}
-.caps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:56px 0 0 8%}
-.cap h3{margin:0 0 14px;font-size:14px;font-weight:600}
-.cap p{margin:0 0 12px;font-size:13px;line-height:1.3;font-weight:600;color:#cfcfcf}
-.cap .ko{color:var(--dim);font-weight:500}
-.chips{display:flex;flex-wrap:wrap;gap:4px}
-.chips span{font:500 10px var(--mono);background:#1a1a1a;color:#bdbdbd;padding:2px 5px}
+/* LOG */
+.log-row{display:grid;grid-template-columns:110px minmax(0,1.2fr) minmax(0,2fr) 110px;gap:20px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--line);transition:background .15s}
+.log-row:hover{background:var(--panel)}
+.log-row:hover h3{color:var(--acc)}
+.log-row h3{margin:0;font-weight:500;font-size:18px;transition:color .15s}
+.log-row p{margin:0;color:var(--dim);font-size:14px}
+.log-row .lang{text-align:right}
+#log-status{color:var(--dim);max-width:640px;margin:0}
 
 /* CONTACT */
-.contact{margin:140px var(--gut) 0;padding:0}
-.contact-box{position:relative;margin-left:8%;padding:28px 0 24px;overflow:hidden}
-.contact-box canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
-.contact-box>*{position:relative}
-.contact h2{margin:6px 0 0;font-weight:600;font-size:clamp(36px,5vw,72px);letter-spacing:-.055em;line-height:.95;color:#bdbdbd}
-.contact .mail{display:inline-block;margin-top:14px;font-weight:600;font-size:clamp(28px,5vw,72px);letter-spacing:-.055em;line-height:1;transition:color .2s}
-.contact .mail:hover{color:var(--orange)}
-
-/* FOOTER */
-footer{padding:120px var(--gut) 16px}
-.wordmark{font-family:"Archivo",sans-serif;font-stretch:125%;font-weight:900;font-size:min(16.2vw,260px);line-height:.8;letter-spacing:-.02em;color:#c8c8c8;white-space:nowrap;padding-bottom:12px;border-bottom:1px solid var(--line);user-select:none}
-.wordmark span{color:var(--orange)}
-.foot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:end;padding-top:140px}
-.foot-note{max-width:300px;font-weight:600;line-height:1.25}
-.foot-note .ko{display:block;color:var(--dim);font-weight:500;margin-top:8px}
-.foot-links{display:flex;flex-direction:column}
-.foot-links a{font-weight:600;font-size:clamp(24px,2.4vw,34px);letter-spacing:-.04em;line-height:1.05;width:max-content}
-.foot-links a:hover{color:var(--orange)}
-.foot-meta{text-align:right;font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:6px}
-.foot-meta a{color:var(--fg)}
-.foot-meta a:hover{color:var(--orange)}
+.contact{padding-bottom:40px}
+.contact h2{font-size:clamp(40px,7vw,104px);max-width:12ch}
+.contact-link{display:inline-flex;align-items:center;gap:14px;margin-top:36px;font-family:var(--mono);font-size:14px;border:1px solid var(--acc);border-radius:40px;padding:14px 22px;transition:background .2s,color .2s}
+.contact-link:hover{background:var(--acc);color:var(--bg)}
+footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:80px var(--gut) 24px;color:var(--dim)}
 
 /* DIALOG */
-dialog{background:#0a0a0a;color:var(--fg);border:1px solid #2a2a2a;max-width:720px;width:calc(100% - 32px);max-height:85svh;padding:28px}
-dialog::backdrop{background:#000c;backdrop-filter:blur(6px)}
+dialog{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;max-width:680px;width:calc(100% - 32px);max-height:85svh;padding:28px}
+dialog::backdrop{background:#000b;backdrop-filter:blur(6px)}
 .d-top{display:flex;justify-content:space-between;align-items:center}
-.d-close{width:32px;height:32px;border:1px solid #2a2a2a;font-size:18px}
-.d-close:hover{border-color:var(--orange);color:var(--orange)}
-dialog h2{margin:22px 0 10px;font-size:clamp(32px,6vw,56px);letter-spacing:-.05em;line-height:1;font-weight:600}
-.d-note{color:var(--dim);font-size:12px;line-height:1.6;padding-bottom:16px;border-bottom:1px solid var(--line);margin:0}
+.d-close{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;font-size:18px}
+.d-close:hover{border-color:var(--acc);color:var(--acc)}
+dialog h2{margin:20px 0 12px;font-size:clamp(30px,5vw,46px)}
+.d-note{color:var(--dim);font-size:13px;margin:0 0 8px;padding-bottom:16px;border-bottom:1px solid var(--line)}
 .d-stage{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
-.d-stage h3{margin:0;font:500 11px var(--mono);text-transform:uppercase;color:var(--orange)}
-.d-stage p{margin:0;font-size:14px;line-height:1.6}
+.d-stage h3{margin:0;font:500 11px/2 var(--mono);text-transform:uppercase;color:var(--acc)}
+.d-stage p{margin:0;font-size:14px}
 
-/* REVEAL */
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
 .reveal.in{opacity:1;transform:none}
 .no-motion .reveal{opacity:1;transform:none;transition:none}
-.no-motion .online::before{animation:none}
 
-@media(max-width:900px){
-.grid{grid-template-columns:repeat(3,1fr)}
-.project{grid-template-columns:1fr 1fr;padding-bottom:48px}
-.p-media{grid-column:1/-1;order:0}.p-desc{order:2}.p-title{order:1;text-align:left;grid-column:1/-1;padding-top:6px}
-.caps{grid-template-columns:1fr 1fr;padding-left:0}
-.contact-box{margin-left:0}
-.repo-row{grid-template-columns:32px minmax(0,1fr) 24px}.repo-row p.desc,.repo-row .lang{display:none}
+@media(max-width:820px){
+.nav nav a{display:none}
+.hud-top .hud-right{display:none}
+.hero-copy{bottom:96px}
+.hero-tools{left:var(--gut);right:auto;bottom:32px;flex-direction:row;align-items:center;gap:16px}
+.hint{text-align:left}
+.about,.exp{grid-template-columns:1fr}
+.exp-visual{min-height:240px;order:-1}
+.method{grid-template-columns:1fr 1fr;gap:36px 20px}.method::before{display:none}
+.log-row{grid-template-columns:minmax(0,1fr) auto}.log-row p,.log-row .date{display:none}
+.d-stage{grid-template-columns:1fr;gap:4px}
 }
-@media(max-width:700px){
-.nav{grid-template-columns:1fr auto}.nav-links,.clock,.online,.motion-btn{display:none}
-.menu-btn{display:block;font-size:12px}
-.stage{height:62svh;min-height:380px}
-.hud.tr,.hud.br{display:none}
-.grid{grid-template-columns:repeat(2,1fr)}
-.project{grid-template-columns:1fr}
-.p-desc{gap:14px}
-.caps{grid-template-columns:1fr;gap:32px}
-.sec-sub .hide-sm{display:none}
-.foot{grid-template-columns:1fr;padding-top:64px}.foot-meta{text-align:left}
-.d-stage{grid-template-columns:1fr;gap:6px}
-dialog{padding:20px}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 </style>
 </head>
 <body>
-<a class="skip" href="#work">프로젝트로 바로가기</a>
-
+<a class="skip" href="#experiments">실험 목록으로 바로가기</a>
 <header class="nav">
-  <a class="logo" href="#top" aria-label="yoon57296 홈">yoon<span>.</span></a>
-  <nav class="nav-links" aria-label="주요 메뉴">
-    <a href="#top" data-scramble>Home</a>
-    <a href="#work" data-scramble>Work<sup class="count">(03)</sup></a>
-    <a href="#focus" data-scramble>Focus</a>
-    <a href="#lab" data-scramble>Lab<sup class="count" id="repo-count"></sup></a>
-    <a href="https://github.com/yoon57296" data-scramble>GitHub ↗</a>
+  <a class="logo" href="#top">yoon<span>/</span>lab</a>
+  <nav aria-label="주요 메뉴">
+    <a href="#about">About</a><a href="#experiments">Experiments</a><a href="#method">Method</a><a href="#log">Log</a><a href="#contact">Contact</a>
+    <button class="chip-btn" id="motion-toggle" type="button" aria-pressed="true">MOTION ON</button>
   </nav>
-  <div class="nav-right">
-    <span class="online">Online <sup class="count">(SEOUL)</sup></span>
-    <span class="clock" id="clock" aria-label="서울 현재 시각">--:--:--</span>
-    <button class="motion-btn" id="motion-toggle" type="button" aria-pressed="true">MOTION ON</button>
-    <a href="#contact" data-scramble>Contact</a>
-    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
-  </div>
 </header>
-<div class="menu" id="menu" aria-hidden="true">
-  <a href="#top">Home</a><a href="#work">Work</a><a href="#focus">Focus</a><a href="#lab">Lab</a><a href="#contact">Contact</a>
-  <button class="motion-btn" id="motion-toggle-m" type="button" style="align-self:flex-start;margin-top:20px">MOTION ON</button>
-  <span class="mono dim">yoon57296.github.io</span>
-</div>
 
-<main id="top">
-  <div class="hero">
-    <div class="stage" id="stage">
-      <canvas id="hero-canvas" aria-hidden="true"></canvas>
-      <div class="hud tl">FIG. 001 — <b>IDEAS IN ORBIT</b><br>RENDER / <span id="hud-mode">DITHER 4×4</span></div>
-      <div class="hud tr">X <b id="hud-x">+0.000</b> &nbsp;Y <b id="hud-y">+0.000</b><br>ROT <b id="hud-r">000.0°</b></div>
-      <div class="hud bl">37.5665° N<br>126.9780° E</div>
-      <div class="hud br">FPS <b id="hud-fps">--</b><br>BUILT FROM SCRATCH</div>
-      <div class="mode" role="group" aria-label="렌더링 모드">
-        <button type="button" data-mode="human" aria-pressed="true">HUMAN</button>
-        <button type="button" data-mode="machine" aria-pressed="false">MACHINE</button>
+<main>
+  <div class="hero" id="top">
+    <canvas id="hero-graph" tabindex="0" aria-label="생각 그래프. 클릭하거나 Enter 키를 누르면 새 생각이 자랍니다."></canvas>
+    <div class="hud hud-top">
+      <span>FIG.01 — THOUGHT GRAPH<br>NODES <b id="h-nodes">0</b> · LINKS <b id="h-links">0</b> · DEPTH <b id="h-depth">0</b></span>
+      <span class="hud-right" style="text-align:right">LATEST<br><b id="h-latest">—</b></span>
+    </div>
+    <div class="hero-copy">
+      <h1 class="reveal">Ideas grow when<br>you <em>poke</em> them.</h1>
+      <p class="reveal">궁금한 것에서 시작해, 작동하는 것으로.<br>yoon57296의 실험실에 오신 걸 환영합니다.</p>
+    </div>
+    <div class="hero-tools">
+      <p class="hint"><kbd>click</kbd> 생각 키우기 · <kbd>drag</kbd> 옮기기</p>
+      <button class="chip-btn" id="graph-reset" type="button">↺ RESET</button>
+    </div>
+  </div>
+
+  <section id="about" aria-labelledby="about-title">
+    <div class="label mono dim"><span>01 / About</span><span>Who's in the lab</span></div>
+    <div class="about">
+      <h2 class="reveal" id="about-title">Hello, I'm yoon.<br>I build to <em>understand.</em></h2>
+      <div class="reveal">
+        <p>하나의 분야보다 <strong>하나의 질문</strong>에서 시작합니다. 디자인에서 코드로, 코드에서 AI와 시스템으로 — 질문이 이끄는 곳으로 갑니다.</p>
+        <p>완벽한 계획보다 <strong>작게 만들어 보는 것</strong>을 좋아합니다. 만들고, 부수고, 다시 만들면서 다음 질문을 찾습니다.</p>
+        <div class="fields"><span>Design</span><span>Code</span><span>AI / ML</span><span>Systems</span><span>Interaction</span></div>
       </div>
     </div>
-    <div class="headline">
-      <h1 class="reveal">A one-person studio making curious things that actually work</h1>
-      <p class="reveal">I turn half-formed ideas into real software — through design, code, AI and a lot of experiments.<span class="ko" style="display:block">생각을 코드로 꺼내고, 만드는 과정을 기록합니다.<br>디자인에서 코드로, 코드에서 AI와 시스템으로.</span></p>
+  </section>
+
+  <section id="experiments" aria-labelledby="exp-title">
+    <div class="label mono dim"><span>02 / Experiments</span><span>Concept demos</span></div>
+    <h2 class="reveal" id="exp-title" style="margin-bottom:48px">Selected <em>experiments.</em></h2>
+    <div id="exp-list"></div>
+  </section>
+
+  <section id="method" aria-labelledby="method-title">
+    <div class="label mono dim"><span>03 / Method</span><span>How a thought becomes a thing</span></div>
+    <h2 class="reveal" id="method-title">Every experiment<br>follows the <em>same thread.</em></h2>
+    <div class="method">
+      <div class="step reveal"><span class="mono dim">01 / Ask</span><h3>Problem</h3><p>무엇이 불편했는가? 해결할 문제와 제약을 정의합니다.</p></div>
+      <div class="step reveal"><span class="mono dim">02 / Choose</span><h3>Approach</h3><p>왜 이 방법인가? 선택의 근거와 대안을 적습니다.</p></div>
+      <div class="step reveal"><span class="mono dim">03 / Try</span><h3>Experiment</h3><p>어떻게 확인했는가? 가설을 세우고 직접 검증합니다.</p></div>
+      <div class="step reveal"><span class="mono dim">04 / Learn</span><h3>Result</h3><p>무엇을 배웠는가? 결과와 다음 질문을 기록합니다.</p></div>
     </div>
-  </div>
-
-  <section id="focus" aria-labelledby="focus-title">
-    <h2 class="sec-title reveal" id="focus-title">Driven by Curiosity</h2>
-    <div class="sec-sub mono dim"><span>01 / Things I explore</span><span class="hide-sm">Hover to light up</span></div>
-    <div class="grid" id="interest-grid"></div>
   </section>
 
-  <section id="work" aria-labelledby="work-title">
-    <h2 class="sec-title reveal" id="work-title">Featured Projects</h2>
-    <div class="sec-sub mono dim"><span>02 / Selected explorations</span><span class="hide-sm">아래 3개는 연출용 데모입니다</span></div>
-    <div id="projects"></div>
-  </section>
-
-  <section id="lab" aria-labelledby="lab-title">
-    <h2 class="sec-title reveal" id="lab-title">Currently Building</h2>
-    <div class="sec-sub mono dim"><span>03 / Live from GitHub</span><a href="https://github.com/yoon57296" class="hide-sm">github.com/yoon57296 ↗</a></div>
-    <p id="repo-status" role="status">공개 저장소를 불러오는 중…</p>
-    <div id="repositories"></div>
-  </section>
-
-  <section aria-labelledby="cap-title">
-    <h2 class="statement reveal" id="cap-title">I'm here to build the <em>extraordinary.</em> No shortcuts, just curious, carefully-engineered work that leaves a mark.</h2>
-    <div class="caps">
-      <div class="cap reveal"><h3>Websites &amp; Interaction</h3><p>Pages that feel alive — scroll stories, motion and small details people remember.</p><p class="ko">스크롤과 모션으로 이야기하는 웹 경험.</p><div class="chips"><span>HTML/CSS</span><span>JavaScript</span><span>Canvas</span><span>Motion</span></div></div>
-      <div class="cap reveal"><h3>Visual Design</h3><p>Bold typography, strict grids and a clear visual system behind every screen.</p><p class="ko">타이포그래피와 그리드로 만드는 시각 체계.</p><div class="chips"><span>Typography</span><span>Layout</span><span>UI</span></div></div>
-      <div class="cap reveal"><h3>AI Experiments</h3><p>Testing what models can do, then shaping it into something people can touch.</p><p class="ko">모델을 실험하고, 만질 수 있는 형태로.</p><div class="chips"><span>ML</span><span>Prototyping</span><span>Evaluation</span></div></div>
-      <div class="cap reveal"><h3>Systems &amp; CS</h3><p>Understanding how things work underneath — and explaining why each choice was made.</p><p class="ko">구조를 이해하고, 선택의 이유를 설명합니다.</p><div class="chips"><span>Architecture</span><span>Algorithms</span><span>Tooling</span></div></div>
-    </div>
+  <section id="log" aria-labelledby="log-title">
+    <div class="label mono dim"><span>04 / Lab log</span><a href="https://github.com/yoon57296">Live from GitHub ↗</a></div>
+    <h2 class="reveal" id="log-title" style="margin-bottom:32px">What's on the <em>bench.</em></h2>
+    <p id="log-status" role="status">공개 저장소를 불러오는 중…</p>
+    <div id="log-list"></div>
   </section>
 
   <section class="contact" id="contact" aria-labelledby="contact-title">
-    <div class="contact-box">
-      <canvas id="contact-canvas" aria-hidden="true"></canvas>
-      <span class="dim">Contact</span>
-      <h2 id="contact-title">Let's make something<br>real together.</h2>
-      <a class="mail" href="https://github.com/yoon57296">github/yoon57296 ↗</a>
-    </div>
+    <div class="label mono dim"><span>05 / Contact</span><span>Open questions welcome</span></div>
+    <h2 class="reveal" id="contact-title">Got a question worth <em>exploring?</em></h2>
+    <a class="contact-link" href="https://github.com/yoon57296">github.com/yoon57296 <span aria-hidden="true">↗</span></a>
   </section>
 </main>
-
-<footer>
-  <div class="wordmark" aria-hidden="true">YOON<span>.</span><span id="yy" style="color:inherit">26</span></div>
-  <div class="foot">
-    <p class="foot-note">Ready to see what's next? Follow along on GitHub — new experiments land there first.<span class="ko">새로운 실험은 GitHub에 가장 먼저 올라옵니다.</span></p>
-    <nav class="foot-links" aria-label="푸터 메뉴">
-      <a href="#top">Home</a><a href="#work">Work<sup class="count">(03)</sup></a><a href="#focus">Focus</a><a href="#lab">Lab</a><a href="https://github.com/yoon57296">GitHub ↗</a><a href="#contact">Contact</a>
-    </nav>
-    <div class="foot-meta"><span><a href="https://github.com/yoon57296">GitHub</a> , <a href="#top">Back to top ↑</a></span><span>© <span id="year">2026</span> yoon57296 — all experiments reserved</span></div>
-  </div>
-</footer>
+<footer class="mono"><span>© <span id="year">2026</span> yoon57296</span><span>Hand-built, no frameworks</span><a href="#top">Back to top ↑</a></footer>
 
 <dialog id="case-dialog" aria-labelledby="case-title">
-  <div class="d-top"><span class="mono dim">Concept case study / Demo</span><button class="d-close" type="button" aria-label="닫기">×</button></div>
+  <div class="d-top"><span class="mono dim" id="case-id">EXP</span><button class="d-close" type="button" aria-label="닫기">×</button></div>
   <h2 id="case-title"></h2>
   <p class="d-note">실제 프로젝트 실적이 아닌 시연용 구성입니다. 실제 포트폴리오에서는 이 자리에 프로젝트 소개, 본인의 역할, 검증 자료를 넣습니다.</p>
   <div id="case-content"></div>
@@ -285,179 +218,204 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 let motion = !reduce.matches;
-
-/* ---------- Dither / ASCII surface renderer ---------- */
-const BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5].map(v => (v + .5) / 16);
-const RAMP = ' .:-=+*#%@';
 const TAU = Math.PI * 2;
+const ACC = '#b8ff4a';
+const seeded = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 
-function buildMesh(fn, U, V) {
-  const n = U * V, pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), e = 1e-3;
-  let k = 0;
-  for (let i = 0; i < U; i++) for (let j = 0; j < V; j++, k += 3) {
-    const u = i / U, v = j / V, p = fn(u, v), pu = fn(u + e, v), pv = fn(u, v + e);
-    const a = [pu[0]-p[0], pu[1]-p[1], pu[2]-p[2]], b = [pv[0]-p[0], pv[1]-p[1], pv[2]-p[2]];
-    let nx = a[1]*b[2]-a[2]*b[1], ny = a[2]*b[0]-a[0]*b[2], nz = a[0]*b[1]-a[1]*b[0];
-    const l = Math.hypot(nx, ny, nz) || 1;
-    pos[k] = p[0]; pos[k+1] = p[1]; pos[k+2] = p[2];
-    nor[k] = nx/l; nor[k+1] = ny/l; nor[k+2] = nz/l;
-  }
-  return { pos, nor, n };
-}
-const shapes = {
-  knot: buildMesh((u, v) => {
-    const c = t => { const r = 2 + .6 * Math.cos(3*t); return [r*Math.cos(2*t), r*Math.sin(2*t), .85*Math.sin(3*t)]; };
-    const t = u * TAU, p = c(t), q = c(t + .001);
-    const T = [q[0]-p[0], q[1]-p[1], q[2]-p[2]], tl = Math.hypot(...T); T[0]/=tl; T[1]/=tl; T[2]/=tl;
-    const nl = Math.hypot(T[0], T[1]), N = [-T[1]/nl, T[0]/nl, 0];
-    const B = [T[1]*N[2]-T[2]*N[1], T[2]*N[0]-T[0]*N[2], T[0]*N[1]-T[1]*N[0]];
-    const ph = v * TAU, r = .42, cs = Math.cos(ph)*r, sn = Math.sin(ph)*r;
-    return [p[0]+N[0]*cs+B[0]*sn, p[1]+N[1]*cs+B[1]*sn, p[2]+N[2]*cs+B[2]*sn];
-  }, 720, 56),
-  blob: buildMesh((u, v) => {
-    const th = u * TAU, ph = v * Math.PI, r = 2.2 + .28*Math.sin(5*th)*Math.sin(4*ph) + .18*Math.cos(7*ph);
-    return [r*Math.sin(ph)*Math.cos(th), r*Math.cos(ph), r*Math.sin(ph)*Math.sin(th)];
-  }, 260, 140),
-  box: buildMesh((u, v) => {
-    const th = u * TAU, ph = v * Math.PI, x = Math.sin(ph)*Math.cos(th), y = Math.cos(ph), z = Math.sin(ph)*Math.sin(th);
-    const k = 2 / Math.pow(x**8 + y**8 + z**8, 1 / 8);
-    return [x*k, y*k, z*k];
-  }, 320, 160),
-  ring: buildMesh((u, v) => {
-    const th = u * TAU, ph = v * TAU, R = 2 + .35*Math.sin(3*th), r = .7 + .15*Math.sin(6*th);
-    return [(R + r*Math.cos(ph))*Math.cos(th), r*Math.sin(ph) + .4*Math.sin(2*th), (R + r*Math.cos(ph))*Math.sin(th)];
-  }, 360, 90)
-};
-
-class Renderer {
-  constructor(canvas, shape, opt = {}) {
-    this.c = canvas; this.ctx = canvas.getContext('2d'); this.shape = shape;
-    this.cell = opt.cell || 4; this.zoom = opt.zoom || .17; this.tilt = opt.tilt ?? .55;
-    this.speed = opt.speed ?? 1; this.mode = 'human'; this.angle = opt.start || 0;
-    this.px = 0; this.py = 0; this.tx = 0; this.ty = 0; this.visible = true; this.alpha = opt.alpha ?? 1;
-    this.resize();
+/* ---------- Thought graph ---------- */
+class Graph {
+  constructor(canvas, o) {
+    this.c = canvas; this.ctx = canvas.getContext('2d'); this.o = o;
+    this.rand = o.seed ? seeded(o.seed) : Math.random;
+    this.t = 0; this.hover = null; this.drag = null; this.visible = true;
+    this.resize(); this.reset();
+    if (o.interactive) this.bind();
   }
   resize() {
     const r = this.c.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    const ow = this.w, oh = this.h;
     this.w = Math.max(1, r.width); this.h = Math.max(1, r.height);
     this.c.width = Math.round(this.w * dpr); this.c.height = Math.round(this.h * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    this.layout();
+    this.s = Math.max(.45, Math.min(1.15, Math.min(this.w, this.h) / 720));
+    if (ow && this.nodes) this.nodes.forEach(n => { n.x *= this.w / ow; n.y *= this.h / oh; });
   }
-  layout() {
-    const cell = this.mode === 'machine' ? Math.max(8, this.cell * 2.4) : this.cell;
-    this.cs = cell; this.cols = Math.ceil(this.w / cell); this.rows = Math.ceil(this.h / cell);
-    this.z = new Float32Array(this.cols * this.rows); this.l = new Float32Array(this.cols * this.rows);
+  reset() {
+    this.nodes = []; this.edges = []; this.used = [];
+    this.root = this.add(null, this.o.root);
+    this.root.x = this.w * (this.o.cx ?? .5); this.root.y = this.h * (this.o.cy ?? .5);
+    for (let i = 0; i < (this.o.start || 0); i++) this.grow(null, true);
+    if (this.o.settle) for (let i = 0; i < this.o.settle; i++) this.step(16);
+    for (const x of [...this.nodes, ...this.edges]) x.born = this.t - 1000; // starting graph appears fully drawn
+    this.changed();
   }
-  setMode(m) { this.mode = m; this.layout(); }
-  draw(dt) {
-    if (motion) this.angle += dt * .00022 * this.speed;
-    this.px += (this.tx - this.px) * .06; this.py += (this.ty - this.py) * .06;
-    const { pos, nor, n } = this.shape, cols = this.cols, rows = this.rows, cs = this.cs, z = this.z, L = this.l;
-    z.fill(-1e9); L.fill(0);
-    const ay = this.angle + this.px * .8, ax = this.tilt + this.py * .5;
-    const cy = Math.cos(ay), sy = Math.sin(ay), cx = Math.cos(ax), sx = Math.sin(ax);
-    const scale = Math.min(this.w, this.h) * this.zoom, ox = this.w / 2, oy = this.h / 2, f = 8;
-    const lx = -.45, ly = -.6, lz = .66;
-    for (let k = 0; k < n * 3; k += 3) {
-      let x = pos[k], y = pos[k+1], q = pos[k+2];
-      const rx = x*cy + q*sy, rz = -x*sy + q*cy, ry = y*cx - rz*sx, d = y*sx + rz*cx;
-      const p = f / (f - d), ix = ((ox + rx*scale*p) / cs) | 0, iy = ((oy + ry*scale*p) / cs) | 0;
-      if (ix < 0 || iy < 0 || ix >= cols || iy >= rows) continue;
-      const id = iy * cols + ix;
-      if (d <= z[id]) continue;
-      z[id] = d;
-      x = nor[k]; y = nor[k+1]; q = nor[k+2];
-      const nx = x*cy + q*sy, nz0 = -x*sy + q*cy, ny = y*cx - nz0*sx, nz = y*sx + nz0*cx;
-      let lum = nx*lx + ny*ly + nz*lz; lum = Math.abs(lum) * .85 + .08 + (d + 3) * .03;
-      L[id] = lum > 1 ? 1 : lum;
+  word() {
+    const w = this.o.words, free = w.filter(x => !this.used.includes(x)), pool = free.length ? free : w;
+    const pick = pool[(this.rand() * pool.length) | 0];
+    this.used.push(pick); if (this.used.length > w.length * .7) this.used.shift();
+    return pick;
+  }
+  add(parent, label, x, y) {
+    const a = this.rand() * TAU, d = 18 * this.s;
+    const n = { x: x ?? (parent ? parent.x + Math.cos(a) * d : this.w / 2), y: y ?? (parent ? parent.y + Math.sin(a) * d : this.h / 2),
+      vx: 0, vy: 0, label, parent, depth: parent ? parent.depth + 1 : 0, born: this.t, kids: 0 };
+    this.nodes.push(n);
+    if (parent) { this.edges.push({ a: parent, b: n, born: this.t }); parent.kids++; }
+    this.latest = n;
+    return n;
+  }
+  grow(target, quiet) {
+    const max = this.o.max || 80;
+    if (this.nodes.length >= max) return;
+    let p = target;
+    if (!p) { // prefer shallow nodes with few children, so the graph branches instead of chaining
+      let best = -Infinity;
+      for (const n of this.nodes) { const sc = this.rand() * 3 - n.kids * .9 - n.depth * .5; if (sc > best) { best = sc; p = n; } }
     }
-    const ctx = this.ctx; ctx.clearRect(0, 0, this.w, this.h); ctx.globalAlpha = this.alpha;
-    if (this.mode === 'human') {
-      const hot = new Path2D(), cool = new Path2D(), s = cs - 1;
-      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-        const v = L[j*cols + i]; if (!v) continue;
-        if (v > BAYER[(j & 3) * 4 + (i & 3)]) (v > .72 ? cool : hot).rect(i*cs, j*cs, s, s);
-      }
-      ctx.fillStyle = '#ff4d00'; ctx.fill(hot); ctx.fillStyle = '#e6e6e6'; ctx.fill(cool);
-    } else {
-      ctx.font = '500 ' + Math.round(cs * 1.15) + 'px "Geist Mono",monospace'; ctx.textBaseline = 'top';
-      for (const [col, lo, hi] of [['#ff4d00', 0, .62], ['#e6e6e6', .62, 1.01]]) {
-        ctx.fillStyle = col;
-        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-          const v = L[j*cols + i]; if (!v || v < lo || v >= hi) continue;
-          ctx.fillText(RAMP[Math.min(9, 1 + (v * 9) | 0)], i*cs, j*cs);
-        }
+    const count = target ? 2 + ((this.rand() * 2) | 0) : 1;
+    for (let i = 0; i < count && this.nodes.length < max; i++) this.add(p, this.word());
+    if (!quiet) this.changed();
+  }
+  changed() { this.o.onChange && this.o.onChange(this); }
+  step() {
+    const N = this.nodes, n = N.length, s = this.s, K = 2600 * s * s, rest = 64 * s;
+    for (let i = 0; i < n; i++) {
+      const a = N[i];
+      for (let j = i + 1; j < n; j++) {
+        const b = N[j]; let dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+        if (d2 < 1) { dx = this.rand() - .5; dy = this.rand() - .5; d2 = 1; }
+        if (d2 > 90000 * s) continue;
+        const f = K / d2, d = Math.sqrt(d2);
+        a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f;
       }
     }
-    ctx.globalAlpha = 1;
+    for (const e of this.edges) {
+      const dx = e.b.x - e.a.x, dy = e.b.y - e.a.y, d = Math.hypot(dx, dy) || 1;
+      const f = (d - rest * (e.a === this.root ? 1.5 : 1)) * .03;
+      e.a.vx += dx / d * f; e.a.vy += dy / d * f; e.b.vx -= dx / d * f; e.b.vy -= dy / d * f;
+    }
+    const cx = this.w * (this.o.cx ?? .5), cy = this.h * (this.o.cy ?? .5), pad = 24;
+    for (const p of N) {
+      if (p === this.drag) { p.vx = p.vy = 0; continue; }
+      p.vx += (cx - p.x) * .0016; p.vy += (cy - p.y) * .0016;
+      if (p === this.root) { p.vx += (cx - p.x) * .02; p.vy += (cy - p.y) * .02; }
+      p.vx *= .8; p.vy *= .8;
+      const sp = Math.hypot(p.vx, p.vy); if (sp > 12) { p.vx *= 12 / sp; p.vy *= 12 / sp; }
+      p.x = Math.max(pad, Math.min(this.w - pad, p.x + p.vx));
+      p.y = Math.max(pad, Math.min(this.h - pad, p.y + p.vy));
+    }
+  }
+  path(n) { const s = new Set(); while (n) { s.add(n); n = n.parent; } return s; }
+  draw() {
+    const ctx = this.ctx, t = this.t, hot = this.path(this.hover || this.latest);
+    ctx.clearRect(0, 0, this.w, this.h);
+    ctx.lineWidth = 1;
+    for (const e of this.edges) {
+      const p = motion ? Math.min(1, (t - e.born) / 450) : 1, on = hot.has(e.b);
+      ctx.strokeStyle = on ? ACC : 'rgba(200,225,210,' + (.12 + .1 / (1 + e.b.depth * .5)) + ')';
+      ctx.beginPath(); ctx.moveTo(e.a.x, e.a.y); ctx.lineTo(e.a.x + (e.b.x - e.a.x) * p, e.a.y + (e.b.y - e.a.y) * p); ctx.stroke();
+    }
+    const fs = Math.round(10 + 2 * this.s);
+    ctx.font = '400 ' + fs + 'px "IBM Plex Mono",monospace'; ctx.textBaseline = 'middle';
+    for (const n of this.nodes) {
+      const age = t - n.born, on = hot.has(n), root = n === this.root;
+      if (motion && age < 900) {
+        ctx.strokeStyle = 'rgba(184,255,74,' + (1 - age / 900) + ')';
+        ctx.beginPath(); ctx.arc(n.x, n.y, 4 + age / 28, 0, TAU); ctx.stroke();
+      }
+      ctx.fillStyle = root || on ? ACC : '#9aa59f';
+      ctx.beginPath(); ctx.arc(n.x, n.y, root ? 6 : n === this.hover ? 5 : 3, 0, TAU); ctx.fill();
+      ctx.fillStyle = on || root ? '#e4ebe6' : 'rgba(170,185,176,' + Math.max(.35, .8 - n.depth * .1) + ')';
+      ctx.fillText(n.label, n.x + (root ? 12 : 8), n.y);
+    }
+  }
+  tick(dt) {
+    this.t += dt;
+    if (motion && this.o.auto && this.t - (this.lastAuto || 0) > this.o.auto && this.nodes.length < (this.o.autoMax || 30)) { this.lastAuto = this.t; this.grow(); }
+    this.step(); this.draw();
+  }
+  hit(x, y) {
+    let best = null, bd = 22 * 22;
+    for (const n of this.nodes) { const d = (n.x - x) ** 2 + (n.y - y) ** 2; if (d < bd) { bd = d; best = n; } }
+    return best;
+  }
+  nearest(x, y) { let best = this.root, bd = Infinity; for (const n of this.nodes) { const d = (n.x - x) ** 2 + (n.y - y) ** 2; if (d < bd) { bd = d; best = n; } } return best; }
+  bind() {
+    const c = this.c, pos = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    let down = null;
+    c.addEventListener('pointerdown', e => {
+      const [x, y] = pos(e); down = { x, y, n: this.hit(x, y) };
+      if (down.n && e.pointerType !== 'touch') { this.drag = down.n; c.setPointerCapture(e.pointerId); }
+    });
+    c.addEventListener('pointermove', e => {
+      const [x, y] = pos(e);
+      if (this.drag) { this.drag.x = x; this.drag.y = y; }
+      else if (e.pointerType !== 'touch') { const h = this.hit(x, y); this.hover = h; c.style.cursor = h ? 'grab' : 'crosshair'; }
+      wake();
+    });
+    c.addEventListener('pointerup', e => {
+      const [x, y] = pos(e);
+      if (down && Math.hypot(x - down.x, y - down.y) < 6) {
+        if (down.n) this.grow(down.n);
+        else if (this.nodes.length < (this.o.max || 80)) { this.add(this.nearest(x, y), this.word(), x, y); this.changed(); }
+      }
+      this.drag = null; down = null; wake();
+    });
+    c.addEventListener('pointerleave', () => { if (!this.drag) this.hover = null; });
+    c.addEventListener('pointercancel', () => { this.drag = null; down = null; });
+    c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.grow(); wake(); } });
   }
 }
 
-/* ---------- Hero ---------- */
-const stage = $('#stage');
-const hero = new Renderer($('#hero-canvas'), shapes.knot, { cell: innerWidth < 700 ? 3 : 4, zoom: innerWidth < 700 ? .14 : .155 });
-stage.addEventListener('pointermove', e => {
-  if (e.pointerType === 'touch') return;
-  const r = stage.getBoundingClientRect();
-  hero.tx = (e.clientX - r.left) / r.width - .5; hero.ty = (e.clientY - r.top) / r.height - .5;
-  $('#hud-x').textContent = (hero.tx >= 0 ? '+' : '') + hero.tx.toFixed(3);
-  $('#hud-y').textContent = (hero.ty <= 0 ? '+' : '') + (-hero.ty).toFixed(3);
+/* ---------- Hero graph ---------- */
+const small = innerWidth < 820;
+const heroWords = ['왜?', '만약에', 'what if', 'AI', '프로토타입', '디자인', '코드', '실패', '다시', '시스템', '데이터', '질문', '실험', '연결', '관찰', '가설', '버그', '배움', '인터랙션', '모델', '구조', '감각', '도구', '기록', '호기심', 'build', 'break', 'learn', '스케치', '측정', '피드백', '단순하게', '타이포', '알고리즘', '모션', '사용자', '맥락', '리팩터링'];
+const hero = new Graph($('#hero-graph'), {
+  root: '?', words: heroWords, interactive: true, start: small ? 7 : 10, settle: 120,
+  cx: small ? .5 : .62, cy: small ? .38 : .46, auto: 1700, autoMax: small ? 18 : 30, max: small ? 40 : 80,
+  onChange: g => {
+    $('#h-nodes').textContent = g.nodes.length; $('#h-links').textContent = g.edges.length;
+    $('#h-depth').textContent = Math.max(...g.nodes.map(n => n.depth));
+    $('#h-latest').textContent = g.latest && g.latest.parent ? g.latest.parent.label + ' → ' + g.latest.label : '—';
+  }
 });
-stage.addEventListener('pointerleave', () => { hero.tx = 0; hero.ty = 0; });
-$$('.mode button').forEach(b => b.addEventListener('click', () => {
-  $$('.mode button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-  hero.setMode(b.dataset.mode);
-  $('#hud-mode').textContent = b.dataset.mode === 'human' ? 'DITHER 4×4' : 'ASCII 10-STEP';
-}));
+$('#graph-reset').addEventListener('click', () => { hero.reset(); wake(); });
 
-/* ---------- Interest grid ---------- */
-const interests = [['AI','✳'],['Machine Learning','∿'],['Design','◐'],['Creative Code','{ }'],['Systems','⌘'],['Web','↗'],['3D & Motion','◇'],['Typography','Aa'],['Interaction','⊹'],['Data','▤'],['Open Source','⑂'],['Experiments','?']];
-$('#interest-grid').append(...interests.map(([name, icon], i) => {
-  const d = document.createElement('div'); d.className = 'grid-cell reveal';
-  d.style.transitionDelay = (i % 6) * 40 + 'ms';
-  d.innerHTML = '<small>' + String(i + 1).padStart(2, '0') + '</small><span><i></i></span>';
-  d.querySelector('i').textContent = icon; d.querySelector('span').append(' ' + name);
-  return d;
-}));
-
-/* ---------- Projects ---------- */
-const projects = [
-  { title: 'Neural Field', shape: 'blob', desc: 'Making invisible connections visible — a scene for AI experiments and the moments of discovery along the way.', ko: '보이지 않는 연결을 눈에 보이는 형태로.', tags: ['AI / ML', 'Visual Thinking', 'Experiment'],
-    steps: ['AI의 동작과 실험 과정을, 처음 보는 사람에게 어떻게 설명할까?', '입력과 연결, 출력을 하나의 시각적 구조로 묶고 핵심 질문을 먼저 보여줍니다.', '이 시연에서는 유기적인 형태를 ASCII 문자로 렌더링해 탐색 장면을 구성했습니다.', '실제 프로젝트에서는 데이터, baseline, 평가 지표와 오차 분석을 이 자리에 기록합니다.'] },
-  { title: 'System Flow', shape: 'box', desc: 'Complex structures, clear flows. A place for architecture decisions and the reasoning behind every trade-off.', ko: '복잡한 구조를, 명확한 흐름으로.', tags: ['System Design', 'Architecture', 'CS'],
-    steps: ['시스템의 구성 요소가 많아질 때, 설계의 이유를 어떻게 전달할까?', 'Input → Process → Output 흐름으로 구조를 단순화하고 각 선택의 근거를 설명합니다.', '이 시연에서는 단단한 큐브 형태를 디더링 픽셀로 렌더링해 시스템 프로젝트를 표현했습니다.', '실제 프로젝트에서는 부하 테스트, 장애 사례와 개선 전후의 검증 자료를 이 자리에 기록합니다.'] },
-  { title: 'Playground', shape: 'ring', desc: 'Curiosity you can touch. Small interactions, odd ideas and new attempts — this very page included.', ko: '호기심을 직접 만질 수 있게.', tags: ['Interaction', 'Creative Code', 'Web'],
-    steps: ['스크롤을 단순한 이동이 아닌, 탐색하는 경험으로 만들 수 있을까?', '큰 타이포그래피, 엄격한 그리드, 살아 있는 오브젝트를 조합합니다.', '이 페이지 자체가 시연입니다. 라이브러리 없이 직접 만든 3D 디더/ASCII 렌더러가 모든 비주얼을 그립니다.', '사용자는 HUMAN/MACHINE 모드를 바꾸거나 모션을 끌 수 있고, 모바일에서도 그대로 탐색할 수 있습니다.'] }
+/* ---------- Experiments ---------- */
+const experiments = [
+  { id: 'EXP-001', field: 'AI / ML', title: 'Neural Field', hyp: '보이지 않는 연결도, 형태로 보여주면 이해할 수 있다.', how: 'AI 실험의 입력·연결·출력을 하나의 시각 구조로 묶는다.',
+    words: ['input', 'weight', 'layer', 'loss', 'signal', 'noise', 'pattern', 'output', 'bias', 'error', 'feature', 'baseline', 'metric', 'sample'], seed: 7,
+    steps: ['AI의 동작과 실험 과정을, 처음 보는 사람에게 어떻게 설명할까?', '입력과 연결, 출력을 하나의 시각적 구조로 묶고 핵심 질문을 먼저 보여줍니다.', '이 시연에서는 노드 그래프로 모델 내부의 연결을 은유적으로 표현했습니다.', '실제 프로젝트에서는 데이터, baseline, 평가 지표와 오차 분석을 이 자리에 기록합니다.'] },
+  { id: 'EXP-002', field: 'Systems & CS', title: 'System Flow', hyp: '복잡한 구조도, 흐름으로 정리하면 설명할 수 있다.', how: 'Input → Process → Output으로 구조를 단순화하고 선택의 이유를 남긴다.',
+    words: ['request', 'queue', 'cache', 'worker', 'db', 'retry', 'log', 'api', 'index', 'shard', 'timeout', 'load', 'deploy', 'monitor'], seed: 21,
+    steps: ['시스템의 구성 요소가 많아질 때, 설계의 이유를 어떻게 전달할까?', 'Input → Process → Output 흐름으로 구조를 단순화하고 각 선택의 근거를 설명합니다.', '이 시연에서는 컴포넌트를 노드로, 의존성을 선으로 표현했습니다.', '실제 프로젝트에서는 부하 테스트, 장애 사례와 개선 전후의 검증 자료를 이 자리에 기록합니다.'] },
+  { id: 'EXP-003', field: 'Creative Code', title: 'Thought Graph', hyp: '스크롤만 하는 페이지보다, 만지는 페이지가 더 오래 기억된다.', how: '첫 화면을 직접 키울 수 있는 생각 그래프로 만든다. — 바로 이 사이트.',
+    words: ['click', 'drag', 'spring', 'force', 'canvas', 'node', 'edge', 'pulse', 'grow', 'reset', 'motion', 'touch', 'frame', 'play'], seed: 3,
+    steps: ['포트폴리오 첫 화면을, 읽는 것이 아니라 만지는 경험으로 만들 수 있을까?', '"생각이 자란다"는 메시지를 그대로 인터랙션으로 옮겼습니다.', '라이브러리 없이 Canvas와 간단한 물리 시뮬레이션(반발력 + 스프링)으로 그래프를 구현했습니다.', '클릭·드래그·키보드로 조작할 수 있고, 모션을 끄거나 모바일에서도 그대로 탐색할 수 있습니다.'] }
 ];
-const projectRenderers = [];
-projects.forEach((p, i) => {
-  const a = document.createElement('article'); a.className = 'project reveal';
-  a.innerHTML = '<div class="p-media" role="button" tabindex="0"><canvas aria-hidden="true"></canvas><span class="badge">CONCEPT 0' + (i + 1) + ' / DEMO</span><span class="open">VIEW CASE ↗</span></div>' +
-    '<div class="p-desc"><div><p class="en"></p><p class="ko"></p></div><div class="p-tags"></div></div><h3 class="p-title"><button type="button"></button></h3>';
-  $('.p-media', a).setAttribute('aria-label', p.title + ' 케이스 스터디 열기');
-  $('.en', a).textContent = p.desc; $('.ko', a).textContent = p.ko;
-  $('.p-tags', a).append(...p.tags.map(t => Object.assign(document.createElement('span'), { textContent: t })));
-  $('.p-title button', a).textContent = p.title;
-  $('#projects').append(a);
-  const r = new Renderer($('canvas', a), shapes[p.shape], { cell: 4, zoom: .16, start: i * 1.7, speed: .8, tilt: .4 + i * .15 });
-  if (i === 0) r.setMode('machine');
-  r.visible = false; projectRenderers.push(r);
-  const open = () => openCase(p);
-  $('.p-media', a).addEventListener('click', open);
-  $('.p-media', a).addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
-  $('.p-title button', a).addEventListener('click', open);
-  a.addEventListener('pointermove', e => { const b = a.getBoundingClientRect(); r.tx = (e.clientX - b.left) / b.width - .5; r.ty = (e.clientY - b.top) / b.height - .5; });
-  a.addEventListener('pointerleave', () => { r.tx = 0; r.ty = 0; });
+const miniGraphs = [];
+experiments.forEach(x => {
+  const el = document.createElement('article'); el.className = 'exp reveal';
+  el.innerHTML = '<div><div class="exp-meta mono dim"><span class="id"></span><span class="field"></span><span class="status">● Concept demo</span></div><h3></h3>' +
+    '<dl><dt>Hypothesis</dt><dd class="hyp"></dd><dt>Approach</dt><dd class="how"></dd></dl><button class="open-case" type="button">케이스 노트 열기 →</button></div>' +
+    '<div class="exp-visual"><canvas aria-hidden="true"></canvas><span class="mono">hover to grow</span></div>';
+  $('.id', el).textContent = x.id; $('.field', el).textContent = x.field; $('h3', el).textContent = x.title;
+  $('.hyp', el).textContent = x.hyp; $('.how', el).textContent = x.how;
+  $('#exp-list').append(el);
+  const g = new Graph($('canvas', el), { root: x.title.toLowerCase(), words: x.words, seed: x.seed, start: 9, settle: 260, max: 22 });
+  g.visible = false; miniGraphs.push(g);
+  let timer = 0;
+  el.addEventListener('pointerenter', () => { clearInterval(timer); timer = setInterval(() => { g.grow(); wake(); }, 650); });
+  el.addEventListener('pointerleave', () => clearInterval(timer));
+  $('.open-case', el).addEventListener('click', () => openCase(x));
 });
-
 const dialog = $('#case-dialog');
-function openCase(p) {
-  $('#case-title').textContent = p.title + '.';
+function openCase(x) {
+  $('#case-id').textContent = x.id + ' / ' + x.field; $('#case-title').textContent = x.title;
   const c = $('#case-content'); c.replaceChildren();
   ['Problem', 'Approach', 'Experiment', 'Result'].forEach((s, i) => {
     const row = document.createElement('section'); row.className = 'd-stage';
-    row.append(Object.assign(document.createElement('h3'), { textContent: '0' + (i + 1) + ' ' + s }), Object.assign(document.createElement('p'), { textContent: p.steps[i] }));
+    row.append(Object.assign(document.createElement('h3'), { textContent: '0' + (i + 1) + ' ' + s }), Object.assign(document.createElement('p'), { textContent: x.steps[i] }));
     c.append(row);
   });
   dialog.showModal();
@@ -465,98 +423,64 @@ function openCase(p) {
 $('.d-close').addEventListener('click', () => dialog.close());
 dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
 
-/* ---------- Contact backdrop ---------- */
-const contact = new Renderer($('#contact-canvas'), shapes.knot, { cell: 5, zoom: .22, speed: .5, alpha: .5 });
-contact.setMode('machine'); contact.visible = false;
-
-/* ---------- Visibility + loop ---------- */
-const all = [hero, ...projectRenderers, contact];
-const io = new IntersectionObserver(es => es.forEach(e => {
-  const r = all.find(x => x.c === e.target || x.c.parentElement === e.target);
-  if (r) { r.visible = e.isIntersecting; if (r.visible) start(); }
-}), { rootMargin: '100px' });
-all.forEach(r => io.observe(r.c));
-const revealIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); } }), { threshold: .12 });
-$$('.reveal').forEach(el => revealIO.observe(el));
-
-let last = 0, raf = 0, fpsT = 0, fpsN = 0;
+/* ---------- Loop ---------- */
+const graphs = [hero, ...miniGraphs];
+let raf = 0, last = 0;
 function loop(t) {
   raf = 0;
-  const dt = Math.min(64, t - (last || t)); last = t;
+  const dt = last ? Math.min(50, t - last) : 16; last = t;
   let any = false;
-  for (const r of all) if (r.visible) { r.draw(dt); any = true; }
-  fpsN++; if (t - fpsT > 500) { $('#hud-fps').textContent = Math.round(fpsN * 1000 / (t - fpsT)); fpsT = t; fpsN = 0; }
-  $('#hud-r').textContent = ((hero.angle * 180 / Math.PI) % 360).toFixed(1).padStart(5, '0') + '°';
-  if (any && !document.hidden && (motion || Math.abs(hero.tx - hero.px) > .001)) raf = requestAnimationFrame(loop);
+  for (const g of graphs) if (g.visible) { g.tick(dt); any = true; }
+  if (any && !document.hidden) raf = requestAnimationFrame(loop); else last = 0;
 }
-function start() { if (!raf && !document.hidden) { last = 0; raf = requestAnimationFrame(loop); } }
-document.addEventListener('visibilitychange', start);
-stage.addEventListener('pointermove', start);
-addEventListener('resize', () => { all.forEach(r => r.resize()); all.forEach(r => r.draw(0)); start(); });
-document.fonts.ready.then(() => all.forEach(r => r.draw(0)));
+function wake() { if (!raf && !document.hidden) raf = requestAnimationFrame(loop); }
+const io = new IntersectionObserver(es => es.forEach(e => {
+  const g = graphs.find(x => x.c === e.target); if (g) { g.visible = e.isIntersecting; if (g.visible) wake(); }
+}));
+graphs.forEach(g => io.observe(g.c));
+document.addEventListener('visibilitychange', wake);
+addEventListener('resize', () => { graphs.forEach(g => { g.resize(); g.draw(); }); wake(); });
+document.fonts.ready.then(() => graphs.forEach(g => g.draw()));
 
-/* ---------- Motion toggle ---------- */
+const revealIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); } }), { threshold: .1 });
+$$('.reveal').forEach(el => revealIO.observe(el));
+
+const navLinks = $$('.nav nav a');
+const secIO = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+}), { rootMargin: '-45% 0px -50% 0px' });
+['about', 'experiments', 'method', 'log', 'contact'].forEach(id => secIO.observe(document.getElementById(id)));
+
 function setMotion(on) {
-  motion = on;
-  document.body.classList.toggle('no-motion', !on);
-  $$('.motion-btn').forEach(b => { b.textContent = on ? 'MOTION ON' : 'MOTION OFF'; b.setAttribute('aria-pressed', String(on)); });
-  all.forEach(r => r.draw(0)); start();
+  motion = on; document.body.classList.toggle('no-motion', !on);
+  const b = $('#motion-toggle'); b.textContent = on ? 'MOTION ON' : 'MOTION OFF'; b.setAttribute('aria-pressed', String(on));
+  wake();
 }
-$$('.motion-btn').forEach(b => b.addEventListener('click', () => setMotion(!motion)));
+$('#motion-toggle').addEventListener('click', () => setMotion(!motion));
 reduce.addEventListener('change', e => setMotion(!e.matches));
 setMotion(motion);
 
-/* ---------- Nav: scramble, clock, menu, active ---------- */
-const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&*+=-_/';
-$$('[data-scramble]').forEach(a => {
-  const node = a.firstChild, text = node.textContent; let busy = false;
-  a.addEventListener('mouseenter', () => {
-    if (!motion || busy) return; busy = true; let f = 0;
-    const tick = () => {
-      node.textContent = [...text].map((c, i) => i < f / 2 || c === ' ' ? c : CH[(Math.random() * CH.length) | 0]).join('');
-      if (++f <= text.length * 2) requestAnimationFrame(tick); else { node.textContent = text; busy = false; }
-    };
-    tick();
-  });
-});
-const clock = $('#clock');
-const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-const tickClock = () => { clock.textContent = fmt.format(new Date()) + ' KST'; };
-tickClock(); setInterval(tickClock, 1000);
-const menu = $('#menu'), menuBtn = $('#menu-btn');
-const setMenu = open => { menu.classList.toggle('open', open); menu.setAttribute('aria-hidden', String(!open)); menuBtn.setAttribute('aria-expanded', String(open)); menuBtn.textContent = open ? 'Close' : 'Menu'; };
-menuBtn.addEventListener('click', () => setMenu(!menu.classList.contains('open')));
-$$('#menu a').forEach(a => a.addEventListener('click', () => setMenu(false)));
-addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
-const navMap = $$('.nav-links a[href^="#"]');
-const secIO = new IntersectionObserver(es => es.forEach(e => {
-  if (!e.isIntersecting) return;
-  navMap.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
-}), { rootMargin: '-45% 0px -50% 0px' });
-['focus', 'work', 'lab', 'contact'].forEach(id => secIO.observe(document.getElementById(id)));
-
-/* ---------- Year + GitHub repos ---------- */
-const y = new Date().getFullYear();
-$('#year').textContent = y; $('#yy').textContent = String(y).slice(-2);
-const repoStatus = $('#repo-status'), list = $('#repositories');
+/* ---------- Lab log (GitHub) ---------- */
+$('#year').textContent = new Date().getFullYear();
+const status = $('#log-status'), list = $('#log-list');
+const dfmt = new Intl.DateTimeFormat('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' });
 fetch('https://api.github.com/users/yoon57296/repos?per_page=100&sort=updated')
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(repos => {
     const items = repos.filter(r => !r.fork && !r.archived && r.name !== 'yoon57296.github.io').slice(0, 8);
-    $('#repo-count').textContent = '(' + String(items.length).padStart(2, '0') + ')';
-    repoStatus.textContent = items.length ? '' : '아직 공개 프로젝트가 없습니다. 위의 쇼케이스는 연출 시연이며, 공개 저장소가 추가되면 이곳에 자동으로 표시됩니다.';
-    if (items.length) repoStatus.hidden = true;
-    items.forEach((r, i) => {
-      const a = document.createElement('a'); a.className = 'repo-row'; a.href = r.html_url;
-      const n = Object.assign(document.createElement('span'), { className: 'mono dim', textContent: String(i + 1).padStart(2, '0') });
-      const h = Object.assign(document.createElement('h3'), { textContent: r.name });
-      const p = Object.assign(document.createElement('p'), { className: 'desc', textContent: r.description || 'GitHub에서 프로젝트 살펴보기' });
-      const l = Object.assign(document.createElement('span'), { className: 'mono dim lang', textContent: r.language || '—' });
-      const ar = Object.assign(document.createElement('span'), { className: 'arrow', textContent: '↗' }); ar.setAttribute('aria-hidden', 'true');
-      a.append(n, h, p, l, ar); list.append(a);
+    if (!items.length) { status.textContent = '아직 공개된 실험이 없습니다. 새 저장소가 올라오면 이곳에 자동으로 기록됩니다.'; return; }
+    status.hidden = true;
+    items.forEach(r => {
+      const a = document.createElement('a'); a.className = 'log-row'; a.href = r.html_url;
+      a.append(
+        Object.assign(document.createElement('span'), { className: 'mono dim date', textContent: dfmt.format(new Date(r.pushed_at || r.updated_at)) }),
+        Object.assign(document.createElement('h3'), { textContent: r.name }),
+        Object.assign(document.createElement('p'), { textContent: r.description || 'GitHub에서 살펴보기' }),
+        Object.assign(document.createElement('span'), { className: 'mono dim lang', textContent: (r.language || '—') + ' ↗' }));
+      list.append(a);
     });
   })
-  .catch(() => { repoStatus.textContent = 'GitHub 저장소를 불러오지 못했습니다. github.com/yoon57296 에서 공개 코드를 확인할 수 있습니다.'; });
+  .catch(() => { status.textContent = 'GitHub 기록을 불러오지 못했습니다. github.com/yoon57296 에서 직접 확인할 수 있습니다.'; });
 </script>
 </body>
 </html>
