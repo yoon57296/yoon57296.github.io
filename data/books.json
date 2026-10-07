@@ -1,0 +1,31 @@
+{
+  "books": [
+    {
+      "example": true,
+      "title": "첫 번째 책 (예시)",
+      "author": "저자 이름",
+      "read": "2026-09",
+      "rating": 4,
+      "color": "#2f4a5c",
+      "review": "이 자리에 독후감을 적어주세요.\n\n문단은 빈 줄로 나눌 수 있어요."
+    },
+    {
+      "example": true,
+      "title": "두 번째 책 (예시)",
+      "author": "저자 이름",
+      "read": "2026-08",
+      "rating": 5,
+      "color": "#8a3b2e",
+      "review": "가장 기억에 남는 문장, 읽고 나서 바뀐 생각 같은 것들을 남겨보세요."
+    },
+    {
+      "example": true,
+      "title": "세 번째 책 (예시)",
+      "author": "저자 이름",
+      "read": "2026-07",
+      "rating": 3,
+      "color": "#c9a24a",
+      "review": "짧게 한 줄만 적어도 괜찮아요."
+    }
+  ]
+}
