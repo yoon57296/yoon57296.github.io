@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="yoon57296의 프로젝트 포트폴리오">
+  <title>yoon57296 — Projects</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0c111b; color: #f3f6fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: inherit; }
+    .wrap { width: min(1060px, calc(100% - 40px)); margin: auto; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 28px 0; }
+    .brand { font-weight: 800; text-decoration: none; letter-spacing: -.04em; font-size: 20px; }
+    .profile { text-decoration: none; color: #b4c3dc; font-size: 14px; }
+    .profile:hover, .card a:hover { color: #78b8ff; }
+    main { padding: 70px 0 100px; }
+    .eyebrow { color: #78b8ff; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; }
+    h1 { font-size: clamp(46px, 8vw, 88px); line-height: 1.05; letter-spacing: -.07em; margin: 14px 0 24px; }
+    .intro { color: #b4c3dc; max-width: 620px; font-size: clamp(17px, 2.3vw, 21px); line-height: 1.7; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+    .button { display: inline-block; padding: 13px 18px; border-radius: 10px; text-decoration: none; font-weight: 700; border: 1px solid #46536c; }
+    .button.primary { background: #78b8ff; border-color: #78b8ff; color: #0c111b; }
+    .button:focus-visible, a:focus-visible { outline: 3px solid #ffce73; outline-offset: 3px; }
+    section { margin-top: 100px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; border-bottom: 1px solid #293346; padding-bottom: 18px; }
+    h2 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
+    .section-head a { color: #b4c3dc; white-space: nowrap; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+    .card { min-height: 190px; background: #151e2e; border: 1px solid #293346; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; }
+    .card h3 { margin: 0 0 12px; font-size: 22px; overflow-wrap: anywhere; }
+    .card h3 a { text-decoration: none; }
+    .card p { margin: 0; color: #b4c3dc; line-height: 1.6; flex: 1; }
+    .meta { color: #78b8ff; font-size: 13px; margin-top: 24px; }
+    #status { color: #b4c3dc; padding: 20px 0; }
+    footer { border-top: 1px solid #293346; padding: 30px 0 50px; color: #899ab5; font-size: 14px; }
+    @media (max-width: 650px) { .grid { grid-template-columns: 1fr; } main { padding-top: 45px; } section { margin-top: 75px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header><a class="brand" href="#top">yoon57296<span style="color:#78b8ff">.</span></a><a class="profile" href="https://github.com/yoon57296">GitHub ↗</a></header>
+    <main id="top">
+      <p class="eyebrow">Project portfolio</p>
+      <h1>만들고,<br>기록하고,<br>공유합니다.</h1>
+      <p class="intro">GitHub에 공개한 프로젝트를 모았습니다. 각 저장소에서 코드와 작업 내용을 확인할 수 있습니다.</p>
+      <div class="actions"><a class="button primary" href="#projects">프로젝트 보기 ↓</a><a class="button" href="https://github.com/yoon57296">GitHub 프로필 ↗</a></div>
+      <section id="projects" aria-labelledby="projects-title">
+        <div class="section-head"><h2 id="projects-title">Projects</h2><a href="https://github.com/yoon57296?tab=repositories">모든 저장소 ↗</a></div>
+        <p id="status" role="status">공개 프로젝트를 불러오는 중입니다…</p>
+        <div class="grid" id="project-grid"></div>
+      </section>
+    </main>
+    <footer>© <span id="year"></span> yoon57296 · Built with GitHub Pages</footer>
+  </div>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const status = document.getElementById('status');
+    const grid = document.getElementById('project-grid');
+    fetch('https://api.github.com/users/yoon57296/repos?per_page=100&sort=updated')
+      .then(response => { if (!response.ok) throw new Error(String(response.status)); return response.json(); })
+      .then(repos => {
+        const projects = repos.filter(repo => !repo.fork && !repo.archived && repo.name !== 'yoon57296.github.io').slice(0, 8);
+        status.textContent = projects.length ? '' : '표시할 공개 프로젝트가 없습니다. GitHub 프로필에서 저장소를 확인해 주세요.';
+        for (const repo of projects) {
+          const card = document.createElement('article');
+          card.className = 'card';
+          const title = document.createElement('h3');
+          const link = document.createElement('a');
+          link.href = repo.html_url;
+          link.textContent = repo.name;
+          title.append(link);
+          const description = document.createElement('p');
+          description.textContent = repo.description || 'GitHub에서 프로젝트 살펴보기';
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+          meta.textContent = repo.language || 'Repository';
+          card.append(title, description, meta);
+          grid.append(card);
+        }
+      })
+      .catch(() => { status.textContent = '프로젝트를 불러오지 못했습니다. GitHub 프로필에서 확인해 주세요.'; });
+  </script>
+</body>
+</html>
