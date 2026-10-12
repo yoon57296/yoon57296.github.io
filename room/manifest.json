@@ -1,0 +1,196 @@
+{
+ "version": 2,
+ "gamma": 4.0,
+ "encoding": "lin = pow(png, gamma) * scale",
+ "groups": [
+  "sky",
+  "sun",
+  "lamp",
+  "fairy",
+  "screen"
+ ],
+ "reference": {
+  "day": {
+   "sky": {
+    "color": "#c0d6f3",
+    "intensity": 1.0
+   },
+   "sun": {
+    "color": "#fff1d6",
+    "intensity": 4.2
+   },
+   "lamp": 0,
+   "fairy": 0,
+   "screen": 0.4,
+   "exposure": 1.9
+  },
+  "night": {
+   "sky": {
+    "color": "#141b2c",
+    "intensity": 0.15
+   },
+   "sun": {
+    "color": "#a9bde0",
+    "intensity": 0.25
+   },
+   "lamp": 1,
+   "fairy": 1,
+   "screen": 1,
+   "exposure": 1.4
+  }
+ },
+ "toneMapping": "AgX",
+ "atlases": {
+  "shell": {
+   "size": 2048,
+   "lightmaps": {
+    "sky": {
+     "file": "shell_sky.webp",
+     "scale": 0.874548,
+     "fileLow": "shell_sky.1k.webp"
+    },
+    "sun": {
+     "file": "shell_sun.webp",
+     "scale": 0.303416,
+     "fileLow": "shell_sun.1k.webp"
+    },
+    "lamp": {
+     "file": "shell_lamp.webp",
+     "scale": 0.021205,
+     "fileLow": "shell_lamp.1k.webp"
+    },
+    "fairy": {
+     "file": "shell_fairy.webp",
+     "scale": 2.081963,
+     "fileLow": "shell_fairy.1k.webp"
+    },
+    "screen": {
+     "file": "shell_screen.webp",
+     "scale": 0.030144,
+     "fileLow": "shell_screen.1k.webp"
+    }
+   },
+   "albedo": null,
+   "direct": {
+    "sun": {
+     "file": "shell_sun_direct.png",
+     "scale": 0.170843
+    },
+    "lamp": {
+     "file": "shell_lamp_direct.png",
+     "scale": 0.010643
+    },
+    "fairy": {
+     "file": "shell_fairy_direct.png",
+     "scale": 2.224648
+    },
+    "screen": {
+     "file": "shell_screen_direct.png",
+     "scale": 0.026549
+    }
+   }
+  },
+  "furniture": {
+   "size": 2048,
+   "lightmaps": {
+    "sky": {
+     "file": "furniture_sky.webp",
+     "scale": 0.834597,
+     "fileLow": "furniture_sky.1k.webp"
+    },
+    "sun": {
+     "file": "furniture_sun.webp",
+     "scale": 0.864699,
+     "fileLow": "furniture_sun.1k.webp"
+    },
+    "lamp": {
+     "file": "furniture_lamp.webp",
+     "scale": 0.059629,
+     "fileLow": "furniture_lamp.1k.webp"
+    },
+    "fairy": {
+     "file": "furniture_fairy.webp",
+     "scale": 0.281735,
+     "fileLow": "furniture_fairy.1k.webp"
+    },
+    "screen": {
+     "file": "furniture_screen.webp",
+     "scale": 0.106668,
+     "fileLow": "furniture_screen.1k.webp"
+    }
+   },
+   "albedo": "furniture_albedo.jpg",
+   "direct": {
+    "sun": {
+     "file": "furniture_sun_direct.png",
+     "scale": 0.309034
+    },
+    "lamp": {
+     "file": "furniture_lamp_direct.png",
+     "scale": 0.043947
+    },
+    "fairy": {
+     "file": "furniture_fairy_direct.png",
+     "scale": 0.085635
+    },
+    "screen": {
+     "file": "furniture_screen_direct.png",
+     "scale": 0.107664
+    }
+   }
+  },
+  "props": {
+   "size": 2048,
+   "lightmaps": {
+    "sky": {
+     "file": "props_sky.webp",
+     "scale": 0.118304,
+     "fileLow": "props_sky.1k.webp"
+    },
+    "sun": {
+     "file": "props_sun.webp",
+     "scale": 0.088082,
+     "fileLow": "props_sun.1k.webp"
+    },
+    "lamp": {
+     "file": "props_lamp.webp",
+     "scale": 0.081406,
+     "fileLow": "props_lamp.1k.webp"
+    },
+    "fairy": {
+     "file": "props_fairy.webp",
+     "scale": 11.307388,
+     "fileLow": "props_fairy.1k.webp"
+    },
+    "screen": {
+     "file": "props_screen.webp",
+     "scale": 0.953368,
+     "fileLow": "props_screen.1k.webp"
+    }
+   },
+   "albedo": "props_albedo.jpg",
+   "direct": {
+    "sun": {
+     "file": "props_sun_direct.png",
+     "scale": 1.0
+    },
+    "lamp": {
+     "file": "props_lamp_direct.png",
+     "scale": 0.060747
+    },
+    "fairy": {
+     "file": "props_fairy_direct.png",
+     "scale": 13.11515
+    },
+    "screen": {
+     "file": "props_screen_direct.png",
+     "scale": 0.959412
+    }
+   }
+  }
+ },
+ "env": {
+  "day": "env_day.hdr",
+  "night": "env_night.hdr"
+ }
+}
