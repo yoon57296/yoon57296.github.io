@@ -101,6 +101,7 @@ input[type=range]{width:100%;accent-color:var(--lamp)}
 .seg button[aria-pressed="true"]{border-color:var(--lamp);background:#f2a65a12}
 .seg button[aria-pressed="true"] span{color:var(--lamp)}
 .status{font-size:13px;color:var(--muted)}
+.giscus-slot{margin-top:18px;min-height:120px}
 .note{font:400 13px/1.7 var(--sans);color:var(--muted);border-left:2px solid var(--line);padding-left:12px;margin-top:22px}
 
 #loader{position:fixed;inset:0;z-index:20;background:var(--ink);display:grid;place-items:center;text-align:center;transition:opacity .9s}
@@ -160,11 +161,17 @@ body.fps.aim #crosshair{transform:scale(1.9);background:var(--lamp)}
   <p>쉴 때는 게임을 해요. 잘 만든 게임은 제가 아는 가장 정교한 인터랙션이라, 놀다가도 이건 어떻게 만들었을까 자주 생각해요.</p>
   <p class="note">좋아하는 게임 목록은 곧 채울게요.</p>
 </template>
-<template id="tpl-guitar">
-  <div class="kicker">Guitar</div>
+<template id="tpl-piano">
+  <div class="kicker">Keyboard</div>
   <h2 id="panel-title">Music</h2>
-  <p>코드가 막힐 때 잡는 악기예요. 반복해서 연습하다 보면 어느 순간 손이 먼저 아는 감각이 생기는데, 그게 코딩과 닮았다고 생각해요.</p>
+  <p>코드가 막힐 때 앉는 자리예요. 반복해서 연습하다 보면 어느 순간 손이 먼저 아는 감각이 생기는데, 그게 코딩과 닮았다고 생각해요.</p>
   <p class="note">요즘 연습하는 곡은 곧 적어둘게요.</p>
+</template>
+<template id="tpl-guestbook">
+  <div class="kicker">Guestbook</div>
+  <h2 id="panel-title">한 줄 남기고 가세요</h2>
+  <p>요정 조명 아래 코르크 보드예요. 남겨주신 글은 메모지가 되어 보드에 꽂혀요. GitHub 계정으로 로그인해서 쓸 수 있어요.</p>
+  <div id="giscus-slot" class="giscus-slot"></div>
 </template>
 <template id="tpl-hobby">
   <div class="kicker">Hobby shelf</div>
@@ -221,7 +228,7 @@ const hash = s => { let h = 2166136261; for (const c of String(s)) h = Math.imul
   g.putImageData(d, 0, 0); document.documentElement.style.setProperty('--grain', 'url(' + c.toDataURL() + ')'); })();
 
 /* ---------- State ---------- */
-const state = { live: true, minutes: 0, weatherMode: 'live', liveWeather: 'clear', liveWeatherOk: false, lamp: null, focus: null };
+const state = { live: true, minutes: 0, weatherMode: 'live', liveWeather: 'clear', liveWeatherOk: false, lamp: null, ceil: null, focus: null };
 const seoulMinutes = () => {
   const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
   return (+p.find(x => x.type === 'hour').value % 24) * 60 + +p.find(x => x.type === 'minute').value;
@@ -247,17 +254,20 @@ const booksReady = fetch('data/books.json')
 
 /* ---------- Objects ---------- */
 const OBJECTS = {
-  reading:  { label: '책장', sub: 'Books & reviews', pos: [-1.45, 1.4, -1.6], look: [-2.85, 1.25, -1.6] },
-  projects: { label: '프로젝트 책장', sub: 'GitHub projects', pos: [2.4, 1.35, -1.5], look: [2.42, 1.2, -3.0] },
+  reading:  { label: '책장', sub: 'Books & reviews', pos: [-1.3, 1.4, -2.15], look: [-2.85, 1.2, -2.38] },
+  projects: { label: '프로젝트 책장', sub: 'GitHub projects', pos: [2.3, 1.35, -1.45], look: [2.5, 1.2, -3.0] },
   monitor:  { label: '모니터', sub: 'Now building', tpl: 'tpl-monitor', pos: [1.0, 1.22, -1.7], look: [1.0, 1.05, -2.8] },
-  console:  { label: '게임기', sub: 'Games', tpl: 'tpl-console', pos: [1.3, 1.1, -0.4], look: [2.85, 0.85, -0.4] },
-  guitar:   { label: '기타', sub: 'Music', tpl: 'tpl-guitar', pos: [-1.6, 1.0, 0.3], look: [-2.8, 0.72, 0.3] },
+  console:  { label: '게임기', sub: 'Games', tpl: 'tpl-console', pos: [1.25, 1.25, -0.4], look: [2.9, 0.95, -0.4] },
+  piano:    { label: '키보드', sub: 'Music', tpl: 'tpl-piano', pos: [-1.45, 1.35, -0.1], look: [-2.75, 0.85, -0.1] },
+  guestbook: { label: '방명록', sub: 'Guestbook', tpl: 'tpl-guestbook', pos: [-1.2, 1.5, 1.92], look: [-3.0, 1.5, 1.92] },
   hobby:    { label: '취미 선반', sub: 'Little things', tpl: 'tpl-hobby', pos: [1.55, 1.8, -0.4], look: [2.9, 1.8, -0.4] },
   door:     { label: '방문', sub: 'Contact', tpl: 'tpl-door', pos: [1.45, 1.5, 1.2], look: [1.45, 1.25, 3.0] },
   clock:    { label: '벽시계', sub: 'Change time', tpl: 'tpl-clock', pos: [1.0, 2.05, -1.95], look: [1.0, 2.15, -3.0] },
   window:   { label: '창문', sub: 'Change weather', tpl: 'tpl-window', pos: [-1.0, 1.6, -1.5], look: [-1.0, 1.65, -4.0] },
-  lamp:     { label: '스탠드', sub: 'Light on / off' }
+  lamp:     { label: '스탠드', sub: 'Light on / off' },
+  switch:   { label: '천장 조명', sub: 'Light switch' }
 };
+const TOGGLES = ['lamp', 'switch'];   // light switches: no panel, no camera move
 
 /* ---------- Panel ---------- */
 const panel = $('#panel'), body = $('#panel-body');
@@ -275,7 +285,27 @@ function openPanel(key) {
   showPanel([$('#' + OBJECTS[key].tpl).content.cloneNode(true)]);
   if (key === 'clock') bindClock();
   if (key === 'window') bindWeather();
+  if (key === 'guestbook') mountGiscus();
 }
+/* ---------- Guestbook: giscus (GitHub Discussions). A workflow in this repo copies the comments into
+   data/guestbook.json, which the 3D board reads to pin them up as notes. ---------- */
+const GISCUS = { repo: 'yoon57296/yoon57296.github.io', repoId: 'R_kgDOU_M0CA', category: 'Guestbook', categoryId: '' };
+function mountGiscus() {
+  const slot = $('#giscus-slot'); if (!slot) return;
+  if (!GISCUS.categoryId) { slot.append(el('p', { className: 'note', textContent: '방명록을 준비하고 있어요. 곧 열려요.' })); return; }
+  const s = document.createElement('script');
+  Object.entries({ src: 'https://giscus.app/client.js', 'data-repo': GISCUS.repo, 'data-repo-id': GISCUS.repoId,
+    'data-category': GISCUS.category, 'data-category-id': GISCUS.categoryId, 'data-mapping': 'specific', 'data-term': 'guestbook',
+    'data-strict': '1', 'data-reactions-enabled': '0', 'data-emit-metadata': '0', 'data-input-position': 'top',
+    'data-theme': 'dark_dimmed', 'data-lang': 'ko', 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' })
+    .forEach(([k, v]) => s.setAttribute(k, v));
+  slot.append(s);
+}
+// raw.githubusercontent.com sees the workflow's commit within minutes, without waiting for a Pages rebuild
+const guestReady = fetch('https://raw.githubusercontent.com/yoon57296/yoon57296.github.io/main/data/guestbook.json', { cache: 'no-cache' })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .catch(() => fetch('data/guestbook.json').then(r => r.ok ? r.json() : { comments: [] }))
+  .then(j => j.comments || []).catch(() => []);
 function closePanel() {
   panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true');
   state.focus = null; hooks.onClose();
@@ -401,7 +431,7 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978
 /* ---------- 3D ---------- */
 // The room itself is drawn by the module script below. Everything above also works without it:
 // with no WebGL the object list still opens every panel.
-let activate = key => { if (key === 'lamp') return; state.focus = key; openPanel(key); };
+let activate = key => { if (TOGGLES.includes(key)) return; state.focus = key; openPanel(key); };
 function hasWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGL2RenderingContext && c.getContext('webgl2')); } catch (e) { return false; } }
 if (!hasWebGL()) { document.documentElement.classList.add('nogl'); $('#loader').classList.add('done'); $('#hint').hidden = true; }
 </script>
@@ -411,8 +441,8 @@ if (!hasWebGL()) { document.documentElement.classList.add('nogl'); $('#loader').
 </script>
 <script type="module">
 /* The room: modelled and lit in Blender (github.com/yoon7270/site_blender), loaded here as one GLB.
-   Light is baked per source (sky, sun, desk lamp, fairy lights, screens) and mixed live from the Seoul time,
-   the weather and the lamp switch; a 360° probe adds reflections. */
+   Light is baked per source (sky, sun, desk lamp, fairy lights, screens, ceiling light) and mixed live from the
+   Seoul time, the weather and the light switches; a 360° probe adds reflections. */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
@@ -447,7 +477,8 @@ async function startRoom() {
 
   /* ===== load: manifest, lightmaps, reflection probes, the room ===== */
   const manifest = await (await fetch(BASE + 'manifest.json')).json();
-  const GROUPS = ['sky', 'sun', 'lamp', 'fairy', 'screen'];
+  const GROUPS = ['sky', 'sun', 'lamp', 'fairy', 'screen', 'ceil'];
+  const BLACK = new THREE.DataTexture(new Uint8Array(4), 1, 1); BLACK.needsUpdate = true;   // a group an older bake lacks
   const progress = $('#loader span');
   let done = 0; const total = Object.keys(manifest.atlases).length * GROUPS.length + 3;
   const tick = () => { progress.textContent = '불 켜는 중 · ' + Math.round(++done / total * 100) + '%'; };
@@ -460,7 +491,7 @@ async function startRoom() {
   const atlas = {};
   await Promise.all(Object.entries(manifest.atlases).map(async ([name, a]) => {
     const t = {};
-    await Promise.all(GROUPS.map(async g => { const lm = a.lightmaps[g]; t[g] = lm ? await loadLM(phone && lm.fileLow ? lm.fileLow : lm.file) : null; }));
+    await Promise.all(GROUPS.map(async g => { const lm = a.lightmaps[g]; t[g] = lm ? await loadLM(phone && lm.fileLow ? lm.fileLow : lm.file) : (tick(), BLACK); }));
     atlas[name] = { tex: t, scales: GROUPS.map(g => a.lightmaps[g] ? a.lightmaps[g].scale : 0) };
   }));
   const pmrem = new THREE.PMREMGenerator(renderer), env = {};
@@ -474,11 +505,11 @@ async function startRoom() {
 
   /* lightmap mixing, shared by every baked material */
   const mix = { lmSkyCol: { value: new THREE.Color() }, lmSunCol: { value: new THREE.Color() },
-    lmLampW: { value: 0 }, lmFairyW: { value: 0 }, lmScreenW: { value: 0 }, lmGamma: { value: manifest.gamma || 2.2 } };
+    lmLampW: { value: 0 }, lmFairyW: { value: 0 }, lmScreenW: { value: 0 }, lmCeilW: { value: 0 }, lmGamma: { value: manifest.gamma || 2.2 } };
   const HEADER = `
-uniform sampler2D lmSun, lmLamp, lmFairy, lmScreen;
-uniform float lmScale[5];
-uniform float lmGamma, lmLampW, lmFairyW, lmScreenW;
+uniform sampler2D lmSun, lmLamp, lmFairy, lmScreen, lmCeil;
+uniform float lmScale[6];
+uniform float lmGamma, lmLampW, lmFairyW, lmScreenW, lmCeilW;
 uniform vec3 lmSkyCol, lmSunCol;
 vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   const MIXED = `vec3 lightMapIrradiance = PI * lightMapIntensity * (
@@ -486,7 +517,8 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   + lmDec(texture2D(lmSun, vLightMapUv), lmScale[1]) * lmSunCol
   + lmDec(texture2D(lmLamp, vLightMapUv), lmScale[2]) * lmLampW
   + lmDec(texture2D(lmFairy, vLightMapUv), lmScale[3]) * lmFairyW
-  + lmDec(texture2D(lmScreen, vLightMapUv), lmScale[4]) * lmScreenW );`;
+  + lmDec(texture2D(lmScreen, vLightMapUv), lmScale[4]) * lmScreenW
+  + lmDec(texture2D(lmCeil, vLightMapUv), lmScale[5]) * lmCeilW );`;
   // diffuse = lightmap through the energy-conserving IBL path; the probe only adds specular
   const CHUNK = THREE.ShaderChunk.lights_fragment_maps
     .replace('vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapIntensity;', MIXED)
@@ -500,7 +532,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     m.lightMap = A.tex.sky;
     m.onBeforeCompile = sh => {
       Object.assign(sh.uniforms, mix, { lmSun: { value: A.tex.sun }, lmLamp: { value: A.tex.lamp }, lmFairy: { value: A.tex.fairy },
-        lmScreen: { value: A.tex.screen }, lmScale: { value: A.scales } });
+        lmScreen: { value: A.tex.screen }, lmCeil: { value: A.tex.ceil }, lmScale: { value: A.scales } });
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', '#include <common>' + HEADER)
         .replace('#include <lights_fragment_maps>', CHUNK)
@@ -579,6 +611,8 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   bulbMats.forEach(m => m.userData.bulb = true);
   const fairy = []; room.traverse(o => o.isMesh && o.name.startsWith('fairy_bulb') && fairy.push(o));
   fairy.forEach(o => o.material = new THREE.MeshBasicMaterial({ color: '#ffd59a' }));
+  const ceilGlass = byName.ceil_glass && [].concat(byName.ceil_glass.material)[0];
+  if (ceilGlass) ceilGlass.userData.bulb = true;
   const glass = byName.window_glass;
   if (glass) glass.material = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .03, transparent: true, opacity: .06, depthWrite: false });
 
@@ -622,8 +656,10 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   const shelfMat = c => std(c, { roughness: .7 });
   const paper = std('#efe6d4', { roughness: .9 }), kraft = std('#c9b18c', { roughness: .9 }), kraftDark = std('#b89e78', { roughness: .9 });
   const shelfGroup = (x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); scene.add(g); return g; };
-  const read = shelfGroup(-2.83, 0, -1.6), RW = 1.2, RD = .34, shelfYs = [.04, .46, .88, 1.3, 1.72, 1.905];
-  const proj = shelfGroup(2.43, 0, -2.81), PW = .96, PH = 1.72, PD = .36, cols = 3, rowsN = 4;
+  room.updateMatrixWorld(true);
+  const at = n => byName[n] ? byName[n].getWorldPosition(new THREE.Vector3()).toArray() : [0, 0, 0];   // where the model put it
+  const read = shelfGroup(...at('reading')), RW = 1.2, RD = .34, shelfYs = [.04, .46, .88, 1.3, 1.72, 1.905];
+  const proj = shelfGroup(...at('projects')), PW = .96, PH = 1.72, PD = .36, cols = 3, rowsN = 4;
   const cellW = PW / cols, cellH = (PH - .03) / rowsN;
   const slot = i => { const r = Math.floor(i / cols), c = i % cols; return [-PW / 2 + cellW * (c + .5), .03 + cellH * (rowsN - 1 - r)]; };
   function wrapText(g, text, maxW) { const parts = String(text).split(/(?=[-_. ])/); const lines = []; let cur = ''; for (const p of parts) { if (g.measureText(cur + p).width > maxW && cur) { lines.push(cur); cur = p.replace(/^ /, ''); } else cur += p; } if (cur) lines.push(cur); return lines; }
@@ -687,13 +723,46 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   Promise.all([booksReady, document.fonts.ready]).then(([b]) => buildBooks(b));
   Promise.all([reposReady, document.fonts.ready]).then(([r]) => buildRepos(r));
 
+  /* guestbook: the newest comments pinned to the cork board as notes (board 1.5 x .76 m, title card on top) */
+  const noteMats = [];
+  const NOTE_COLORS = ['#f4ede1', '#f0dca0', '#d9e6f2', '#efcfc1', '#dfe8cf'];
+  function noteTex(c) {
+    return tex(256, 192, (g, w, h) => {
+      g.fillStyle = NOTE_COLORS[Math.floor(hash(c.id || c.author) * NOTE_COLORS.length)]; g.fillRect(0, 0, w, h);
+      g.fillStyle = 'rgba(0,0,0,.06)'; g.fillRect(0, 0, w, 16);
+      g.fillStyle = '#231c15'; g.font = '400 20px "Gowun Batang", serif';
+      const lines = []; let cur = '';
+      for (const ch of String(c.body || '').replace(/\s+/g, ' ').trim()) {   // per character: Korean has few spaces
+        if (g.measureText(cur + ch).width > w - 32) { lines.push(cur); cur = ch.trim(); } else cur += ch;
+      }
+      if (cur) lines.push(cur);
+      lines.slice(0, 5).forEach((l, i) => g.fillText(i === 4 && lines.length > 5 ? l.slice(0, -1) + '…' : l, 16, 46 + i * 26));
+      g.fillStyle = '#7a6b58'; g.font = '400 14px "IBM Plex Mono", monospace'; g.fillText('— ' + String(c.author || '').slice(0, 20), 16, h - 14);
+    });
+  }
+  function buildNotes(comments) {
+    const board = byName.guestbook; if (!board) return;
+    const COLS = 6, ROWS = 3, NW = .2, NH = .15;
+    comments.slice(-COLS * ROWS).reverse().forEach((c, i) => {   // newest first, top left
+      const col = i % COLS, row = Math.floor(i / COLS), j = hash((c.id || '') + i);
+      const map = noteTex(c), mat = std('#ffffff', { map, emissive: '#ffffff', emissiveMap: map, roughness: .9 });
+      noteMats.push(mat);   // not baked: they take a little of the room's light as glow (see applyEnvironment)
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(NW, NH), mat);
+      mesh.position.set(-.62 + col * .248 + (j - .5) * .03, .17 - row * .19 + (hash(c.author + i) - .5) * .02, .0135 + i * .0002);
+      mesh.rotation.z = (j - .5) * .12;
+      const pin = new THREE.Mesh(new THREE.SphereGeometry(.007, 10, 8), std('#c2532f', { roughness: .3 })); pin.position.set(0, NH / 2 - .02, .004); mesh.add(pin);
+      board.add(mesh); reg(mesh); reg(pin); mesh.userData.key = pin.userData.key = 'guestbook';
+    });
+  }
+  Promise.all([guestReady, document.fonts.ready]).then(([c]) => buildNotes(c));
+
   /* ===== walking: walls are the room's bounds, furniture between knee and head height blocks the way ===== */
   const EYE = 1.55, RADIUS = .22, WALL = 3 - RADIUS - .03;
   const obstacles = [];
   room.updateMatrixWorld(true);
   room.traverse(o => {
     if (!o.isMesh || !o.visible || (o.userData.atlas || o.parent?.userData.atlas) === 'shell') return;
-    if (/Curtain|Sheer|window_glass|fairy|Poster|Pin|Note/i.test(o.name + ' ' + (o.parent?.name || ''))) return;
+    if (/Curtain|Sheer|window_glass|fairy|Poster|Pin|Note|Guestbook|Switch|switch|ceil/i.test(o.name + ' ' + (o.parent?.name || ''))) return;
     const b = new THREE.Box3().setFromObject(o);
     if (b.max.y < .25 || b.min.y > 1.6 || (b.max.x - b.min.x) * (b.max.z - b.min.z) < .0025) return;
     obstacles.push(b);
@@ -711,6 +780,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   const view = { cur: 0, goal: 0 };
   let selected = null, hoverItem = null, darkness = 0;
   const lampOn = () => state.lamp !== null ? state.lamp : darkness > .45;
+  const ceilOn = () => state.ceil !== null ? state.ceil : darkness > .45;
   const locked = () => document.pointerLockElement === canvas;
   function moveTo(key) {
     const o = OBJECTS[key]; state.focus = key; objLook.set(...o.look); objPos.set(...o.pos);
@@ -721,6 +791,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   }
   activate = key => {
     if (key === 'lamp') { state.lamp = !lampOn(); return; }
+    if (key === 'switch') { state.ceil = !ceilOn(); return; }
     moveTo(key); selected = null; openPanel(key);
   };
   hooks.onClose = () => { view.goal = 0; selected = null; };
@@ -756,7 +827,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   }
   function useHit(hit) {
     if (hit && hit.item) (hit.item.kind === 'book' ? openBook : openRepo)(hit.item.index);
-    else if (hit) { if (hit.key === 'lamp' || hit.key !== state.focus) activate(hit.key); }
+    else if (hit) { if (TOGGLES.includes(hit.key) || hit.key !== state.focus) activate(hit.key); }
     else if (state.focus) closePanel();
   }
   canvas.addEventListener('pointerdown', e => { if (locked()) return; drag = { x: e.clientX, y: e.clientY, yaw, pitch, moved: false, id: e.pointerId, type: e.pointerType }; canvas.setPointerCapture(e.pointerId); });
@@ -789,6 +860,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     if (state.focus || (e.target.closest && e.target.closest('input,button,a,textarea,select'))) return;
     keys.add(e.code); if (/^(Key[WASD]|Arrow)/.test(e.code)) { hideHint(); e.preventDefault(); }
     if (e.code === 'KeyL') activate('lamp');
+    if (e.code === 'KeyC') activate('switch');
   });
   addEventListener('keyup', e => keys.delete(e.code));
   addEventListener('blur', () => keys.clear());
@@ -807,10 +879,10 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     return { top: m(a[1], b[1]), bottom: m(a[2], b[2]) };
   }
   const W = { clear: { gray: 0, dim: 1, cloud: .15 }, cloudy: { gray: .7, dim: .35, cloud: .9 }, rain: { gray: .8, dim: .25, cloud: 1 }, snow: { gray: .55, dim: .5, cloud: .8 } };
-  const wv = { gray: 0, dim: 1, cloud: .15, rain: 0, snow: 0, lamp: 0, fairy: 0 };
+  const wv = { gray: 0, dim: 1, cloud: .15, rain: 0, snow: 0, lamp: 0, fairy: 0, ceil: 0 };
   const R = manifest.reference, lerp = THREE.MathUtils.lerp, lerpC = (a, b, t) => new THREE.Color(a).lerp(new THREE.Color(b), t);
   let flash = 0, nextFlash = 8;
-  const Z = new THREE.Vector3(0, 0, 1);
+  const Z = new THREE.Vector3(0, 0, 1), X = new THREE.Vector3(1, 0, 0);
   const turn = (n, a) => { const o = byName[n]; if (!o) return; o.userData.base ??= o.quaternion.clone(); o.quaternion.copy(o.userData.base).premultiply(new THREE.Quaternion().setFromAxisAngle(Z, -a)); };
   function applyEnvironment(dt, t) {
     const h = state.minutes / 60, s = sample(h), w = weather(), target = W[w], k = 1 - Math.exp(-dt * 2.5);
@@ -830,14 +902,22 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     mix.lmSunCol.value.copy(sunC).multiplyScalar(lerp(R.night.sun.intensity, R.day.sun.intensity, day) * Math.max(.05, 1 - wv.cloud * .95));
     const kl = reduceMotion ? 1 : 1 - Math.exp(-dt * 6);
     wv.lamp += ((lampOn() ? 1 : 0) - wv.lamp) * kl; wv.fairy += (smooth(.35, .7, darkness) - wv.fairy) * kl;
-    mix.lmLampW.value = wv.lamp; mix.lmFairyW.value = wv.fairy;
+    wv.ceil += ((ceilOn() ? 1 : 0) - wv.ceil) * kl;
+    mix.lmLampW.value = wv.lamp; mix.lmFairyW.value = wv.fairy; mix.lmCeilW.value = wv.ceil;
     mix.lmScreenW.value = lerp(R.night.screen, R.day.screen, day);
     renderer.toneMappingExposure = Math.pow(2, lerp(R.night.exposure, R.day.exposure, day));
     scene.environment = day > .5 ? env.day : env.night;
-    const spec = day > .5 ? lerp(.25, .5, day) * (1 - wv.gray * .4) : .12 + .18 * wv.lamp;
-    const envLight = day > .5 ? lerp(.55, 1, day) * (1 - wv.gray * .5) : .35 + .65 * wv.lamp;
+    const indoor = Math.min(1, wv.lamp + wv.ceil);
+    const spec = day > .5 ? lerp(.25, .5, day) * (1 - wv.gray * .4) : .12 + .18 * indoor;
+    const envLight = day > .5 ? lerp(.55, 1, day) * (1 - wv.gray * .5) : .35 + .65 * indoor;
     allMats.forEach(m => { m.envMapIntensity = m.userData.item ? envLight * .7 : m.userData.envLit ? envLight : spec; });
     bulbMats.forEach(m => { m.emissive.set('#ffc98a'); m.emissiveIntensity = 2.5 * wv.lamp; });
+    if (ceilGlass) { ceilGlass.emissive.set('#fff1dc'); ceilGlass.emissiveIntensity = 1.6 * wv.ceil; }
+    const noteGlow = Math.min(.6, day * (.25 + .25 * wv.dim) + .4 * indoor + .15 * wv.fairy);
+    noteMats.forEach(m => { m.emissiveIntensity = noteGlow; });
+    const rocker = byName.switch_rocker;   // the rocker tips the other way when the light is on
+    if (rocker) { rocker.userData.base ??= rocker.quaternion.clone();
+      rocker.quaternion.copy(rocker.userData.base).multiply(new THREE.Quaternion().setFromAxisAngle(X, wv.ceil > .5 ? -.24 : 0)); }
     fairy.forEach(o => o.material.color.set('#ffd59a').multiplyScalar(wv.fairy > .05 ? 5 * wv.fairy + .4 : .4));
     // outside
     const gray = new THREE.Color('#15171d').lerp(cA.set('#8c939c'), day);

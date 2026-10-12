@@ -1,0 +1,46 @@
+# Copies the guestbook (the giscus discussion titled "guestbook" in the Guestbook category) into
+# data/guestbook.json, which the room's cork board reads to pin the comments up as notes.
+name: guestbook
+on:
+  discussion_comment:
+    types: [created, edited, deleted]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'   # daily, in case an event was missed
+permissions:
+  contents: write
+  discussions: read
+concurrency: guestbook
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const q = `query($owner: String!, $name: String!) {
+              repository(owner: $owner, name: $name) {
+                discussions(first: 20, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  nodes { title category { name } comments(last: 60) { nodes {
+                    id bodyText createdAt url isMinimized author { login } } } }
+                }
+              }
+            }`;
+            const r = await github.graphql(q, { owner: context.repo.owner, name: context.repo.repo });
+            const d = r.repository.discussions.nodes.find(n => n.title === 'guestbook' && n.category.name === 'Guestbook');
+            const comments = (d ? d.comments.nodes : []).filter(c => !c.isMinimized && c.bodyText.trim()).map(c => ({
+              id: c.id, author: c.author ? c.author.login : 'ghost', body: c.bodyText.trim().slice(0, 280),
+              createdAt: c.createdAt, url: c.url }));
+            fs.mkdirSync('data', { recursive: true });
+            fs.writeFileSync('data/guestbook.json', JSON.stringify({ comments }, null, 1) + '\n');
+            core.info(`${comments.length} comments`);
+      - name: Commit if changed
+        run: |
+          git diff --quiet -- data/guestbook.json && exit 0
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/guestbook.json
+          git commit -m 'guestbook: sync comments'
+          git push
