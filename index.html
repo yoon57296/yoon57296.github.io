@@ -33,7 +33,6 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #scene.dragging{cursor:grabbing}
 #scene.pointing{cursor:pointer}
 .film{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 55%,#0b0907 135%)}
-.film::after{content:"";position:absolute;inset:0;background-image:var(--grain);opacity:.06;mix-blend-mode:overlay}
 
 /* HUD */
 .hud{position:fixed;z-index:5;pointer-events:none;display:flex;gap:8px;align-items:center}
@@ -222,10 +221,6 @@ const clamp01 = v => Math.max(0, Math.min(1, v));
 const smooth = (a, b, v) => { const t = clamp01((v - a) / (b - a)); return t * t * (3 - 2 * t); };
 const hash = s => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; };
 
-// film grain for the CSS overlay
-(() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), d = g.createImageData(128, 128);
-  for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
-  g.putImageData(d, 0, 0); document.documentElement.style.setProperty('--grain', 'url(' + c.toDataURL() + ')'); })();
 
 /* ---------- State ---------- */
 const state = { live: true, minutes: 0, weatherMode: 'live', liveWeather: 'clear', liveWeatherOk: false, lamp: null, ceil: null, focus: null };
