@@ -421,12 +421,21 @@ function updateHud() {
 }
 setInterval(() => { if (state.live) { state.minutes = seoulMinutes(); const r = $('#time-range'); if (r) r.value = state.minutes; } updateHud(); }, 1000);
 updateHud();
-fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=weather_code&timezone=Asia%2FSeoul')
-  .then(r => r.json()).then(j => {
-    const c = j.current.weather_code;
-    state.liveWeather = (c >= 71 && c <= 77) || c === 85 || c === 86 ? 'snow' : (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95 ? 'rain' : c >= 2 ? 'cloudy' : 'clear';
-    state.liveWeatherOk = true; updateHud();
-  }).catch(() => {});
+// Seoul weather: on load, then every 30 min (and on return to a tab hidden longer than that).
+const WEATHER_EVERY = 30 * 60 * 1000;
+let weatherAt = 0;
+function fetchWeather() {
+  weatherAt = Date.now();
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=weather_code&timezone=Asia%2FSeoul')
+    .then(r => r.json()).then(j => {
+      const c = j.current.weather_code;
+      state.liveWeather = (c >= 71 && c <= 77) || c === 85 || c === 86 ? 'snow' : (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95 ? 'rain' : c >= 2 ? 'cloudy' : 'clear';
+      state.liveWeatherOk = true; updateHud();
+    }).catch(() => {});
+}
+fetchWeather();
+setInterval(() => { if (!document.hidden) fetchWeather(); }, WEATHER_EVERY);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - weatherAt > WEATHER_EVERY) fetchWeather(); });
 
 /* ---------- 3D ---------- */
 // The room itself is drawn by the module script below. Everything above also works without it:
