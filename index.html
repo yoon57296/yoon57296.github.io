@@ -634,7 +634,9 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   const glass = byName.window_glass;
   if (glass) glass.material = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .03, transparent: true, opacity: .06, depthWrite: false });
   // display cabinet glass (sides, doors, shelves): see-through, a faint tint so the shelves still read. depthWrite off also lets clicks pass through to what's inside
-  room.traverse(o => { if (o.isMesh && /^SM_Display_Glass/.test(o.name)) o.material = new THREE.MeshPhysicalMaterial({ color: '#d6e6de', roughness: .04, transparent: true, opacity: /Shelves/.test(o.name) ? .1 : .07, depthWrite: false }); });
+  room.traverse(o => { if (o.isMesh && /^SM_Display_Glass(?!Edges)/.test(o.name)) o.material = new THREE.MeshPhysicalMaterial({ color: '#d6e6de', roughness: .04, transparent: true, opacity: /Shelves/.test(o.name) ? .2 : .07, depthWrite: false }); });
+  // the shelves' front edges: the green of thick glass, so the shelves read as something to stand on
+  room.traverse(o => { if (o.isMesh && /^SM_Display_GlassEdges/.test(o.name)) o.material = new THREE.MeshStandardMaterial({ color: '#86ab9b', roughness: .12, transparent: true, opacity: .9, depthWrite: false }); });
 
   /* ===== outside the window: sky, sun or moon, stars, the city, clouds, rain and snow ===== */
   const skyU = { top: { value: new THREE.Color() }, bottom: { value: new THREE.Color() } };

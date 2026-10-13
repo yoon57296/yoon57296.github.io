@@ -59,17 +59,17 @@
     },
     "lamp": {
      "file": "shell_lamp.webp",
-     "scale": 0.014584,
+     "scale": 0.014596,
      "fileLow": "shell_lamp.1k.webp"
     },
     "fairy": {
      "file": "shell_fairy.webp",
-     "scale": 2.023311,
+     "scale": 2.023189,
      "fileLow": "shell_fairy.1k.webp"
     },
     "screen": {
      "file": "shell_screen.webp",
-     "scale": 0.025676,
+     "scale": 0.006369,
      "fileLow": "shell_screen.1k.webp"
     },
     "ceil": {
@@ -90,11 +90,11 @@
     },
     "fairy": {
      "file": "shell_fairy_direct.png",
-     "scale": 2.192986
+     "scale": 2.191556
     },
     "screen": {
      "file": "shell_screen_direct.png",
-     "scale": 0.021947
+     "scale": 0.005338
     },
     "ceil": {
      "file": "shell_ceil_direct.png",
@@ -107,32 +107,32 @@
    "lightmaps": {
     "sky": {
      "file": "furniture_sky.webp",
-     "scale": 0.829819,
+     "scale": 0.865841,
      "fileLow": "furniture_sky.1k.webp"
     },
     "sun": {
      "file": "furniture_sun.webp",
-     "scale": 0.741771,
+     "scale": 0.750606,
      "fileLow": "furniture_sun.1k.webp"
     },
     "lamp": {
      "file": "furniture_lamp.webp",
-     "scale": 0.042923,
+     "scale": 0.041359,
      "fileLow": "furniture_lamp.1k.webp"
     },
     "fairy": {
      "file": "furniture_fairy.webp",
-     "scale": 0.22028,
+     "scale": 0.216552,
      "fileLow": "furniture_fairy.1k.webp"
     },
     "screen": {
      "file": "furniture_screen.webp",
-     "scale": 0.123378,
+     "scale": 0.026624,
      "fileLow": "furniture_screen.1k.webp"
     },
     "ceil": {
      "file": "furniture_ceil.webp",
-     "scale": 1.378041,
+     "scale": 1.377988,
      "fileLow": "furniture_ceil.1k.webp"
     }
    },
@@ -140,23 +140,23 @@
    "direct": {
     "sun": {
      "file": "furniture_sun_direct.png",
-     "scale": 0.31555
+     "scale": 0.316046
     },
     "lamp": {
      "file": "furniture_lamp_direct.png",
-     "scale": 0.033616
+     "scale": 0.033743
     },
     "fairy": {
      "file": "furniture_fairy_direct.png",
-     "scale": 0.079434
+     "scale": 0.083851
     },
     "screen": {
      "file": "furniture_screen_direct.png",
-     "scale": 0.161221
+     "scale": 0.094564
     },
     "ceil": {
      "file": "furniture_ceil_direct.png",
-     "scale": 1.141832
+     "scale": 1.141655
     }
    }
   },
@@ -165,32 +165,32 @@
    "lightmaps": {
     "sky": {
      "file": "props_sky.webp",
-     "scale": 0.111407,
+     "scale": 0.108854,
      "fileLow": "props_sky.1k.webp"
     },
     "sun": {
      "file": "props_sun.webp",
-     "scale": 0.060434,
+     "scale": 0.061696,
      "fileLow": "props_sun.1k.webp"
     },
     "lamp": {
      "file": "props_lamp.webp",
-     "scale": 0.077978,
+     "scale": 0.080038,
      "fileLow": "props_lamp.1k.webp"
     },
     "fairy": {
      "file": "props_fairy.webp",
-     "scale": 13.779132,
+     "scale": 14.252604,
      "fileLow": "props_fairy.1k.webp"
     },
     "screen": {
      "file": "props_screen.webp",
-     "scale": 0.941016,
+     "scale": 0.035554,
      "fileLow": "props_screen.1k.webp"
     },
     "ceil": {
      "file": "props_ceil.webp",
-     "scale": 20.148287,
+     "scale": 20.156521,
      "fileLow": "props_ceil.1k.webp"
     }
    },
@@ -198,23 +198,23 @@
    "direct": {
     "sun": {
      "file": "props_sun_direct.png",
-     "scale": 1.0
+     "scale": 0.001061
     },
     "lamp": {
      "file": "props_lamp_direct.png",
-     "scale": 0.067639
+     "scale": 0.064285
     },
     "fairy": {
      "file": "props_fairy_direct.png",
-     "scale": 16.126163
+     "scale": 15.801389
     },
     "screen": {
      "file": "props_screen_direct.png",
-     "scale": 0.949445
+     "scale": 0.032688
     },
     "ceil": {
      "file": "props_ceil_direct.png",
-     "scale": 6.951072
+     "scale": 6.951675
     }
    }
   }
