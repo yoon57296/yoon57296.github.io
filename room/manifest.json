@@ -49,32 +49,32 @@
    "lightmaps": {
     "sky": {
      "file": "shell_sky.webp",
-     "scale": 0.877081,
+     "scale": 0.882125,
      "fileLow": "shell_sky.1k.webp"
     },
     "sun": {
      "file": "shell_sun.webp",
-     "scale": 0.304651,
+     "scale": 0.28578,
      "fileLow": "shell_sun.1k.webp"
     },
     "lamp": {
      "file": "shell_lamp.webp",
-     "scale": 0.014524,
+     "scale": 0.014584,
      "fileLow": "shell_lamp.1k.webp"
     },
     "fairy": {
      "file": "shell_fairy.webp",
-     "scale": 2.041415,
+     "scale": 2.023311,
      "fileLow": "shell_fairy.1k.webp"
     },
     "screen": {
      "file": "shell_screen.webp",
-     "scale": 0.025601,
+     "scale": 0.025676,
      "fileLow": "shell_screen.1k.webp"
     },
     "ceil": {
      "file": "shell_ceil.webp",
-     "scale": 1.200523,
+     "scale": 1.199113,
      "fileLow": "shell_ceil.1k.webp"
     }
    },
@@ -82,23 +82,23 @@
    "direct": {
     "sun": {
      "file": "shell_sun_direct.png",
-     "scale": 0.170839
+     "scale": 0.17084
     },
     "lamp": {
      "file": "shell_lamp_direct.png",
-     "scale": 0.011289
+     "scale": 0.011129
     },
     "fairy": {
      "file": "shell_fairy_direct.png",
-     "scale": 2.20566
+     "scale": 2.192986
     },
     "screen": {
      "file": "shell_screen_direct.png",
-     "scale": 0.021712
+     "scale": 0.021947
     },
     "ceil": {
      "file": "shell_ceil_direct.png",
-     "scale": 0.956588
+     "scale": 0.95647
     }
    }
   },
@@ -107,32 +107,32 @@
    "lightmaps": {
     "sky": {
      "file": "furniture_sky.webp",
-     "scale": 0.852388,
+     "scale": 0.829819,
      "fileLow": "furniture_sky.1k.webp"
     },
     "sun": {
      "file": "furniture_sun.webp",
-     "scale": 0.828601,
+     "scale": 0.741771,
      "fileLow": "furniture_sun.1k.webp"
     },
     "lamp": {
      "file": "furniture_lamp.webp",
-     "scale": 0.049406,
+     "scale": 0.042923,
      "fileLow": "furniture_lamp.1k.webp"
     },
     "fairy": {
      "file": "furniture_fairy.webp",
-     "scale": 0.219172,
+     "scale": 0.22028,
      "fileLow": "furniture_fairy.1k.webp"
     },
     "screen": {
      "file": "furniture_screen.webp",
-     "scale": 0.132996,
+     "scale": 0.123378,
      "fileLow": "furniture_screen.1k.webp"
     },
     "ceil": {
      "file": "furniture_ceil.webp",
-     "scale": 1.390348,
+     "scale": 1.378041,
      "fileLow": "furniture_ceil.1k.webp"
     }
    },
@@ -140,23 +140,23 @@
    "direct": {
     "sun": {
      "file": "furniture_sun_direct.png",
-     "scale": 0.311286
+     "scale": 0.31555
     },
     "lamp": {
      "file": "furniture_lamp_direct.png",
-     "scale": 0.037183
+     "scale": 0.033616
     },
     "fairy": {
      "file": "furniture_fairy_direct.png",
-     "scale": 0.086011
+     "scale": 0.079434
     },
     "screen": {
      "file": "furniture_screen_direct.png",
-     "scale": 0.187813
+     "scale": 0.161221
     },
     "ceil": {
      "file": "furniture_ceil_direct.png",
-     "scale": 1.14803
+     "scale": 1.141832
     }
    }
   },
@@ -165,32 +165,32 @@
    "lightmaps": {
     "sky": {
      "file": "props_sky.webp",
-     "scale": 0.127811,
+     "scale": 0.111407,
      "fileLow": "props_sky.1k.webp"
     },
     "sun": {
      "file": "props_sun.webp",
-     "scale": 0.074959,
+     "scale": 0.060434,
      "fileLow": "props_sun.1k.webp"
     },
     "lamp": {
      "file": "props_lamp.webp",
-     "scale": 0.082221,
+     "scale": 0.077978,
      "fileLow": "props_lamp.1k.webp"
     },
     "fairy": {
      "file": "props_fairy.webp",
-     "scale": 14.899948,
+     "scale": 13.779132,
      "fileLow": "props_fairy.1k.webp"
     },
     "screen": {
      "file": "props_screen.webp",
-     "scale": 0.947765,
+     "scale": 0.941016,
      "fileLow": "props_screen.1k.webp"
     },
     "ceil": {
      "file": "props_ceil.webp",
-     "scale": 20.174835,
+     "scale": 20.148287,
      "fileLow": "props_ceil.1k.webp"
     }
    },
@@ -202,19 +202,19 @@
     },
     "lamp": {
      "file": "props_lamp_direct.png",
-     "scale": 0.066256
+     "scale": 0.067639
     },
     "fairy": {
      "file": "props_fairy_direct.png",
-     "scale": 16.654877
+     "scale": 16.126163
     },
     "screen": {
      "file": "props_screen_direct.png",
-     "scale": 0.955022
+     "scale": 0.949445
     },
     "ceil": {
      "file": "props_ceil_direct.png",
-     "scale": 6.95444
+     "scale": 6.951072
     }
    }
   }
