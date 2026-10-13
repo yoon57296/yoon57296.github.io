@@ -165,32 +165,32 @@
    "lightmaps": {
     "sky": {
      "file": "props_sky.webp",
-     "scale": 0.108854,
+     "scale": 0.123071,
      "fileLow": "props_sky.1k.webp"
     },
     "sun": {
      "file": "props_sun.webp",
-     "scale": 0.061696,
+     "scale": 0.07837,
      "fileLow": "props_sun.1k.webp"
     },
     "lamp": {
      "file": "props_lamp.webp",
-     "scale": 0.080038,
+     "scale": 0.091903,
      "fileLow": "props_lamp.1k.webp"
     },
     "fairy": {
      "file": "props_fairy.webp",
-     "scale": 14.252604,
+     "scale": 12.486293,
      "fileLow": "props_fairy.1k.webp"
     },
     "screen": {
      "file": "props_screen.webp",
-     "scale": 0.035554,
+     "scale": 0.027431,
      "fileLow": "props_screen.1k.webp"
     },
     "ceil": {
      "file": "props_ceil.webp",
-     "scale": 20.156521,
+     "scale": 20.192301,
      "fileLow": "props_ceil.1k.webp"
     }
    },
@@ -198,23 +198,81 @@
    "direct": {
     "sun": {
      "file": "props_sun_direct.png",
-     "scale": 0.001061
+     "scale": 1.0
     },
     "lamp": {
      "file": "props_lamp_direct.png",
-     "scale": 0.064285
+     "scale": 0.074234
     },
     "fairy": {
      "file": "props_fairy_direct.png",
-     "scale": 15.801389
+     "scale": 13.708386
     },
     "screen": {
      "file": "props_screen_direct.png",
-     "scale": 0.032688
+     "scale": 0.027614
     },
     "ceil": {
      "file": "props_ceil_direct.png",
-     "scale": 6.951675
+     "scale": 6.964159
+    }
+   }
+  },
+  "desk": {
+   "size": 1024,
+   "lightmaps": {
+    "sky": {
+     "file": "desk_sky.webp",
+     "scale": 0.034338,
+     "fileLow": "desk_sky.1k.webp"
+    },
+    "sun": {
+     "file": "desk_sun.webp",
+     "scale": 0.016524,
+     "fileLow": "desk_sun.1k.webp"
+    },
+    "lamp": {
+     "file": "desk_lamp.webp",
+     "scale": 0.06099,
+     "fileLow": "desk_lamp.1k.webp"
+    },
+    "fairy": {
+     "file": "desk_fairy.webp",
+     "scale": 0.06505,
+     "fileLow": "desk_fairy.1k.webp"
+    },
+    "screen": {
+     "file": "desk_screen.webp",
+     "scale": 0.03747,
+     "fileLow": "desk_screen.1k.webp"
+    },
+    "ceil": {
+     "file": "desk_ceil.webp",
+     "scale": 0.737964,
+     "fileLow": "desk_ceil.1k.webp"
+    }
+   },
+   "albedo": null,
+   "direct": {
+    "sun": {
+     "file": "desk_sun_direct.png",
+     "scale": 1.0
+    },
+    "lamp": {
+     "file": "desk_lamp_direct.png",
+     "scale": 0.029943
+    },
+    "fairy": {
+     "file": "desk_fairy_direct.png",
+     "scale": 0.005519
+    },
+    "screen": {
+     "file": "desk_screen_direct.png",
+     "scale": 0.033971
+    },
+    "ceil": {
+     "file": "desk_ceil_direct.png",
+     "scale": 0.511695
     }
    }
   }
