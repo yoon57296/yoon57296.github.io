@@ -479,29 +479,48 @@ async function startRoom() {
   const manifest = await (await fetch(BASE + 'manifest.json')).json();
   const GROUPS = ['sky', 'sun', 'lamp', 'fairy', 'screen', 'ceil'];
   const BLACK = new THREE.DataTexture(new Uint8Array(4), 1, 1); BLACK.needsUpdate = true;   // a group an older bake lacks
+  // The night lights (desk lamp, fairy lights, ceiling light) and the probe for the other half of the day load
+  // when first needed: a daytime visit downloads about half as much. At night they load up front instead.
+  const hourNow = state.minutes / 60, dayNow = smooth(5, 8, hourNow) * (1 - smooth(17.5, 20.5, hourNow)) > .5;
+  const LAZY = dayNow ? ['lamp', 'fairy', 'ceil'] : [];
+  const EAGER = GROUPS.filter(g => !LAZY.includes(g));
   const progress = $('#loader span');
-  let done = 0; const total = Object.keys(manifest.atlases).length * GROUPS.length + 3;
+  let done = 0; const total = Object.keys(manifest.atlases).length * EAGER.length + 2;
   const tick = () => { progress.textContent = '불 켜는 중 · ' + Math.round(++done / total * 100) + '%'; };
   const texLoader = new THREE.TextureLoader();
-  const loadLM = f => new Promise((res, rej) => texLoader.load(BASE + f, t => {
+  const loadLM = (f, count = true) => new Promise((res, rej) => texLoader.load(BASE + f, t => {
     t.flipY = false; t.colorSpace = THREE.NoColorSpace; t.channel = 1;
     // no mipmaps: shrinking an atlas blends islands with their empty surroundings and darkens edges at distance
-    t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; tick(); res(t);
+    t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; if (count) tick(); res(t);
   }, undefined, () => rej(new Error('lightmap ' + f))));
+  const lmFile = lm => phone && lm.fileLow ? lm.fileLow : lm.file;
+  const UNI = { sun: 'lmSun', lamp: 'lmLamp', fairy: 'lmFairy', screen: 'lmScreen', ceil: 'lmCeil' };
   const atlas = {};
   await Promise.all(Object.entries(manifest.atlases).map(async ([name, a]) => {
     const t = {};
-    await Promise.all(GROUPS.map(async g => { const lm = a.lightmaps[g]; t[g] = lm ? await loadLM(phone && lm.fileLow ? lm.fileLow : lm.file) : (tick(), BLACK); }));
-    atlas[name] = { tex: t, scales: GROUPS.map(g => a.lightmaps[g] ? a.lightmaps[g].scale : 0) };
+    await Promise.all(EAGER.map(async g => { const lm = a.lightmaps[g]; t[g] = lm ? await loadLM(lmFile(lm)) : (tick(), BLACK); }));
+    for (const g of LAZY) t[g] = BLACK;
+    // uniforms shared by every material of the atlas, so a lightmap that arrives later reaches all of them
+    const u = {}; for (const [g, n] of Object.entries(UNI)) u[n] = { value: t[g] };
+    atlas[name] = { tex: t, u, scales: GROUPS.map(g => a.lightmaps[g] ? a.lightmaps[g].scale : 0) };
   }));
-  const pmrem = new THREE.PMREMGenerator(renderer), env = {};
-  await Promise.all(Object.entries(manifest.env || {}).map(async ([k, f]) => {
-    const t = await new RGBELoader().setDataType(THREE.FloatType).loadAsync(BASE + f);
+  const ready = Object.fromEntries(EAGER.map(g => [g, true])), loading = {};
+  const need = g => {   // start loading a light group's lightmaps; true once they're in
+    if (!ready[g] && !loading[g]) loading[g] = Promise.all(Object.entries(manifest.atlases).map(async ([name, a]) => {
+      const lm = a.lightmaps[g]; if (!lm) return;
+      const t = await loadLM(lmFile(lm), false); atlas[name].tex[g] = t; atlas[name].u[UNI[g]].value = t;
+    })).then(() => { ready[g] = true; }, err => console.error(err));
+    return !!ready[g];
+  };
+  const pmrem = new THREE.PMREMGenerator(renderer), env = {}, envLoading = {};
+  const loadEnv = k => envLoading[k] ??= new RGBELoader().setDataType(THREE.FloatType).loadAsync(BASE + manifest.env[k]).then(t => {
     // cap the brightest spots (bulbs, sun on the window) so glossy things don't flare with their reflection
     const d = t.image.data, CAP = 3;
     for (let i = 0; i < d.length; i += 4) { const m = Math.max(d[i], d[i + 1], d[i + 2]); if (m > CAP) { const s = CAP / m; d[i] *= s; d[i + 1] *= s; d[i + 2] *= s; } }
-    env[k] = pmrem.fromEquirectangular(t).texture; tick();
-  }));
+    env[k] = pmrem.fromEquirectangular(t).texture;
+  });
+  const needEnv = k => { if (manifest.env && manifest.env[k] && !env[k]) loadEnv(k).catch(err => console.error(err)); };
+  await loadEnv(dayNow ? 'day' : 'night'); tick();
 
   /* lightmap mixing, shared by every baked material */
   const mix = { lmSkyCol: { value: new THREE.Color() }, lmSunCol: { value: new THREE.Color() },
@@ -531,8 +550,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     const m = mat.clone(), A = atlas[name];
     m.lightMap = A.tex.sky;
     m.onBeforeCompile = sh => {
-      Object.assign(sh.uniforms, mix, { lmSun: { value: A.tex.sun }, lmLamp: { value: A.tex.lamp }, lmFairy: { value: A.tex.fairy },
-        lmScreen: { value: A.tex.screen }, lmCeil: { value: A.tex.ceil }, lmScale: { value: A.scales } });
+      Object.assign(sh.uniforms, mix, A.u, { lmScale: { value: A.scales } });
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', '#include <common>' + HEADER)
         .replace('#include <lights_fragment_maps>', CHUNK)
@@ -905,12 +923,15 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     const sunC = lerpC(R.night.sun.color, R.day.sun.color, day).lerp(cA.set('#ff9a52'), Math.min(1, golden) * .7);
     mix.lmSunCol.value.copy(sunC).multiplyScalar(lerp(R.night.sun.intensity, R.day.sun.intensity, day) * Math.max(.05, 1 - wv.cloud * .95));
     const kl = reduceMotion ? 1 : 1 - Math.exp(-dt * 6);
-    wv.lamp += ((lampOn() ? 1 : 0) - wv.lamp) * kl; wv.fairy += (smooth(.35, .7, darkness) - wv.fairy) * kl;
-    wv.ceil += ((ceilOn() ? 1 : 0) - wv.ceil) * kl;
+    // a night light fades in once its lightmaps are in (they load on first use)
+    const lampR = lampOn() && need('lamp'), fairyR = darkness > .3 && need('fairy'), ceilR = ceilOn() && need('ceil');
+    wv.lamp += ((lampR ? 1 : 0) - wv.lamp) * kl; wv.fairy += ((fairyR ? smooth(.35, .7, darkness) : 0) - wv.fairy) * kl;
+    wv.ceil += ((ceilR ? 1 : 0) - wv.ceil) * kl;
     mix.lmLampW.value = wv.lamp; mix.lmFairyW.value = wv.fairy; mix.lmCeilW.value = wv.ceil;
     mix.lmScreenW.value = lerp(R.night.screen, R.day.screen, day);
     renderer.toneMappingExposure = Math.pow(2, lerp(R.night.exposure, R.day.exposure, day));
-    scene.environment = day > .5 ? env.day : env.night;
+    if (day < .7) needEnv('night'); if (day > .3) needEnv('day');
+    scene.environment = (day > .5 ? env.day : env.night) || env.day || env.night;
     const indoor = Math.min(1, wv.lamp + wv.ceil);
     const spec = day > .5 ? lerp(.25, .5, day) * (1 - wv.gray * .4) : .12 + .18 * indoor;
     const envLight = day > .5 ? lerp(.55, 1, day) * (1 - wv.gray * .5) : .35 + .65 * indoor;
