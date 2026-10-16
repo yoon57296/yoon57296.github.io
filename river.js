@@ -137,32 +137,55 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
     near.add(new THREE.Mesh(g, basic({ map: ripTex, side: THREE.DoubleSide })));
   };
   slope(-152, SHORE_N); slope(SHORE_S - 8, SHORE_S);
-  const treeCols = ['#5f7a3a', '#6d8540', '#7f8f45', '#55703a', '#a9a04a', '#c2a945', '#4f6b36', '#8a9a48'];
+  // trees: Cycles-rendered impostors (site_blender: blender/tree_sprites.py, packed by tools/tree_atlas.py): a row per
+  // kind, a column per elevation the render was made from, the shadow (seen from straight above) in the last column.
+  // One card per tree, square to the line from the window, showing the render nearest the angle it is seen at; the
+  // shadow lies flat beneath it. Cut-out, not blended: cheap, and it sorts itself.
+  const TREE_KINDS = [   // name, height, card centre height, card size, shadow size (m), at scale 1
+    ['zelkova', 6.94, 3.46, 7.50, 15.00],
+    ['cherry', 4.48, 2.24, 6.28, 12.55],
+    ['metaseq', 13.65, 6.82, 14.75, 29.50],
+  ];
+  const TREE_ELEVS = [15, 30, 50, 75];
   const trees = []; let shadowMat = null;
-  for (let i = 0; i < (phone ? 100 : 200); i++) {
-    const zone = rnd();
-    const z = zone < .35 ? -6 - rnd() * 28 : zone < .9 ? -80 - rnd() * 66 : SHORE_S - 20 - rnd() * 60;
-    const x = (rnd() - .5) * (zone < .35 ? 560 : 1600), r = 2.2 + rnd() * 2.2;
-    trees.push([x, (zone < .9 ? (zone < .35 ? G : G - .6) : G - .6) + r * 1.6, z, r, pick(treeCols)]);
+  {   // planted in loose groups, as the park is: clumps of 3-9 with gaps between; the complex's grounds get fewer
+    const onPath = z => (z < -124.5 && z > -131.5) || (z < -109.5 && z > -115.5) || (z < -98 && z > -102);   // bike path, walk, lamp line
+    const add = (x, y0, z, kind) => onPath(z) || trees.push([x, y0, z, kind, kind === 2 ? 1 + rnd() * .3 : kind === 1 ? 1.35 + rnd() * .45 : 1.3 + rnd() * .5]);
+    for (let i = 0; i < (phone ? 22 : 45); i++) add((rnd() - .5) * 560, G, -8 - rnd() * 24, rnd() < .6 ? 0 : 1);
+    const groups = phone ? 70 : 150;
+    for (let gI = 0; gI < groups; gI++) {
+      const far = rnd() < .12, gx = (rnd() - .5) * (far ? 1600 : 1000) * (.4 + .6 * rnd());
+      const gz = far ? SHORE_S - 20 - rnd() * 60 : -80 - rnd() * 66, kind = rnd() < .14 ? 2 : rnd() < .55 ? 0 : 1, n = 3 + Math.floor(rnd() * 7);
+      for (let k = 0; k < n; k++) add(gx + (rnd() - .5) * 26, G - .6, Math.min(-77, gz + (rnd() - .5) * 14), rnd() < .8 ? kind : Math.floor(rnd() * 2));
+    }
   }
-  {   // trees: one instanced mesh of lumpy crowns, trunks merged
-    const crown = new THREE.IcosahedronGeometry(1, 1); crown.scale(1, .85, 1);
-    { const p = crown.attributes.position; for (let k = 0; k < p.count; k++) { const v = new THREE.Vector3().fromBufferAttribute(p, k), n = 1 + .16 * Math.sin(v.x * 5.1 + v.y * 3.7) * Math.cos(v.z * 4.3 - v.y * 2.9); p.setXYZ(k, v.x * n, v.y * n, v.z * n); } }
-    { const p = crown.attributes.position, n = crown.attributes.normal, v = new THREE.Vector3();
-      for (let k = 0; k < p.count; k++) { v.fromBufferAttribute(p, k).normalize(); n.setXYZ(k, v.x, v.y, v.z); } }
-    const cc0 = new Float32Array(crown.attributes.position.count * 3);
-    for (let k = 0; k < cc0.length / 3; k++) { const n = crown.attributes.normal; const kk = .55 + .45 * Math.max(0, n.getY(k)) + .15 * Math.max(0, n.getZ(k)); cc0.set([kk, kk, kk], k * 3); }
-    crown.setAttribute('color', new THREE.BufferAttribute(cc0, 3));
-    const im = new THREE.InstancedMesh(crown, basic({ vertexColors: true }), trees.length);
-    const c = new THREE.Color();
-    trees.forEach(([x, y, z, r, col], i) => { m4.compose(new THREE.Vector3(x, y, z), q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), rnd() * 6), new THREE.Vector3(r, r * 1.1, r)); im.setMatrixAt(i, m4); im.setColorAt(i, c.set(col)); });
-    near.add(im);
-    for (const [x, y, z, r] of trees) solids.push(cyl(.18, .26, r * 1.6, x, y - r * 1.4, z, '#4a3a2c', 5));
-    const shTex = tex(64, 64, (g, w) => { const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
-    const shGeo = new THREE.PlaneGeometry(1, 1.5); shGeo.rotateX(-Math.PI / 2);
-    const sh = new THREE.InstancedMesh(shGeo, new THREE.MeshBasicMaterial({ map: shTex, transparent: true, depthWrite: false }), trees.length);
-    trees.forEach(([x, y, z, r], i) => { m4.compose(new THREE.Vector3(x, y - r * 1.6 + .08, z + r * .5), q.identity(), new THREE.Vector3(r * 2.4, 1, r * 2.4)); sh.setMatrixAt(i, m4); });
-    near.add(sh); shadowMat = sh.material;
+  {
+    const cols = TREE_ELEVS.length + 1, rows = TREE_KINDS.length;
+    const atlasTex = new THREE.TextureLoader().load(new URL('./room/trees.webp', import.meta.url).href, () => { cards.visible = sh.visible = true; });
+    atlasTex.colorSpace = THREE.SRGBColorSpace; atlasTex.anisotropy = 8;
+    const eyeW = new THREE.Vector3(0, 1.55, -1.5), C = new THREE.Vector3(), d = new THREE.Vector3(), up = new THREE.Vector3(), rt = new THREE.Vector3();
+    const pos = [], uv = [], idx = [], spos = [], suv = [];
+    const cell = (col, kind, sx, sy) => [(col + (sx + 1) / 2) / cols, 1 - (kind + (1 - sy) / 2) / rows];
+    for (const [x, y0, z, kind, k] of trees) {
+      const [, , cen, size, ssize] = TREE_KINDS[kind];
+      C.set(x, y0 + cen * k, z); d.subVectors(eyeW, C).normalize();
+      const el = Math.asin(d.y) * 180 / Math.PI;
+      let e = 0; TREE_ELEVS.forEach((v, j) => { if (Math.abs(v - el) < Math.abs(TREE_ELEVS[e] - el)) e = j; });
+      up.copy(Y).addScaledVector(d, -d.y).normalize(); rt.crossVectors(up, d).normalize();
+      const h = size * k / 2, hs = ssize * k / 2, b = pos.length / 3;
+      for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+        pos.push(C.x + (rt.x * sx + up.x * sy) * h, C.y + (rt.y * sx + up.y * sy) * h, C.z + (rt.z * sx + up.z * sy) * h);
+        uv.push(...cell(e, kind, sx, sy));
+        spos.push(x + sx * hs, y0 + .12, z - sy * hs);       // shadow render: image right = +x, image up = south (-z)
+        suv.push(...cell(cols - 1, kind, sx, sy));
+      }
+      idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+    }
+    const quads = (p, t) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(t, 2)); g.setIndex(idx); return g; };
+    const cards = new THREE.Mesh(quads(pos, uv), basic({ map: atlasTex, alphaTest: .45, side: THREE.DoubleSide }));
+    const sh = new THREE.Mesh(quads(spos, suv), new THREE.MeshBasicMaterial({ color: '#000000', map: atlasTex, transparent: true, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+    cards.visible = sh.visible = false;
+    near.add(sh, cards); shadowMat = sh.material;
   }
   for (let x = -700; x <= 700; x += 35) { solids.push(cyl(.06, .08, 4.5, x, G + 1.65, -100, '#5b5e62', 5)); lampHeads.push([x, G + 3.9, -100]); }
 
