@@ -653,7 +653,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
       if (!o.isMesh) return;
       const a = o.userData.atlas || (o.parent && o.parent.userData.atlas);
       if (/^OUT_Trees/.test(o.name) || /^OUT_Trees/.test(o.parent && o.parent.name)) {   // ginkgo crowns: painted shading, tinted for the hour
-        o.material = new THREE.MeshBasicMaterial({ map: [].concat(o.material)[0].map, alphaTest: .5, side: THREE.DoubleSide });
+        o.material = new THREE.MeshBasicMaterial({ map: [].concat(o.material)[0].map, alphaTest: .5, side: THREE.DoubleSide, vertexColors: true });
         streetMats.trees.push(o.material); return;
       }
       o.material = [].concat(o.material).map(m => {

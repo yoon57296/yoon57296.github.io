@@ -286,7 +286,7 @@
     },
     "sun": {
      "file": "outside_sun.webp",
-     "scale": 0.349745,
+     "scale": 0.344953,
      "fileLow": "outside_sun.1k.webp"
     }
    }
