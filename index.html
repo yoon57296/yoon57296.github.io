@@ -670,14 +670,26 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   const clouds = [];
   for (let i = 0; i < 8; i++) { const c = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.1), new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, depthWrite: false, opacity: 0, fog: false })); c.position.set(-9 + i * 2.4, 2.8 + (i % 3) * .8, -9.5 + i * .04); c.userData.speed = .07 + (i % 4) * .03; skyGroup.add(skyBehind(c, 1006)); clouds.push(c); }
   const rand = (a, b) => a + Math.random() * (b - a);
+  // Rain and snow fall in the vertex shader, wrapped into the 6 m between y = -1 and 5 from a clock uniform: rewriting
+  // their buffers every frame made ANGLE/D3D11 wait on the GPU (~20 ms a frame on an Intel iGPU), like the river traffic.
+  const fallT = { value: 0 };
+  const falling = (mat, key, glsl) => {
+    mat.onBeforeCompile = sh => { sh.uniforms.uFallT = fallT;
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uFallT;').replace('#include <begin_vertex>', '#include <begin_vertex>\n' + glsl); };
+    mat.customProgramCacheKey = () => key; return mat;
+  };
+  // a streak's two ends both hold its bottom's height, so they wrap together; the shader lifts the top (even) end .24
   const RAIN = 800, rainPos = new Float32Array(RAIN * 6);
-  for (let i = 0; i < RAIN; i++) { const x = rand(-4, 2), y = rand(-1, 5), z = rand(-9, -3.3); rainPos.set([x, y, z, x - .02, y - .24, z], i * 6); }
+  for (let i = 0; i < RAIN; i++) { const x = rand(-4, 2), y = rand(-1, 5), z = rand(-9, -3.3); rainPos.set([x, y, z, x - .02, y, z], i * 6); }
   const rainGeo = new THREE.BufferGeometry(); rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
-  const rain = new THREE.LineSegments(rainGeo, new THREE.LineBasicMaterial({ color: '#b3c3d3', transparent: true, opacity: .5 })); scene.add(rain);
+  const rain = new THREE.LineSegments(rainGeo, falling(new THREE.LineBasicMaterial({ color: '#b3c3d3', transparent: true, opacity: .5 }), 'rain',
+    'transformed.y = -1. + mod(position.y + 1. - 9. * uFallT, 6.) + (gl_VertexID % 2 == 0 ? .24 : 0.);')); scene.add(rain);
+  // each flake sways on its own phase (its index in the old position array)
   const SNOW = 600, snowPos = new Float32Array(SNOW * 3);
   for (let i = 0; i < SNOW; i++) snowPos.set([rand(-4, 2), rand(-1, 5), rand(-9, -3.3)], i * 3);
   const snowGeo = new THREE.BufferGeometry(); snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
-  const snow = new THREE.Points(snowGeo, new THREE.PointsMaterial({ color: '#ffffff', size: .045, transparent: true, opacity: .9, map: gradTex([[0, 'rgba(255,255,255,1)'], [1, 'rgba(255,255,255,0)']], true), depthWrite: false })); scene.add(snow);
+  const snow = new THREE.Points(snowGeo, falling(new THREE.PointsMaterial({ color: '#ffffff', size: .045, transparent: true, opacity: .9, map: gradTex([[0, 'rgba(255,255,255,1)'], [1, 'rgba(255,255,255,0)']], true), depthWrite: false }), 'snow',
+    'transformed.y = -1. + mod(position.y + 1. - .7 * uFallT, 6.); transformed.x -= .15 * cos(uFallT + float(gl_VertexID) * 3.);')); scene.add(snow);
 
   /* ===== shelf items built from data: books (data/books.json) and one box per GitHub repo ===== */
   const items = []; // { mesh, kind, index, home, out, label, sub }
@@ -986,9 +998,8 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     river.update({ day, darkness, gray: wv.gray, golden, flash: fl, exposure: renderer.toneMappingExposure, skyTop: skyU.top.value, skyBottom: skyU.bottom.value,
       sunPos: disc.getWorldPosition(sunWorld), sunColor: sunCol.copy(disc.material.color).multiplyScalar(disc.material.opacity * (isDay ? 1 : .25)) }, dt, t);
     rain.visible = wv.rain > .02; rain.material.opacity = .5 * wv.rain;
-    if (rain.visible && !reduceMotion) { const a = rainGeo.attributes.position.array; for (let i = 0; i < a.length; i += 6) { a[i + 1] -= dt * 9; a[i + 4] -= dt * 9; if (a[i + 4] < -1) { a[i + 1] += 6; a[i + 4] += 6; } } rainGeo.attributes.position.needsUpdate = true; }
     snow.visible = wv.snow > .02; snow.material.opacity = .9 * wv.snow;
-    if (snow.visible && !reduceMotion) { const a = snowGeo.attributes.position.array; for (let i = 0; i < a.length; i += 3) { a[i + 1] -= dt * .7; a[i] += Math.sin(t + i) * dt * .15; if (a[i + 1] < -1) a[i + 1] += 6; } snowGeo.attributes.position.needsUpdate = true; }
+    if (!reduceMotion) fallT.value = (fallT.value + dt) % 3600;   // float precision; an hour is whole laps of both falls (the sway skips a little)
     // the clock follows the time shown (seconds only when it's live)
     const sec = state.live ? new Date().getSeconds() : 0, mm = state.minutes + sec / 60;
     turn('clock_hour', ((mm / 60) % 12) / 12 * Math.PI * 2); turn('clock_min', (mm % 60) / 60 * Math.PI * 2); turn('clock_sec', sec / 60 * Math.PI * 2);
