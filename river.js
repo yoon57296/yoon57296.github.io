@@ -163,7 +163,7 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
     const cols = TREE_ELEVS.length + 1, rows = TREE_KINDS.length;
     const atlasTex = new THREE.TextureLoader().load(new URL('./room/trees.webp', import.meta.url).href, () => { cards.visible = sh.visible = true; });
     atlasTex.colorSpace = THREE.SRGBColorSpace; atlasTex.anisotropy = 8;
-    const eyeW = new THREE.Vector3(0, 1.55, -1.5), C = new THREE.Vector3(), d = new THREE.Vector3(), up = new THREE.Vector3(), rt = new THREE.Vector3();
+    const Y = new THREE.Vector3(0, 1, 0), eyeW = new THREE.Vector3(0, 1.55, -1.5), C = new THREE.Vector3(), d = new THREE.Vector3(), up = new THREE.Vector3(), rt = new THREE.Vector3();
     const pos = [], uv = [], idx = [], spos = [], suv = [];
     const cell = (col, kind, sx, sy) => [(col + (sx + 1) / 2) / cols, 1 - (kind + (1 - sy) / 2) / rows];
     for (const [x, y0, z, kind, k] of trees) {
