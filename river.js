@@ -419,6 +419,15 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
   const allLamps = lampHeads.concat(bridgeLights);
   const lampGeo = mergeGeometries(allLamps.map(([x, y, z]) => { const g = new THREE.SphereGeometry(.35, 6, 4); g.translate(x, y, z); return g; }));
   const lampMat = basic({ color: '#ffd9a0' }, []); near.add(new THREE.Mesh(lampGeo, lampMat));
+  {   // the pools of light they throw on the expressway and the park paths: soft discs, added, faded in with the night
+    const poolTex = tex(64, 64, (g, w) => { const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.45, 'rgba(255,255,255,.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+    const pools = (list, w, d, col) => near.add(new THREE.Mesh(mergeGeometries(list.map(([x, y, z]) => {
+      const g = new THREE.PlaneGeometry(w, d); g.rotateX(-Math.PI / 2); g.translate(x, y, z); return g;
+    })), additive({ map: poolTex, color: col })));
+    // the median masts' two heads light a roadway each, long pools that nearly meet; the park's lamps, small rounds
+    pools(lampHeads.filter(h => h[1] > G + 8).map(([x, , z], i) => [x, G + .06, z + (i % 2 ? -8.5 : 8.5)]), 46, 17, '#4d3c28');
+    pools(lampHeads.filter(h => h[1] < G + 8).map(([x, , z]) => [x, G - .54, z + 1.5]), 10, 10, '#5a4832');
+  }
   const streakTex = tex(32, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.15, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = gr; g.fillRect(0, 0, w, h); const gx = g.createLinearGradient(0, 0, w, 0); gx.addColorStop(0, 'rgba(0,0,0,1)'); gx.addColorStop(.5, 'rgba(0,0,0,0)'); gx.addColorStop(1, 'rgba(0,0,0,1)');
     g.globalCompositeOperation = 'destination-out'; g.fillStyle = gx; g.fillRect(0, 0, w, h); });
@@ -454,14 +463,20 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
   const hazeU = { value: new THREE.Color('#b9c6d3') }, litK = { value: 0 };
   let order = 1100;
   const farAdd = o => { o.renderOrder = order++; far.add(o); return o; };
-  const farMat = (o, hazeK, lit = null, tile = null) => {
+  const farMat = (o, hazeK, lit = null, tile = null, gable = false) => {
     const m = basic({ ...o, fog: false, depthWrite: false });
     m.onBeforeCompile = sh => {
       Object.assign(sh.uniforms, { uHaze: hazeU, uHazeK: { value: hazeK }, uLitK: litK, uLit: { value: lit } });
+      // gable: the texture is two columns, front walls on the left, the blank end walls (|normal.x| > .5) on the right
+      const tuv = gable ? 'tuv' : 'vMapUv';
       sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform vec3 uHaze; uniform float uHazeK, uLitK; uniform sampler2D uLit;')
-        .replace('#include <opaque_fragment>', (lit ? 'outgoingLight += texture2D(uLit, vMapUv).rgb * uLitK;\n' : '') +
+        .replace('#include <common>', '#include <common>\nuniform vec3 uHaze; uniform float uHazeK, uLitK; uniform sampler2D uLit;' + (gable ? '\nvarying float vSide;' : ''))
+        .replace('#include <map_fragment>', gable ? `vec2 tuv = vec2(fract(vMapUv.x) * .5 + vSide * .5, vMapUv.y), gx = dFdx(vMapUv) * vec2(.5, 1.), gy = dFdy(vMapUv) * vec2(.5, 1.);
+          diffuseColor *= textureGrad(map, tuv, gx, gy);` : '#include <map_fragment>')
+        .replace('#include <opaque_fragment>', (lit ? `outgoingLight += ${gable ? 'textureGrad(uLit, tuv, gx, gy)' : 'texture2D(uLit, vMapUv)'}.rgb * uLitK;\n` : '') +
           'outgoingLight = mix(outgoingLight, uHaze, uHazeK);\n#include <opaque_fragment>');
+      if (gable) sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying float vSide;')
+        .replace('#include <uv_vertex>', '#include <uv_vertex>\n  vSide = abs(normal.x) > .5 ? 1. : 0.;\n  if (vSide > .5) vMapUv.x = uv.x;   // one end wall across');
       sh.vertexShader = sh.vertexShader.replace(/}\s*$/, '  gl_Position.z = gl_Position.w;\n}');
       if (tile) sh.vertexShader = sh.vertexShader.replace('#include <uv_vertex>', `#include <uv_vertex>
         #ifdef USE_INSTANCING   // the texture repeats with the box size: UVs come from the unit box
@@ -469,7 +484,7 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
           vMapUv = uv * vec2(abs(normal.x) > .5 ? sc.z : sc.x, abs(normal.y) > .5 ? sc.z : sc.y) / vec2(${tile});
         #endif`);
     };
-    m.customProgramCacheKey = () => `far${lit ? 'L' : ''}${tile || ''}`;
+    m.customProgramCacheKey = () => `far${lit ? 'L' : ''}${tile || ''}${gable ? 'G' : ''}`;
     return m;
   };
   const ridge = (z, base, amp, col, ph, k) => {
@@ -488,21 +503,63 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
     farAdd(new THREE.Mesh(shade(g, '#c9d2da'), farMat({ vertexColors: true }, .5)));
     const beacon = farAdd(new THREE.Mesh(new THREE.SphereGeometry(5, 8, 6), farMat({ color: '#ff3a2a' }, .15))); beacon.position.set(-5600, G + 560, -4800); glow.push(beacon);
   }
-  const towers = [];   // [x, z, w, d, h, kind]
-  for (let i = 0; i < (phone ? 140 : 240); i++) {   // riverside apartments: rows of slabs
-    const x = -3200 + rnd() * 6400, z = -1300 - rnd() * 700; towers.push([x, z, 40 + rnd() * 30, 14, 55 + rnd() * 55, 0]);
+  // the far bank's apartments: the Korean pattern, complexes of identical slabs in rows (old 15-floor ones, newer
+  // towers of 25-35), each slab with its blank end walls and a lift housing on the roof
+  const farAptTex = tex(512, 512, (g, w, h) => {   // left: front (4 flats x 30 floors), right: the end wall
+    const H = w / 2;
+    g.fillStyle = '#e8e4dc'; g.fillRect(0, 0, H, h);
+    for (let y = 0; y < h; y += 17) {
+      g.fillStyle = '#d2cdc3'; g.fillRect(0, y, H, 2);
+      for (let x = 0; x < H; x += 64) {
+        g.fillStyle = '#7c8996'; g.fillRect(x + 6, y + 4, 40, 10); g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x + 6, y + 4, 40, 2);
+        g.fillStyle = '#c9c4ba'; g.fillRect(x + 6, y + 12, 40, 2); g.fillStyle = '#9aa3ab'; g.fillRect(x + 50, y + 5, 8, 8);
+      }
+    }
+    g.fillStyle = 'rgba(0,0,0,.06)'; for (let x = 0; x < H; x += 64) g.fillRect(x + 46, 0, 4, h);
+    g.fillStyle = '#ece8e0'; g.fillRect(H, 0, H, h);                                              // end wall: blank,
+    g.fillStyle = 'rgba(0,0,0,.05)'; g.fillRect(H, 0, 10, h); g.fillRect(w - 10, 0, 10, h);
+    for (let y = 8; y < h; y += 17) { g.fillStyle = '#8d96a0'; g.fillRect(H + H / 2 - 5, y, 10, 7); }   // the stair's small windows,
+    g.fillStyle = '#4f7fae'; g.fillRect(H + 40, 18, H - 80, 10); g.fillStyle = '#b9483d'; g.fillRect(H + 40, 32, (H - 80) * .6, 6);   // a brand's stripes
+  }, true);
+  const farAptLitTex = tex(512, 512, (g, w, h) => {
+    const H = w / 2;
+    for (let y = 0; y < h; y += 17) for (let x = 0; x < H; x += 64) if (rnd() < .28) { g.fillStyle = pick(['#ffd08a', '#ffe6b8', '#fff3dc', '#d6e4ff']); g.fillRect(x + 6, y + 4, 40, 10); }
+    for (let y = 8; y < h; y += 17) { g.fillStyle = 'rgba(255,240,210,.8)'; g.fillRect(H + H / 2 - 5, y, 10, 7); }   // stairs are lit all night
+  }, true);
+  // faces lit by the early-afternoon sun beyond them: tops brightest, the east ends (facing -x) next, the faces toward
+  // us (+z) in their own shade, west ends darkest
+  const shadedBox = () => {
+    const g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, .5, 0);
+    const n = g.attributes.normal, c = new Float32Array(n.count * 3);
+    for (let k = 0; k < n.count; k++) { const v = n.getY(k) > .5 ? 1.05 : n.getX(k) < -.5 ? .9 : n.getX(k) > .5 ? .68 : n.getZ(k) > .5 ? .8 : .75; c.set([v, v, v], k * 3); }
+    g.setAttribute('color', new THREE.BufferAttribute(c, 3)); return g;
+  };
+  const slabs = [], housings = [];   // [x, z, w, d, h]
+  for (let c = 0; c < (phone ? 26 : 46); c++) {
+    const newer = rnd() < .45, nx = 3 + Math.floor(rnd() * (newer ? 3 : 4)), nz = 1 + Math.floor(rnd() * 3);
+    const w = newer ? 26 + rnd() * 14 : 45 + rnd() * 25, d = newer ? 22 : 14, h = newer ? 75 + rnd() * 35 : 40 + rnd() * 8;
+    const x0 = (rnd() + rnd() - 1) * 2900 - 150, z0 = -1290 - rnd() * 650, gx = w + 22 + rnd() * 25, gz = d + 40 + rnd() * 30;
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      const hh = h * (newer ? .9 + rnd() * .2 : 1), x = x0 + i * gx + (j % 2) * gx * .3, z = z0 - j * gz;
+      slabs.push([x, z, w, d, hh]);
+      housings.push([x + w * (rnd() < .5 ? -.25 : .25), z, Math.min(w * .3, 9), d * .7, hh + (newer ? 7 : 4.5)]);
+    }
   }
+  const offices = [];
   for (let i = 0; i < (phone ? 50 : 90); i++) {      // Gangnam offices, clustered left of centre
-    const x = -1900 + (rnd() + rnd() - 1) * 1600, z = -2300 - rnd() * 1500; towers.push([x, z, 30 + rnd() * 35, 30 + rnd() * 25, 90 + rnd() * 160, 1]);
+    const x = -1900 + (rnd() + rnd() - 1) * 1600, z = -2300 - rnd() * 1500; offices.push([x, z, 30 + rnd() * 35, 30 + rnd() * 25, 90 + rnd() * 160]);
   }
-  towers.sort((a, b) => a[1] - b[1]);                 // far to near: no depth writes, the nearer ones are drawn over
+  for (const L of [slabs, housings, offices]) L.sort((a, b) => a[1] - b[1]);   // far to near: no depth writes, the nearer drawn over
   // their texture tiles are about twice the near ones: true-size flats are under 2 px from here and read as noise when lit
-  for (const kind of [1, 0]) {                        // the offices stand behind the riverside blocks
-    const list = towers.filter(t => t[5] === kind), g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, .5, 0);
-    const im = farAdd(new THREE.InstancedMesh(g, farMat({ map: kind ? officeTex : aptTex }, kind ? .3 : .18, kind ? officeLit : farAptLit, kind ? '56., 230.' : '40., 160.'), list.length));
-    const tint = new THREE.Color();
-    list.forEach(([x, z, w, d, h], i) => { m4.compose(new THREE.Vector3(x, G, z), new THREE.Quaternion(), new THREE.Vector3(w, h, d)); im.setMatrixAt(i, m4); im.setColorAt(i, tint.setHSL(rnd() < .55 ? .09 : .58, .05 + rnd() * .1, .6 + rnd() * .3)); });
-  }
+  const farBoxes = (list, mat, tint) => {
+    const im = farAdd(new THREE.InstancedMesh(shadedBox(), mat, list.length)), c = new THREE.Color();
+    list.forEach(([x, z, w, d, h], i) => { m4.compose(new THREE.Vector3(x, G, z), new THREE.Quaternion(), new THREE.Vector3(w, h, d)); im.setMatrixAt(i, m4); im.setColorAt(i, tint(c)); });
+  };
+  farBoxes(offices, farMat({ map: officeTex, vertexColors: true }, .3, officeLit, '56., 230.'), c => c.setHSL(rnd() < .55 ? .09 : .58, .05 + rnd() * .1, .6 + rnd() * .3));
+  // the roof housings go first: full-height boxes poking above their roofs, so every slab drawn after covers the part
+  // below; a nearer slab then hides a farther housing, as it should (a farther, taller slab may hide a nearer one: rare)
+  farBoxes(housings, farMat({ color: '#e3ded4', vertexColors: true }, .18), c => c.setHSL(.1, .04, .8 + rnd() * .12));
+  farBoxes(slabs, farMat({ map: farAptTex, vertexColors: true }, .18, farAptLitTex, '40., 160.', true), c => c.setHSL(rnd() < .7 ? .1 : .58, .04 + rnd() * .1, .8 + rnd() * .15));
 
   // three.js sorts opaque things by material before distance, so the water and the grounds could go first and be shaded
   // behind the walls too; after the room's opaque things, the GPU skips them wherever the room is in front
