@@ -47,7 +47,7 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
     m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); return m;
   };
   const solids = [];   // vertex-coloured near things, merged into one mesh at the end
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1), p3 = new THREE.Vector3(), Y = new THREE.Vector3(0, 1, 0);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion();
 
   /* ================= near: the block, the expressway, the park ================= */
   // neighbouring towers of our own complex, left and right along the bank
@@ -285,25 +285,32 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
   for (const [z, v] of [[SHORE_S - 95, 22], [SHORE_S - 101, -22]]) lanes.push(['x', z, G + .75, v, -2500, 2500, phone ? 12 : 24]);
   const cars = [];
   for (const L of lanes) for (let i = 0; i < L[6]; i++) cars.push({ L, p: L[4] + (L[5] - L[4]) * (i + rnd() * .6) / L[6], v: L[3] * (.85 + rnd() * .3) });
-  const carMesh = new THREE.InstancedMesh(carGeo, basic({ vertexColors: true }), cars.length);
+  // They drive in the vertex shader (lane, start and speed per car, position from the clock): rewriting their matrices
+  // every frame made ANGLE/D3D11 wait on the GPU, ~16 ms a frame on an Intel iGPU.
+  const carT = { value: 0 }, aLane = new Float32Array(cars.length * 4), aMove = new Float32Array(cars.length * 4);
+  cars.forEach((c, i) => { const L = c.L; aLane.set([L[0] === 'x' ? 1 : 0, L[1], L[2], L[4]], i * 4); aMove.set([c.p, c.v, L[5] - L[4], 0], i * 4); });
+  const driving = (geo, mat, ahead, drop) => {   // ahead, drop: where on the car (the lights), along the way and down
+    geo.setAttribute('aLane', new THREE.InstancedBufferAttribute(aLane, 4)); geo.setAttribute('aMove', new THREE.InstancedBufferAttribute(aMove, 4));
+    mat.onBeforeCompile = sh => {
+      Object.assign(sh.uniforms, { uCarT: carT, uAhead: { value: ahead }, uDrop: { value: drop } });
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec4 aLane, aMove; uniform float uCarT, uAhead, uDrop;')
+        .replace('#include <begin_vertex>', `#include <begin_vertex>
+          float s = sign(aMove.y), p = aLane.w + mod(aMove.x - aLane.w + aMove.y * uCarT, aMove.z);
+          bool alongX = aLane.x > .5;
+          vec3 fwd = alongX ? vec3(s, 0., 0.) : vec3(0., 0., s), side = alongX ? vec3(0., 0., s) : vec3(-s, 0., 0.);
+          transformed = (alongX ? vec3(p, aLane.z, aLane.y) : vec3(aLane.y, aLane.z, p)) + fwd * (transformed.x + uAhead)
+            + side * transformed.z + vec3(0., transformed.y + uDrop, 0.);`);
+    };
+    mat.customProgramCacheKey = () => 'car';
+    const im = new THREE.InstancedMesh(geo, mat, cars.length); im.frustumCulled = false; return im;   // instance matrices stay identity
+  };
+  const carMesh = driving(carGeo, basic({ vertexColors: true }), 0, 0);
   const lightGeo = new THREE.BoxGeometry(.4, .25, 1.5);
-  const heads = new THREE.InstancedMesh(lightGeo, additive({ color: '#fff4dc' }), cars.length);
-  const tails = new THREE.InstancedMesh(lightGeo, additive({ color: '#ff3024' }), cars.length);
+  const heads = driving(lightGeo, additive({ color: '#fff4dc' }), 2.25, -.1);
+  const tails = driving(lightGeo, additive({ color: '#ff3024' }), -2.25, -.1);
   const cc = new THREE.Color(); cars.forEach((c, i) => carMesh.setColorAt(i, cc.set(pick(['#e9e9e6', '#1d1f22', '#a7abb0', '#2b3f66', '#8e2a24', '#5d6166', '#d8d4c8']))));
   near.add(carMesh, heads, tails);
-  function moveCars(dt) {
-    cars.forEach((c, i) => {
-      const L = c.L; c.p += c.v * dt; if (c.p > L[5]) c.p -= L[5] - L[4]; if (c.p < L[4]) c.p += L[5] - L[4];
-      const along = L[0] === 'x', dirn = Math.sign(c.v);
-      q.setFromAxisAngle(Y, along ? (dirn > 0 ? 0 : Math.PI) : (dirn > 0 ? -Math.PI / 2 : Math.PI / 2));
-      p3.set(along ? c.p : L[1], L[2], along ? L[1] : c.p); m4.compose(p3, q, one); carMesh.setMatrixAt(i, m4);
-      const fx = along ? dirn * 2.25 : 0, fz = along ? 0 : dirn * 2.25;
-      p3.set((along ? c.p : L[1]) + fx, L[2] - .1, (along ? L[1] : c.p) + fz); m4.compose(p3, q, one); heads.setMatrixAt(i, m4);
-      p3.set((along ? c.p : L[1]) - fx, L[2] - .1, (along ? L[1] : c.p) - fz); m4.compose(p3, q, one); tails.setMatrixAt(i, m4);
-    });
-    carMesh.instanceMatrix.needsUpdate = heads.instanceMatrix.needsUpdate = tails.instanceMatrix.needsUpdate = true;
-  }
-  moveCars(0);
+  const moveCars = dt => { carT.value = (carT.value + dt) % 3600; };   // float precision; a jump once an hour
 
   /* ================= night: lamps, and their streaks on the water ================= */
   const allLamps = lampHeads.concat(bridgeLights);
