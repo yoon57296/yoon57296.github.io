@@ -345,7 +345,7 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
     return mergeGeometries([shade(body, '#ffffff'), shade(cab, '#3a3f45')]);
   })();
   const lanes = [];   // [axis 'x'|'z', fixed coord, y, speed (signed), from, to, count]
-  for (const [z, v] of [[-43.5, 24], [-47, 22], [-50.5, 19], [-54, 17], [-60, -17], [-63.5, -19], [-67, -22], [-70.5, -24]]) lanes.push(['x', z, G + .75, v, -900, 900, phone ? 9 : 16]);
+  for (const [z, v] of [[-43.5, 24], [-47, 22], [-50.5, 19], [-54, 17], [-60, -17], [-63.5, -19], [-67, -22], [-70.5, -24]]) lanes.push(['x', z, G + .75, v, -450, 450, phone ? 5 : 8]);
   for (const [bx, by, w] of [[AX, AY, AW], [BX, BY, BW]]) for (const [o, v] of [[-w / 4, 15], [-w / 8, 13], [w / 8, -13], [w / 4, -15]]) lanes.push(['z', bx + o, by + .75, v, DECK_S, DECK_N, phone ? 6 : 11]);
   for (const [z, v] of [[SHORE_S - 95, 22], [SHORE_S - 101, -22]]) lanes.push(['x', z, G + .75, v, -2500, 2500, phone ? 12 : 24]);
   // the expressway below gets real car models (site_blender: blender/car_models.py, lit in Cycles and baked into their
