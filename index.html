@@ -134,7 +134,7 @@ body.fps.aim #crosshair{transform:scale(1.9);background:var(--lamp)}
   <button class="pill weather" id="weather-pill" type="button" aria-label="날씨 바꾸기"><span id="weather-text">맑음</span></button>
 </div>
 <div class="hud hud-bl"><button class="pill" id="list-btn" type="button" aria-expanded="false" aria-controls="list">물건 목록</button></div>
-<div class="hud hud-bc" id="hint"><div class="hint"><span class="desk-only">클릭하면 방 안으로 · WASD로 걷고 · 가운데 점으로 물건을 눌러보세요 · Esc</span><span class="touch-only">드래그해서 둘러보고, 물건을 눌러보세요</span></div></div>
+<div class="hud hud-bc" id="hint"><div class="hint"><span class="desk-only">클릭하면 방 안으로 · WASD로 걷고 · 가운데 점으로 물건을 눌러보세요 · Esc</span><span class="touch-only">옆으로 넘겨 둘러보고, 물건을 눌러보세요</span></div></div>
 <div id="crosshair" aria-hidden="true"></div>
 <div id="list" hidden></div>
 <div id="tip" role="presentation"></div>
@@ -455,6 +455,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { buildRiver } from './river.js';
 
 if (!document.documentElement.classList.contains('nogl')) startRoom().catch(err => {
   console.error(err);
@@ -467,7 +468,7 @@ async function startRoom() {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, phone ? 1.5 : 2));
   renderer.toneMapping = THREE.AgXToneMapping;
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(66, 1, .05, 60);
+  const camera = new THREE.PerspectiveCamera(66, 1, .05, 1600);   // far: the river's far bank is 1.3 km off
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
   const rnd = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
   const std = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: .8, metalness: 0 }, o));
@@ -643,39 +644,52 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   room.traverse(o => { if (o.isMesh && /^SM_Display_GlassEdges/.test(o.name)) o.material = new THREE.MeshStandardMaterial({ color: '#86ab9b', roughness: .12, transparent: true, opacity: .9, depthWrite: false }); });
 
   /* ===== outside the window: sky, sun or moon, stars, the city, clouds, rain and snow ===== */
+  // The room looks out over the Han River (river.js). The sky and the far skyline are drawn last, behind everything,
+  // and only through the window. All of it is hidden while the window is out of view.
+  const river = buildRiver(scene, { phone });
+  // the sky things are laid out as if 10 m away, scaled up 120x about eye height (inside the camera's range)
+  const skyGroup = new THREE.Group(); skyGroup.scale.setScalar(120); skyGroup.position.set(0, 1.6 * (1 - 120), 0); scene.add(skyGroup);
+  // drawn after the room and the river, onto the far plane (depth 1, which only passes where nothing has been drawn, so the
+  // GPU skips them behind the walls), without writing depth; in that order among themselves, so alpha-blended ones stay
+  // in the opaque list (CustomBlending)
+  const farPlane = sh => { sh.vertexShader = sh.vertexShader.replace(/}\s*$/, '  gl_Position.z = gl_Position.w;\n}'); };
+  const skyBehind = (o, order) => { o.renderOrder = order; const m = o.material; m.depthTest = true; m.depthWrite = false; m.fog = false;
+    m.onBeforeCompile = farPlane; m.customProgramCacheKey = () => 'farPlane';
+    if (m.transparent && m.blending === THREE.NormalBlending) m.blending = THREE.CustomBlending; m.transparent = false; return o; };
   const skyU = { top: { value: new THREE.Color() }, bottom: { value: new THREE.Color() } };
   const sky = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), new THREE.ShaderMaterial({ uniforms: skyU, depthWrite: false,
     vertexShader: 'varying float vy; void main(){ vy = uv.y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
     fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying float vy; void main(){ gl_FragColor = vec4(mix(bottom, top, smoothstep(.25,.85,vy)), 1.); }' }));
-  sky.position.set(-1, 3, -10); scene.add(sky);
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(.45, 40), new THREE.MeshBasicMaterial({ color: '#fff3d0', transparent: true })); scene.add(disc);
-  const halo = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), new THREE.MeshBasicMaterial({ map: gradTex([[0, 'rgba(255,240,210,.55)'], [1, 'rgba(255,240,210,0)']], true), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); scene.add(halo);
+  sky.position.set(-1, 3, -10); skyGroup.add(skyBehind(sky, 1000));
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(.45, 40), new THREE.MeshBasicMaterial({ color: '#fff3d0', transparent: true })); skyGroup.add(skyBehind(disc, 1004));
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), new THREE.MeshBasicMaterial({ map: gradTex([[0, 'rgba(255,240,210,.55)'], [1, 'rgba(255,240,210,0)']], true), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); skyGroup.add(skyBehind(halo, 1005));
   const sp = []; for (let i = 0; i < 300; i++) sp.push(-9 + rnd() * 16, 1 + rnd() * 9, -9.8);
   const starGeo = new THREE.BufferGeometry(); starGeo.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
-  const starPts = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: '#ffffff', size: .04, transparent: true })); scene.add(starPts);
-  const cityTex = tex(256, 256, g => { for (let x = 0; x < 256; x += 12) for (let y = 4; y < 256; y += 12) if (rnd() < .32) { g.fillStyle = rnd() < .5 ? '#ffcf86' : '#ffe8c2'; g.fillRect(x + 3, y, 5, 6); } });
-  cityTex.wrapS = cityTex.wrapT = THREE.RepeatWrapping;
-  const cityBody = new THREE.MeshBasicMaterial({ color: '#2b3038' }), litMats = [];
-  for (let i = 0, x = -8; x < 5; i++) {
-    const w = .7 + ((i * 37) % 9) / 10, h = .9 + ((i * 53) % 26) / 10, d = 7 + (i % 3) * .9;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, .6), cityBody); b.position.set(x + w / 2, -.5 + h / 2, -d); scene.add(b);
-    const t = cityTex.clone(); t.needsUpdate = true; t.repeat.set(w / 2.5, h / 2.5); t.offset.set((i * .37) % 1, (i * .21) % 1);
-    const m = new THREE.MeshBasicMaterial({ map: t, transparent: true, opacity: 0, depthWrite: false }); litMats.push(m);
-    const lit = new THREE.Mesh(new THREE.PlaneGeometry(w * .9, h * .96), m); lit.position.set(x + w / 2, -.5 + h / 2, -d + .31); scene.add(lit);
-    x += w + .18;
-  }
+  const starPts = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: '#ffffff', size: .04 * 120, transparent: true })); skyGroup.add(skyBehind(starPts, 1001));
   const cloudTex = tex(256, 128, g => { for (let i = 0; i < 10; i++) { const x = 40 + rnd() * 176, y = 52 + rnd() * 36, r = 22 + rnd() * 32; const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(255,255,255,.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 256, 128); } }, false);
   const clouds = [];
-  for (let i = 0; i < 8; i++) { const c = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.1), new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, depthWrite: false, opacity: 0 })); c.position.set(-9 + i * 2.4, 2.8 + (i % 3) * .8, -9.5 + i * .04); c.userData.speed = .07 + (i % 4) * .03; scene.add(c); clouds.push(c); }
+  for (let i = 0; i < 8; i++) { const c = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.1), new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, depthWrite: false, opacity: 0, fog: false })); c.position.set(-9 + i * 2.4, 2.8 + (i % 3) * .8, -9.5 + i * .04); c.userData.speed = .07 + (i % 4) * .03; skyGroup.add(skyBehind(c, 1006)); clouds.push(c); }
   const rand = (a, b) => a + Math.random() * (b - a);
+  // Rain and snow fall in the vertex shader, wrapped into the 6 m between y = -1 and 5 from a clock uniform: rewriting
+  // their buffers every frame made ANGLE/D3D11 wait on the GPU (~20 ms a frame on an Intel iGPU), like the river traffic.
+  const fallT = { value: 0 };
+  const falling = (mat, key, glsl) => {
+    mat.onBeforeCompile = sh => { sh.uniforms.uFallT = fallT;
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uFallT;').replace('#include <begin_vertex>', '#include <begin_vertex>\n' + glsl); };
+    mat.customProgramCacheKey = () => key; return mat;
+  };
+  // a streak's two ends both hold its bottom's height, so they wrap together; the shader lifts the top (even) end .24
   const RAIN = 800, rainPos = new Float32Array(RAIN * 6);
-  for (let i = 0; i < RAIN; i++) { const x = rand(-4, 2), y = rand(-1, 5), z = rand(-9, -3.3); rainPos.set([x, y, z, x - .02, y - .24, z], i * 6); }
+  for (let i = 0; i < RAIN; i++) { const x = rand(-4, 2), y = rand(-1, 5), z = rand(-9, -3.3); rainPos.set([x, y, z, x - .02, y, z], i * 6); }
   const rainGeo = new THREE.BufferGeometry(); rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
-  const rain = new THREE.LineSegments(rainGeo, new THREE.LineBasicMaterial({ color: '#b3c3d3', transparent: true, opacity: .5 })); scene.add(rain);
+  const rain = new THREE.LineSegments(rainGeo, falling(new THREE.LineBasicMaterial({ color: '#b3c3d3', transparent: true, opacity: .5 }), 'rain',
+    'transformed.y = -1. + mod(position.y + 1. - 9. * uFallT, 6.) + (gl_VertexID % 2 == 0 ? .24 : 0.);')); scene.add(rain);
+  // each flake sways on its own phase (its index in the old position array)
   const SNOW = 600, snowPos = new Float32Array(SNOW * 3);
   for (let i = 0; i < SNOW; i++) snowPos.set([rand(-4, 2), rand(-1, 5), rand(-9, -3.3)], i * 3);
   const snowGeo = new THREE.BufferGeometry(); snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
-  const snow = new THREE.Points(snowGeo, new THREE.PointsMaterial({ color: '#ffffff', size: .045, transparent: true, opacity: .9, map: gradTex([[0, 'rgba(255,255,255,1)'], [1, 'rgba(255,255,255,0)']], true), depthWrite: false })); scene.add(snow);
+  const snow = new THREE.Points(snowGeo, falling(new THREE.PointsMaterial({ color: '#ffffff', size: .045, transparent: true, opacity: .9, map: gradTex([[0, 'rgba(255,255,255,1)'], [1, 'rgba(255,255,255,0)']], true), depthWrite: false }), 'snow',
+    'transformed.y = -1. + mod(position.y + 1. - .7 * uFallT, 6.); transformed.x -= .15 * cos(uFallT + float(gl_VertexID) * 3.);')); scene.add(snow);
 
   /* ===== shelf items built from data: books (data/books.json) and one box per GitHub repo ===== */
   const items = []; // { mesh, kind, index, home, out, label, sub }
@@ -801,8 +815,22 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   });
 
   /* ===== camera: walk around (click → mouse look, WASD), or fly to a thing while its panel is open ===== */
-  const player = new THREE.Vector3(0, EYE, .9);
-  let yaw = innerWidth < innerHeight ? -.35 : 0, pitch = -.07;
+  // Phones and tablets don't walk or look around freely: the camera stands mid-room on one of a few framed views,
+  // a swipe steps to the next one, and tapping a thing flies to it as before. Lighter to run, nothing to learn.
+  const touchMode = matchMedia('(pointer: coarse)').matches || phone;
+  const VIEWS = [   // yaw (0 looks at the window wall, + turns left), pitch; ascending yaw, wrapping round
+    { yaw: -2.97, pitch: -.1 },  // door and poster
+    { yaw: -1.57, pitch: -.12 }, // TV wall
+    { yaw: -.6, pitch: -.2 },    // desk and the display cabinet
+    { yaw: .28, pitch: -.06 },   // window
+    { yaw: .76, pitch: -.12 },   // reading shelf
+    { yaw: 1.3, pitch: -.16 },   // piano
+    { yaw: 2.07, pitch: -.24 },  // bed and guestbook
+  ];
+  let viewI = 3, peek = 0;
+  const player = touchMode ? new THREE.Vector3(.1, EYE, .7) : new THREE.Vector3(0, EYE, .9);
+  let yaw = touchMode ? VIEWS[viewI].yaw : innerWidth < innerHeight ? -.35 : 0, pitch = touchMode ? VIEWS[viewI].pitch : -.07;
+  const stepView = d => { viewI = (viewI + d + VIEWS.length) % VIEWS.length; hideHint(); };
   const lookDir = () => new THREE.Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
   const objPos = new THREE.Vector3(), objLook = new THREE.Vector3();
   const view = { cur: 0, goal: 0 };
@@ -864,7 +892,8 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     if (drag && drag.id === e.pointerId) {
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       if (Math.hypot(dx, dy) > 6) { drag.moved = true; canvas.classList.add('dragging'); hideHint(); }
-      if (drag.moved && !state.focus) { const k = (e.pointerType === 'touch' ? 3.2 : 2.4) / innerWidth; yaw = drag.yaw - dx * k; pitch = Math.max(-1.2, Math.min(1.2, drag.pitch - dy * k)); }
+      if (drag.moved && !state.focus && touchMode) peek = Math.max(-.3, Math.min(.3, -dx / innerWidth * 1.2));   // follows the finger a little
+      else if (drag.moved && !state.focus) { const k = (e.pointerType === 'touch' ? 3.2 : 2.4) / innerWidth; yaw = drag.yaw - dx * k; pitch = Math.max(-1.2, Math.min(1.2, drag.pitch - dy * k)); }
       if (drag.moved) { setHover(null); return; }
     }
     if (e.pointerType !== 'touch') setHover(pick(e.clientX, e.clientY), e.clientX, e.clientY);
@@ -872,6 +901,11 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   canvas.addEventListener('pointerup', e => {
     canvas.classList.remove('dragging');
     if (locked()) { useHit(pick(innerWidth / 2, innerHeight / 2)); return; }   // the crosshair
+    if (drag && drag.moved && touchMode && !state.focus) {   // a sideways swipe steps to the next view
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) stepView(dx < 0 ? -1 : 1);
+      peek = 0;
+    }
     if (drag && !drag.moved) {
       const hit = pick(e.clientX, e.clientY);
       // a click on nothing in particular steps into the room: the mouse looks around, WASD walks
@@ -880,7 +914,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     }
     drag = null;
   });
-  canvas.addEventListener('pointercancel', () => { drag = null; canvas.classList.remove('dragging'); });
+  canvas.addEventListener('pointercancel', () => { drag = null; peek = 0; canvas.classList.remove('dragging'); });
   canvas.addEventListener('pointerleave', () => { if (!drag && !locked()) setHover(null); });
   document.addEventListener('pointerlockchange', () => { document.body.classList.toggle('fps', locked()); keys.clear(); if (!locked()) setHover(null); });
   const keys = new Set();
@@ -912,6 +946,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   let flash = 0, nextFlash = 8;
   const Z = new THREE.Vector3(0, 0, 1), X = new THREE.Vector3(1, 0, 0);
   const turn = (n, a) => { const o = byName[n]; if (!o) return; o.userData.base ??= o.quaternion.clone(); o.quaternion.copy(o.userData.base).premultiply(new THREE.Quaternion().setFromAxisAngle(Z, -a)); };
+  const sunWorld = new THREE.Vector3(), sunCol = new THREE.Color();
   function applyEnvironment(dt, t) {
     const h = state.minutes / 60, s = sample(h), w = weather(), target = W[w], k = 1 - Math.exp(-dt * 2.5);
     for (const key of ['gray', 'dim', 'cloud']) wv[key] += (target[key] - wv[key]) * k;
@@ -960,12 +995,11 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     disc.material.opacity = clamp01(1 - wv.cloud * 1.1) * (isDay ? 1 : .9); halo.material.opacity = disc.material.opacity * .8;
     starPts.material.opacity = (1 - day) * (1 - wv.cloud) * .9;
     clouds.forEach(c => { c.material.opacity = wv.cloud * .85; c.material.color.copy(gray).lerp(cA.set('#ffffff'), day * (1 - wv.gray * .5)); if (!reduceMotion) c.position.x += c.userData.speed * dt; if (c.position.x > 6) c.position.x = -10; });
-    litMats.forEach(m => m.opacity = smooth(.25, .8, darkness));
-    cityBody.color.set('#2b3038').lerp(cA.set('#7d8796'), day * .6);
+    river.update({ day, darkness, gray: wv.gray, golden, flash: fl, exposure: renderer.toneMappingExposure, skyTop: skyU.top.value, skyBottom: skyU.bottom.value,
+      sunPos: disc.getWorldPosition(sunWorld), sunColor: sunCol.copy(disc.material.color).multiplyScalar(disc.material.opacity * (isDay ? 1 : .25)) }, dt, t);
     rain.visible = wv.rain > .02; rain.material.opacity = .5 * wv.rain;
-    if (rain.visible && !reduceMotion) { const a = rainGeo.attributes.position.array; for (let i = 0; i < a.length; i += 6) { a[i + 1] -= dt * 9; a[i + 4] -= dt * 9; if (a[i + 4] < -1) { a[i + 1] += 6; a[i + 4] += 6; } } rainGeo.attributes.position.needsUpdate = true; }
     snow.visible = wv.snow > .02; snow.material.opacity = .9 * wv.snow;
-    if (snow.visible && !reduceMotion) { const a = snowGeo.attributes.position.array; for (let i = 0; i < a.length; i += 3) { a[i + 1] -= dt * .7; a[i] += Math.sin(t + i) * dt * .15; if (a[i + 1] < -1) a[i + 1] += 6; } snowGeo.attributes.position.needsUpdate = true; }
+    if (!reduceMotion) fallT.value = (fallT.value + dt) % 3600;   // float precision; an hour is whole laps of both falls (the sway skips a little)
     // the clock follows the time shown (seconds only when it's live)
     const sec = state.live ? new Date().getSeconds() : 0, mm = state.minutes + sec / 60;
     turn('clock_hour', ((mm / 60) % 12) / 12 * Math.PI * 2); turn('clock_min', (mm % 60) / 60 * Math.PI * 2); turn('clock_sec', sec / 60 * Math.PI * 2);
@@ -975,6 +1009,18 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: phone ? 0 : 4 });
   const composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
+  // is any of the window on screen? (if not, nothing outside is drawn at all)
+  const glassBox = new THREE.Box3().setFromObject(byName.window_glass).expandByScalar(.08), corner = new THREE.Vector3(), ndc3 = new THREE.Vector3();
+  function windowInView() {
+    let behind = 0, x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (let i = 0; i < 8; i++) {
+      corner.set(i & 1 ? glassBox.max.x : glassBox.min.x, i & 2 ? glassBox.max.y : glassBox.min.y, i & 4 ? glassBox.max.z : glassBox.min.z);
+      if (ndc3.copy(corner).applyMatrix4(camera.matrixWorldInverse).z > -.01) { behind++; continue; }
+      corner.project(camera); x0 = Math.min(x0, corner.x); x1 = Math.max(x1, corner.x); y0 = Math.min(y0, corner.y); y1 = Math.max(y1, corner.y);
+    }
+    if (behind === 8) return false;
+    return behind > 0 || !(x1 < -1 || x0 > 1 || y1 < -1 || y0 > 1);
+  }
   if (!phone) composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), .35, .4, 1.2));
   composer.addPass(new OutputPass());
 
@@ -985,11 +1031,18 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   }
   addEventListener('resize', resize); resize();
   const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), eased = v => v * v * (3 - 2 * v);
-  let last = performance.now(), blinkT = 0, tvT = 0, first = true, hoverT = 0;
+  let last = performance.now(), blinkT = 0, tvT = 0, first = true, hoverT = 0, lastDraw = 0;
+  const FRAME_MIN = touchMode ? 1000 / 30 - 2 : 0;   // phones: 30 fps is plenty for a room that mostly holds still
   function frame(now) {
+    if (FRAME_MIN && now - lastDraw < FRAME_MIN) { requestAnimationFrame(frame); return; }
+    lastDraw = now;
     // rAF time can precede the first performance.now(), so never let dt go negative
     const dt = Math.max(0, Math.min(.05, (now - last) / 1000)); last = now; const t = now / 1000;
-    if (!state.focus) {   // walk: slide along whatever is in the way, one axis at a time
+    if (touchMode && !state.focus) {   // ease round to the chosen view (the short way), plus the finger's peek
+      const v = VIEWS[viewI], k = reduceMotion ? 1 : 1 - Math.exp(-dt * 5);
+      let dy = v.yaw + peek - yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+      yaw += dy * k; pitch += (v.pitch - pitch) * k;
+    } else if (!state.focus) {   // walk: slide along whatever is in the way, one axis at a time
       if (keys.has('ArrowLeft')) yaw += dt * 1.8; if (keys.has('ArrowRight')) yaw -= dt * 1.8;
       const fwd = down('KeyW', 'ArrowUp') - down('KeyS', 'ArrowDown'), side = down('KeyD') - down('KeyA');
       if (fwd || side) {
@@ -1011,12 +1064,15 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     blinkT += dt; if (blinkT > .55) { blinkT = 0; drawScreen(Math.floor(t / .55) % 2 === 0); }
     tvT += dt; if (tvT > .1 && !reduceMotion) { tvT = 0; drawTV(t); }
     applyEnvironment(dt, t);
+    camera.updateMatrixWorld();
+    const out = windowInView(); river.near.visible = river.far.visible = skyGroup.visible = out; if (!out) rain.visible = snow.visible = false;
     composer.render();
     if (first) { first = false; setTimeout(() => $('#loader').classList.add('done'), 200); }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__room = { scene, camera, player, blocked, pick, obstacles, view: () => ({ yaw, pitch, x: player.x, z: player.z }) };
+  window.__room = { scene, camera, player, blocked, pick, obstacles, composer, river, view: () => ({ yaw, pitch, x: player.x, z: player.z }),
+    look: (y, p) => { yaw = y; pitch = p; } };   // for screenshots
 }
 </script>
 
