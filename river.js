@@ -87,30 +87,73 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
     const lit = tiled(new THREE.BoxGeometry(w + .1, h, d + .1), w, h, d, 20, 90); lit.translate(cx, G + h / 2, cz);
     near.add(new THREE.Mesh(lit, additive({ map: aptLitTex })));
   }
-  // grounds of the complex: lawns and paths, parked cars, trees; then a wall
+  // Fine detail over the big ground textures, so close up they aren't a smooth smear: a small grey tile repeating every
+  // few metres, multiplied in through the light-map slot (MeshBasic: diffuse x lightMap x intensity / PI).
+  const detail = (n, draw) => { const t = tex(n, n, draw, true); t.colorSpace = THREE.NoColorSpace; return t; };
+  const withDetail = (mesh, dTex, w, d, m) => {
+    const t = dTex.clone(); t.repeat.set(w / m, d / m); t.needsUpdate = true;
+    mesh.material.lightMap = t; mesh.material.lightMapIntensity = Math.PI * 1.25; return mesh;   // the tile averages .8
+  };
+  const wrapDraw = (w, x, y, r, f) => {   // draw near an edge on the far side too, so the tile has no seams
+    for (const dx of [0, -w, w]) for (const dy of [0, -w, w]) if (x + dx > -r && x + dx < w + r && y + dy > -r && y + dy < w + r) f(x + dx, y + dy);
+  };
+  const grassDetail = detail(512, (g, w) => {   // 4 m: blades and clumps
+    g.fillStyle = '#cccccc'; g.fillRect(0, 0, w, w);
+    for (let i = 0; i < 300; i++) { const v = 150 + rnd() * 100 | 0, r = 6 + rnd() * 18; g.fillStyle = `rgba(${v},${v},${v},.35)`; wrapDraw(w, rnd() * w, rnd() * w, r, (x, y) => { g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill(); }); }
+    g.lineCap = 'round';
+    for (let i = 0; i < 22000; i++) {
+      const v = 110 + rnd() * 145 | 0, x = rnd() * w, y = rnd() * w, a = rnd() * 6.283, l = 2 + rnd() * 5;
+      g.strokeStyle = `rgba(${v},${v},${v},.5)`; g.lineWidth = .8 + rnd() * 1.2;
+      wrapDraw(w, x, y, l, (x, y) => { g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); });
+    }
+  });
+  const asphaltDetail = detail(256, (g, w) => {   // 3 m: aggregate, a few patches and cracks
+    g.fillStyle = '#cccccc'; g.fillRect(0, 0, w, w);
+    for (let i = 0; i < 9; i++) { const v = 170 + rnd() * 50 | 0, r = 10 + rnd() * 40; g.fillStyle = `rgba(${v},${v},${v},.4)`; wrapDraw(w, rnd() * w, rnd() * w, r, (x, y) => g.fillRect(x - r, y - r * .6, 2 * r, 1.2 * r)); }
+    for (let i = 0; i < 9000; i++) { const v = 120 + rnd() * 135 | 0; g.fillStyle = `rgba(${v},${v},${v},.55)`; g.fillRect(rnd() * w, rnd() * w, 1 + rnd() * 1.5, 1 + rnd() * 1.5); }
+    g.strokeStyle = 'rgba(70,70,70,.5)'; g.lineWidth = 1;
+    for (let i = 0; i < 4; i++) { let x = rnd() * w, y = rnd() * w; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 8; k++) { x += (rnd() - .5) * 18; y += (rnd() - .3) * 10; g.lineTo(x, y); } g.stroke(); }
+  });
+  const blotches = (g, w, h, n, rMin, rMax, cols) => {   // big soft patches: worn, dry, lush ground (wrapping along x)
+    for (let i = 0; i < n; i++) {
+      const x = rnd() * w, y = rnd() * h, r = rMin + rnd() * (rMax - rMin), c = pick(cols);
+      for (const dx of [0, -w, w]) { if (x + dx < -r || x + dx > w + r) continue; const gr = g.createRadialGradient(x + dx, y, 0, x + dx, y, r); gr.addColorStop(0, c + '.28)'); gr.addColorStop(1, c + '0)'); g.fillStyle = gr; g.fillRect(x + dx - r, y - r, 2 * r, 2 * r); }
+    }
+  };
+  // grounds of the complex, from the wall (z -38.5) toward us: footpath, two rows of nose-in bays, a kerb, lawn
+  const GROUND_TILE = 62.4;   // 24 bays of 2.6 m; the parked cars sit every other bay
   const groundTex = tex(512, 256, (g, w, h) => {
+    const Z = z => (z + 39) / 36 * h, X = w / GROUND_TILE;   // canvas top is the far edge (z -39)
     g.fillStyle = '#6f7d58'; g.fillRect(0, 0, w, h);
+    blotches(g, w, h, 40, 8, 40, ['rgba(150,140,80,', 'rgba(55,75,38,', 'rgba(125,140,75,']);
     for (let i = 0; i < 4000; i++) { g.fillStyle = rnd() < .5 ? 'rgba(40,60,30,.25)' : 'rgba(170,180,120,.18)'; g.fillRect(rnd() * w, rnd() * h, 2, 2); }
-    g.fillStyle = '#b9b2a4'; g.fillRect(0, h * .18, w, h * .1); g.fillRect(0, h * .62, w, h * .3);     // footpath, parking lane
-    g.fillStyle = '#e9e5dc'; for (let x = 0; x < w; x += 12) g.fillRect(x, h * .62, 1, h * .3);          // bays
+    g.fillStyle = '#b9b2a4'; g.fillRect(0, Z(-38.5), w, Z(-36) - Z(-38.5));                 // footpath by the wall
+    g.fillStyle = '#8f8e8a'; g.fillRect(0, Z(-35.5), w, Z(-24.8) - Z(-35.5));               // the bays
+    g.fillStyle = '#c9c4b8'; g.fillRect(0, Z(-24.8), w, Z(-23.2) - Z(-24.8));               // kerb and path
+    g.fillStyle = '#ecebe6';
+    for (let u = .9; u < GROUND_TILE; u += 2.6) g.fillRect(u * X - .5, Z(-35.3), 1.1, Z(-25) - Z(-35.3));
+    g.fillRect(0, Z(-30.3), w, 1.1);
   }, true);
-  groundTex.repeat.set(10, 1);
-  near.add(plane(600, 36, 0, G, -21, groundTex));
+  groundTex.repeat.set(600 / GROUND_TILE, 1);
+  near.add(withDetail(plane(600, 36, 0, G, -21, groundTex), grassDetail, 600, 36, 4));
   const parked = [];   // [x, z]: nose-in bays, drawn with the car models (traffic, below)
-  for (let x = -290; x < 290; x += 5.2) if (rnd() < .7) parked.push([x, rnd() < .5 ? -27.5 : -33]);
+  for (let x = -300 + 2.2 + 5.2 * 29; x < 150; x += 5.2) for (const z of [-27.8, -32.8]) if (rnd() < (phone ? .35 : .65)) parked.push([x, z]);
   solids.push(box(600, 2.2, .5, 0, G + 1.1, -38.5, '#c9c2b4'));
   // the Gangbyeon expressway: eight lanes, a median, crash barriers, high-mast lights
   const ROAD_N = -40, ROAD_S = -74;
   const roadTex = tex(1024, 128, (g, w, h) => {
     g.fillStyle = '#3d3f42'; g.fillRect(0, 0, w, h);
     for (let i = 0; i < 6000; i++) { g.fillStyle = rnd() < .5 ? 'rgba(0,0,0,.2)' : 'rgba(255,255,255,.06)'; g.fillRect(rnd() * w, rnd() * h, 2, 1); }
-    const L = h / 34, X = w / 40;                                // px per metre across, along
+    const L = h / 34, X = w / 40;                                // px per metre across (from the south edge), along
+    // lanes (centres 3.5-14 and 20-30.5 m, where the cars drive): a darker track worn down each, lines between them
+    for (const c of [3.5, 7, 10.5, 14, 20, 23.5, 27, 30.5]) { g.fillStyle = 'rgba(0,0,0,.1)'; g.fillRect(0, (c - .7) * L, w, 1.4 * L); }
     g.fillStyle = '#e8e6df';
-    for (const m of [3.5, 7, 10.5, 20.5, 24, 27.5]) for (let x = 0; x < w; x += 20 * X) g.fillRect(x, m * L, 10 * X, 1.2);
-    g.fillStyle = '#e2b53c'; g.fillRect(0, 15.5 * L, w, 1.2); g.fillRect(0, 18.5 * L, w, 1.2);
+    for (const m of [5.25, 8.75, 12.25, 21.75, 25.25, 28.75]) for (let x = 0; x < w; x += 20 * X) g.fillRect(x, m * L, 10 * X, 1.2);
+    g.fillRect(0, 1.75 * L, w, 1); g.fillRect(0, 32.25 * L, w, 1);                       // edge lines
+    g.fillStyle = '#e2b53c'; g.fillRect(0, 15.9 * L, w, 1.2); g.fillRect(0, 18.1 * L, w, 1.2);
   }, true);
   roadTex.repeat.set(3000 / 40, 1);
-  near.add(plane(3000, ROAD_N - ROAD_S, 0, G + .02, (ROAD_N + ROAD_S) / 2, roadTex));
+  near.add(withDetail(plane(3000, ROAD_N - ROAD_S, 0, G + .02, (ROAD_N + ROAD_S) / 2, roadTex), asphaltDetail, 3000, ROAD_N - ROAD_S, 3));
   for (const z of [ROAD_N - .3, ROAD_S + .3]) solids.push(box(3000, .9, .4, 0, G + .45, z, '#c9c6bf'));
   solids.push(box(3000, 1, .6, 0, G + .5, -57, '#bdb9b1'));
   const lampHeads = [];
@@ -118,7 +161,7 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
   // Hangang Park: lawn, a bike path and a walk, trees, the riprap bank down to the water
   const parkTex = tex(1024, 256, (g, w, h) => {
     g.fillStyle = '#6c7d4e'; g.fillRect(0, 0, w, h);
-    for (let x = 0; x < w; x += 40) { g.fillStyle = x / 40 % 2 ? 'rgba(255,255,255,.04)' : 'rgba(0,0,0,.04)'; g.fillRect(x, 0, 40, h); }   // mowing stripes
+    blotches(g, w, h, 140, 12, 70, ['rgba(160,150,85,', 'rgba(55,78,38,', 'rgba(120,138,72,', 'rgba(95,110,60,']);
     for (let i = 0; i < 9000; i++) { g.fillStyle = rnd() < .5 ? 'rgba(40,60,30,.22)' : 'rgba(180,190,120,.14)'; g.fillRect(rnd() * w, rnd() * h, 2, 2); }
     const M = h / 78;
     g.fillStyle = '#8e5a4a'; g.fillRect(0, 22 * M, w, 4 * M);                                 // bike path
@@ -126,7 +169,7 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
     g.fillStyle = '#c2b9a8'; g.fillRect(0, 38 * M, w, 3 * M);                                 // walk
   }, true);
   parkTex.repeat.set(12, 1);
-  near.add(plane(3000, 78, 0, G - .6, -113, parkTex));
+  near.add(withDetail(plane(3000, 78, 0, G - .6, -113, parkTex), grassDetail, 3000, 78, 4));
   const ripTex = tex(256, 64, (g, w, h) => { g.fillStyle = '#8b877f'; g.fillRect(0, 0, w, h); for (let i = 0; i < 900; i++) { const c = 100 + rnd() * 70; g.fillStyle = `rgb(${c},${c - 4},${c - 10})`; g.fillRect(rnd() * w, rnd() * h, 3 + rnd() * 5, 2 + rnd() * 3); } }, true);
   ripTex.repeat.set(200, 1);
   const slope = (zTop, zLow) => {   // riprap from the park's edge (zTop) down to the waterline (zLow)
@@ -150,7 +193,7 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
   {   // planted in loose groups, as the park is: clumps of 3-9 with gaps between; the complex's grounds get fewer
     const onPath = z => (z < -124.5 && z > -131.5) || (z < -109.5 && z > -115.5) || (z < -98 && z > -102);   // bike path, walk, lamp line
     const add = (x, y0, z, kind) => onPath(z) || trees.push([x, y0, z, kind, kind === 2 ? 1 + rnd() * .3 : kind === 1 ? 1.35 + rnd() * .45 : 1.3 + rnd() * .5]);
-    for (let i = 0; i < (phone ? 22 : 45); i++) add((rnd() - .5) * 560, G, -8 - rnd() * 24, rnd() < .6 ? 0 : 1);
+    for (let i = 0; i < (phone ? 22 : 45); i++) add((rnd() - .5) * 560, G, -6 - rnd() * 15, rnd() < .6 ? 0 : 1);
     const groups = phone ? 70 : 150;
     for (let gI = 0; gI < groups; gI++) {
       const far = rnd() < .12, gx = (rnd() - .5) * (far ? 1600 : 1000) * (.4 + .6 * rnd());
