@@ -9,6 +9,7 @@
 // and a real-time light would also land on the room, whose light is baked.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const G = -42;          // ground level (the room's floor is at 0: 14 floors up)
 const W = -47;          // the river's surface
@@ -95,10 +96,8 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
   }, true);
   groundTex.repeat.set(10, 1);
   near.add(plane(600, 36, 0, G, -21, groundTex));
-  for (let x = -290; x < 290; x += 5.2) if (rnd() < .7) {
-    const car = box(4.4, 1.45, 1.8, x, G + .72, rnd() < .5 ? -27.5 : -33, pick(['#e9e9e6', '#1d1f22', '#a7abb0', '#2b3f66', '#8e2a24', '#5d6166']), Math.PI / 2);
-    solids.push(car);
-  }
+  const parked = [];   // [x, z]: nose-in bays, drawn with the car models (traffic, below)
+  for (let x = -290; x < 290; x += 5.2) if (rnd() < .7) parked.push([x, rnd() < .5 ? -27.5 : -33]);
   solids.push(box(600, 2.2, .5, 0, G + 1.1, -38.5, '#c9c2b4'));
   // the Gangbyeon expressway: eight lanes, a median, crash barriers, high-mast lights
   const ROAD_N = -40, ROAD_S = -74;
@@ -306,15 +305,36 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
   for (const [z, v] of [[-43.5, 24], [-47, 22], [-50.5, 19], [-54, 17], [-60, -17], [-63.5, -19], [-67, -22], [-70.5, -24]]) lanes.push(['x', z, G + .75, v, -900, 900, phone ? 9 : 16]);
   for (const [bx, by, w] of [[AX, AY, AW], [BX, BY, BW]]) for (const [o, v] of [[-w / 4, 15], [-w / 8, 13], [w / 8, -13], [w / 4, -15]]) lanes.push(['z', bx + o, by + .75, v, DECK_S, DECK_N, phone ? 6 : 11]);
   for (const [z, v] of [[SHORE_S - 95, 22], [SHORE_S - 101, -22]]) lanes.push(['x', z, G + .75, v, -2500, 2500, phone ? 12 : 24]);
+  // the expressway below gets real car models (site_blender: blender/car_models.py, lit in Cycles and baked into their
+  // vertex colours); the bridges and the far bank, a kilometre off, keep the boxes
+  const PAINTS = [['#e9e9e6', 30], ['#d8d4c8', 6], ['#a7abb0', 14], ['#5d6166', 12], ['#1d1f22', 18], ['#2b3f66', 7], ['#8e2a24', 5], ['#3d4a3c', 2], ['#c9b48a', 2]];
+  const paint = () => { let r = rnd() * 96; for (const [c, w] of PAINTS) if ((r -= w) < 0) return c; return PAINTS[0][0]; };
+  const KINDS = ['sedan', 'suv', 'hatch'], kindOf = () => { const r = rnd(); return r < .45 ? 0 : r < .8 ? 1 : 2; };
   const cars = [];
-  for (const L of lanes) for (let i = 0; i < L[6]; i++) cars.push({ L, p: L[4] + (L[5] - L[4]) * (i + rnd() * .6) / L[6], v: L[3] * (.85 + rnd() * .3) });
+  lanes.forEach((L, li) => { for (let i = 0; i < L[6]; i++) cars.push({ L, p: L[4] + (L[5] - L[4]) * (i + rnd() * .6) / L[6], v: L[3] * (.85 + rnd() * .3), kind: li < 8 ? kindOf() : -1, col: paint() }); });
   // They drive in the vertex shader (lane, start and speed per car, position from the clock): rewriting their matrices
   // every frame made ANGLE/D3D11 wait on the GPU, ~16 ms a frame on an Intel iGPU.
-  const carT = { value: 0 }, aLane = new Float32Array(cars.length * 4), aMove = new Float32Array(cars.length * 4);
-  cars.forEach((c, i) => { const L = c.L; aLane.set([L[0] === 'x' ? 1 : 0, L[1], L[2], L[4]], i * 4); aMove.set([c.p, c.v, L[5] - L[4], 0], i * 4); });
-  const driving = (geo, mat, ahead, drop) => {   // ahead, drop: where on the car (the lights), along the way and down
+  const carT = { value: 0 }, all = cars.map((_, i) => i);
+  // car paint, as car_models.py packs it: corners with alpha over .25 are paint, rgb x the car's colour plus the
+  // reflection ((a - .5) x 2), so dark cars still show the sky; glass, tyres and lights (alpha 0) stay as baked
+  const paintShader = sh => {
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vPaint;')
+      .replace('#include <color_vertex>', `#include <color_vertex>
+        vPaint = vec3(1.);
+        #ifdef USE_INSTANCING_COLOR
+          vPaint = instanceColor.rgb;
+        #endif
+        vColor = color;`);
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vPaint;')
+      .replace('#include <color_fragment>', `diffuseColor.rgb *= mix(vColor.rgb, vColor.rgb * vPaint + max(vColor.a - .5, 0.) * 2., step(.25, vColor.a));`);
+  };
+  const paintMat = () => { const m = basic({ vertexColors: true }); m.userData.paint = true; return m; };
+  const driving = (geo, mat, ahead, drop, idx = all) => {   // ahead, drop: where on the car (the lights), along the way and down
+    const aLane = new Float32Array(idx.length * 4), aMove = new Float32Array(idx.length * 4);
+    idx.forEach((ci, j) => { const c = cars[ci], L = c.L; aLane.set([L[0] === 'x' ? 1 : 0, L[1], L[2], L[4]], j * 4); aMove.set([c.p, c.v, L[5] - L[4], 0], j * 4); });
     geo.setAttribute('aLane', new THREE.InstancedBufferAttribute(aLane, 4)); geo.setAttribute('aMove', new THREE.InstancedBufferAttribute(aMove, 4));
     mat.onBeforeCompile = sh => {
+      if (mat.userData.paint) paintShader(sh);
       Object.assign(sh.uniforms, { uCarT: carT, uAhead: { value: ahead }, uDrop: { value: drop } });
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec4 aLane, aMove; uniform float uCarT, uAhead, uDrop;')
         .replace('#include <begin_vertex>', `#include <begin_vertex>
@@ -324,15 +344,32 @@ export function buildRiver(scene, { phone = false, seed = 21 } = {}) {
           transformed = (alongX ? vec3(p, aLane.z, aLane.y) : vec3(aLane.y, aLane.z, p)) + fwd * (transformed.x + uAhead)
             + side * transformed.z + vec3(0., transformed.y + uDrop, 0.);`);
     };
-    mat.customProgramCacheKey = () => 'car';
-    const im = new THREE.InstancedMesh(geo, mat, cars.length); im.frustumCulled = false; return im;   // instance matrices stay identity
+    mat.customProgramCacheKey = () => mat.userData.paint ? 'car-paint' : 'car';
+    const im = new THREE.InstancedMesh(geo, mat, idx.length); im.frustumCulled = false;   // instance matrices stay identity
+    if (mat.vertexColors) { const cc = new THREE.Color(); idx.forEach((ci, j) => im.setColorAt(j, cc.set(cars[ci].col))); }
+    return im;
   };
-  const carMesh = driving(carGeo, basic({ vertexColors: true }), 0, 0);
+  const boxes = cars.map((c, i) => i).filter(i => cars[i].kind < 0);
+  const carMesh = driving(carGeo, basic({ vertexColors: true }), 0, 0, boxes);
   const lightGeo = new THREE.BoxGeometry(.4, .25, 1.5);
   const heads = driving(lightGeo, additive({ color: '#fff4dc' }), 2.25, -.1);
   const tails = driving(lightGeo, additive({ color: '#ff3024' }), -2.25, -.1);
-  const cc = new THREE.Color(); cars.forEach((c, i) => carMesh.setColorAt(i, cc.set(pick(['#e9e9e6', '#1d1f22', '#a7abb0', '#2b3f66', '#8e2a24', '#5d6166', '#d8d4c8']))));
   near.add(carMesh, heads, tails);
+  new GLTFLoader().load(new URL('./room/cars.glb', import.meta.url).href, gltf => {
+    const geos = KINDS.map(name => {   // one mesh per body style, a primitive per material: merged, colours only
+      const parts = []; gltf.scene.getObjectByName(name).traverse(o => { if (o.isMesh) { const g = o.geometry.clone(); for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'color') g.deleteAttribute(k); parts.push(g); } });
+      return mergeGeometries(parts);
+    });
+    KINDS.forEach((_, kind) => {
+      const idx = cars.map((c, i) => i).filter(i => cars[i].kind === kind);
+      if (idx.length) near.add(Object.assign(driving(geos[kind].clone(), paintMat(), 0, -.75, idx), { renderOrder: 500 }));
+      const mine = parked.filter((_, j) => j % 3 === kind);   // the bays: still, so plain instances
+      const pm = paintMat(); pm.onBeforeCompile = paintShader; pm.customProgramCacheKey = () => 'parked';
+      const im = new THREE.InstancedMesh(geos[kind], pm, mine.length), cc = new THREE.Color();
+      mine.forEach(([x, z], j) => { m4.compose(new THREE.Vector3(x, G, z), q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), (j * 7 % 2 ? 1 : -1) * Math.PI / 2), new THREE.Vector3(1, 1, 1)); im.setMatrixAt(j, m4); im.setColorAt(j, cc.set(paint())); });
+      im.renderOrder = 500; near.add(im);
+    });
+  });
   const moveCars = dt => { carT.value = (carT.value + dt) % 3600; };   // float precision; a jump once an hour
 
   /* ================= night: lamps, and their streaks on the water ================= */
