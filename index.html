@@ -643,8 +643,34 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   // the shelves' front edges: the green of thick glass, so the shelves read as something to stand on
   room.traverse(o => { if (o.isMesh && /^SM_Display_GlassEdges/.test(o.name)) o.material = new THREE.MeshStandardMaterial({ color: '#86ab9b', roughness: .12, transparent: true, opacity: .9, depthWrite: false }); });
 
-  /* ===== outside the window: the street and the city (outside.js), sky, sun or moon, stars, clouds, rain and snow ===== */
-  const outside = buildOutside(scene, { phone });
+  /* ===== the street out of the window (blender/outside.py): baked like the room, on its own atlas ===== */
+  const streetMats = { facade: [], lamp: [], trees: [] };
+  if (manifest.outside) {
+    const [og, litTex] = await Promise.all([new GLTFLoader().setDRACOLoader(draco).loadAsync(BASE + manifest.outside.glb),
+                                            texLoader.loadAsync(BASE + manifest.outside.lit)]);
+    litTex.flipY = false; litTex.colorSpace = THREE.SRGBColorSpace;   // the facades' lit windows, on their UV0
+    og.scene.traverse(o => {
+      if (!o.isMesh) return;
+      const a = o.userData.atlas || (o.parent && o.parent.userData.atlas);
+      if (/^OUT_Trees/.test(o.name) || /^OUT_Trees/.test(o.parent && o.parent.name)) {   // ginkgo crowns: painted shading, tinted for the hour
+        o.material = new THREE.MeshBasicMaterial({ map: [].concat(o.material)[0].map, alphaTest: .5, side: THREE.DoubleSide });
+        streetMats.trees.push(o.material); return;
+      }
+      o.material = [].concat(o.material).map(m => {
+        const n = a && atlas[a] && o.geometry.attributes.uv1 ? bakeMaterial(m, a, true) : m.clone();
+        n.envMapIntensity = 0;   // the probe is the room's: no reflections of it in the street
+        if (/^OUT_Facade/.test(m.name)) { n.emissiveMap = litTex; n.emissive.set('#ffffff'); n.emissiveIntensity = 0; streetMats.facade.push(n); }
+        if (/^OUT_LampGlow/.test(m.name)) { n.emissive.set('#ffd9a0'); streetMats.lamp.push(n); }
+        return n;
+      });
+      if (o.material.length === 1) o.material = o.material[0];
+    });
+    scene.add(og.scene);
+  }
+
+  /* ===== outside the window: the far city (outside.js), sky, sun or moon, stars, clouds, rain and snow ===== */
+  const outside = buildOutside(scene, { phone, lamps: manifest.outside ? manifest.outside.lamps : [] });
+  streetMats.trees.forEach(outside.tinted);
   scene.fog = new THREE.Fog('#9fb3c8', 30, 950);   // haze over the city; starts well beyond the room
   // the sky things are laid out as if 10 m away, then scaled up 90x about eye height, so they sit behind the ridges
   const skyGroup = new THREE.Group(); skyGroup.scale.setScalar(90); skyGroup.position.set(0, 1.6 * (1 - 90), 0); scene.add(skyGroup);
@@ -974,7 +1000,10 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
     disc.material.opacity = clamp01(1 - wv.cloud * 1.1) * (isDay ? 1 : .9); halo.material.opacity = disc.material.opacity * .8;
     starPts.material.opacity = (1 - day) * (1 - wv.cloud) * .9;
     clouds.forEach(c => { c.material.opacity = wv.cloud * .85; c.material.color.copy(gray).lerp(cA.set('#ffffff'), day * (1 - wv.gray * .5)); if (!reduceMotion) c.position.x += c.userData.speed * dt; if (c.position.x > 6) c.position.x = -10; });
-    outside.update({ day, darkness, gray: wv.gray, golden, flash: fl });
+    outside.update({ day, darkness, gray: wv.gray, golden, flash: fl, exposure: renderer.toneMappingExposure });
+    const streetOn = smooth(.35, .85, darkness);   // homes and shops across the street light up as it gets dark
+    streetMats.facade.forEach(m => { m.emissiveIntensity = .22 * streetOn; });
+    streetMats.lamp.forEach(m => { m.emissiveIntensity = .2 + 2.6 * streetOn; });
     scene.fog.color.copy(skyU.bottom.value).lerp(gray, .35);   // the haze takes the colour of the low sky
     scene.fog.near = lerp(30, 12, wv.rain); scene.fog.far = lerp(950, 260, Math.max(wv.rain, wv.snow * .7));
     rain.visible = wv.rain > .02; rain.material.opacity = .5 * wv.rain;
