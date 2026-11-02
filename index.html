@@ -103,6 +103,26 @@ input[type=range]{width:100%;accent-color:var(--lamp)}
 .giscus-slot{margin-top:18px;min-height:120px}
 .note{font:400 13px/1.7 var(--sans);color:var(--muted);border-left:2px solid var(--line);padding-left:12px;margin-top:22px}
 .row .side.play{color:var(--lamp)}
+/* Monitor: the resume (data/resume.json, drawn by resume/render.js) */
+.rs-example{font:400 12px/1.6 var(--mono);color:var(--lamp);border:1px dashed #f2a65a66;border-radius:4px;padding:8px 12px;margin:16px 0 18px}
+#panel .rs-name{margin-bottom:6px}
+.rs-role{font-size:15.5px;color:#d8d0c3}
+.rs-links{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;font:400 11.5px/1.6 var(--mono);color:var(--muted)}
+.rs-links a:hover{color:var(--lamp)}
+#panel .rs-summary{margin:20px 0 0;font:400 15.5px/1.9 var(--serif);color:#e6ddcf}
+#panel .rs-summary+.rs-summary{margin-top:10px}
+#panel .rs-h{margin:30px 0 2px;color:var(--lamp)}
+.rs-entry{padding:12px 0;border-bottom:1px solid var(--line)}
+.rs-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px 14px;flex-wrap:wrap}
+.rs-title{font:700 16px/1.4 var(--serif)}
+.rs-title a{text-decoration-color:#f2a65a88;text-underline-offset:3px}
+.rs-period{font:400 11px var(--mono);color:var(--muted);white-space:nowrap}
+.rs-org{font-size:13.5px;color:var(--muted)}
+#panel .rs-desc{margin:4px 0 0;font-size:14px}
+.rs-points{margin:6px 0 0;padding-left:1.1em;font-size:14px;color:#d8d0c3}
+.rs-skills{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0}
+.rs-skills li{font:400 11.5px/1 var(--mono);border:1px solid var(--line);border-radius:3px;padding:6px 9px}
+.rs-btns{margin:18px 0 4px}
 
 /* TV: a game picked from the console list fills the screen; the room waits (paused) behind it */
 #tv{position:fixed;inset:0;z-index:12;display:flex;flex-direction:column;background:var(--ink)}
@@ -163,13 +183,6 @@ body.fps.aim #crosshair{transform:scale(1.9);background:var(--lamp)}
 <div id="nogl"><div><b style="font:700 26px var(--serif)">yoon's room</b><p class="status">이 브라우저에서는 3D 방을 그릴 수 없어요.<br>왼쪽 아래 '물건 목록'에서 내용을 볼 수 있어요.</p></div></div>
 <div id="loader"><div><b>yoon's room</b><span>불 켜는 중</span></div></div>
 
-<template id="tpl-monitor">
-  <div class="kicker">Desk · Monitor</div>
-  <h2 id="panel-title">지금 만들고 있는 것</h2>
-  <p>하루의 대부분을 보내는 자리예요. 지금은 이 방을 만들고 있어요. 물건 하나하나를 코드로 깎고, 빛과 날씨를 붙이는 중이에요.</p>
-  <p>완성된 것과 진행 중인 것들은 책상 옆 <strong>프로젝트 책장</strong>에 상자로 꽂혀 있어요.</p>
-  <div class="btns"><button class="cta" type="button" data-go="projects">프로젝트 책장 보기</button></div>
-</template>
 <template id="tpl-piano">
   <div class="kicker">Keyboard</div>
   <h2 id="panel-title">Music</h2>
@@ -221,6 +234,7 @@ body.fps.aim #crosshair{transform:scale(1.9);background:var(--lamp)}
   </div>
 </template>
 
+<script src="resume/render.js"></script>
 <script>
 'use strict';
 const $ = s => document.querySelector(s);
@@ -252,6 +266,9 @@ const reposReady = fetch('https://api.github.com/users/yoon57296/repos?per_page=
   .then(list => { data.repos = list.filter(r => !r.fork && !r.archived); data.reposLive = true; })
   .catch(() => { data.repos = []; })
   .then(() => { if (!data.repos.some(r => r.name === THIS_SITE.name)) data.repos.push(THIS_SITE); return data.repos; });
+const resumeReady = fetch('data/resume.json', { cache: 'no-cache' })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .catch(() => null);
 const booksReady = fetch('data/books.json')
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(j => (data.books = j.books || []))
@@ -261,7 +278,7 @@ const booksReady = fetch('data/books.json')
 const OBJECTS = {
   reading:  { label: '책장', sub: 'Books & reviews', pos: [-1.3, 1.4, -2.15], look: [-2.85, 1.2, -2.38] },
   projects: { label: '프로젝트 진열장', sub: 'GitHub projects', pos: [2.3, 1.35, -1.45], look: [2.5, 1.2, -3.0] },
-  monitor:  { label: '모니터', sub: 'Now building', tpl: 'tpl-monitor', pos: [1.0, 1.22, -1.7], look: [1.0, 1.05, -2.8] },
+  monitor:  { label: '컴퓨터', sub: 'Resume · Portfolio', pos: [1.0, 1.22, -1.7], look: [1.0, 1.05, -2.8] },
   console:  { label: '게임기', sub: 'Games', pos: [1.25, 1.25, -0.4], look: [2.9, 0.95, -0.4] },
   piano:    { label: '키보드', sub: 'Music', tpl: 'tpl-piano', pos: [-1.45, 1.35, -0.1], look: [-2.75, 0.85, -0.1] },
   guestbook: { label: '방명록', sub: 'Guestbook', tpl: 'tpl-guestbook', pos: [-1.2, 1.5, 1.92], look: [-3.0, 1.5, 1.92] },
@@ -288,6 +305,7 @@ function openPanel(key) {
   if (key === 'reading') return showBookList();
   if (key === 'projects') return showRepoList();
   if (key === 'console') return showGameList();
+  if (key === 'monitor') return showResume();
   showPanel([$('#' + OBJECTS[key].tpl).content.cloneNode(true)]);
   if (key === 'clock') bindClock();
   if (key === 'window') bindWeather();
@@ -408,6 +426,26 @@ function showGameList() {
     el('p', { textContent: '직접 만든 게임을 꽂아 두었어요. 누르면 TV에서 바로 시작해요.' }),
     rows
   ]);
+}
+/* ---------- Computer: resume & portfolio. A short version in the panel; the full page (resume/) opens on screen like a game ---------- */
+const RESUME_SCREEN = { id: 'resume', title: '이력서 · 포트폴리오', href: 'resume/' };
+function showResume() {
+  const head = [el('div', { className: 'kicker', textContent: 'Desk · Computer' })];
+  const btns = el('div', { className: 'btns rs-btns' });
+  const big = el('button', { className: 'cta', type: 'button', textContent: '화면 크게 보기' });
+  big.addEventListener('click', () => openGame(RESUME_SCREEN));
+  btns.append(big, el('button', { className: 'cta ghost', type: 'button', textContent: '프로젝트 책장 보기' }));
+  btns.lastChild.dataset.go = 'projects';
+  const fill = r => {
+    if (state.focus !== 'monitor') return;
+    if (!r || !window.renderResume) return showPanel([...head, el('h2', { id: 'panel-title', textContent: '이력서' }), el('p', { textContent: '이력서를 불러오지 못했어요. 화면 크게 보기로 열어보세요.' }), btns]);
+    const doc = renderResume(r, { headingTag: 'h2' });
+    const name = doc.querySelector('.rs-name'); if (name) name.id = 'panel-title';
+    const top = doc.querySelector('.rs-top'); if (top) top.after(btns); else doc.append(btns);
+    showPanel([...head, doc]);
+  };
+  showPanel([...head, el('h2', { id: 'panel-title', textContent: '이력서' }), el('p', { className: 'status', textContent: '불러오는 중…' })]);
+  resumeReady.then(fill);
 }
 const tv = $('#tv'), tvFrame = $('#tv-frame');
 let tvOpener = null;
