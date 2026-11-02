@@ -1,0 +1,25 @@
+{
+  "example": true,
+  "name": "yoon",
+  "role": "한 줄 소개 (예: 프론트엔드 개발자 · 인터랙티브 웹을 만들어요)",
+  "location": "Seoul",
+  "summary": "이 자리에 자기소개를 두세 문장으로 적어주세요.\n\n문단은 빈 줄로 나눌 수 있어요.",
+  "links": [
+    { "label": "GitHub", "href": "https://github.com/yoon57296" }
+  ],
+  "pdf": "",
+  "experience": [
+    { "title": "직무 이름 (예시)", "org": "회사 · 팀 이름", "period": "2025.03 – 현재", "points": ["맡은 일이나 성과를 한 줄씩 적어주세요.", "숫자가 있으면 더 좋아요."] }
+  ],
+  "projects": [
+    { "title": "yoon's room", "period": "2026", "desc": "Three.js로 만든 3D 방 포트폴리오. 지금 보고 있는 이 사이트예요.", "href": "https://github.com/yoon57296/yoon57296.github.io" },
+    { "title": "지뢰 큐브", "period": "2026", "desc": "정육면체 칸으로 쌓은 3차원 지뢰찾기. 오늘의 판과 순위표가 있어요.", "href": "https://yoon57296.github.io/minesweeper-3d/" }
+  ],
+  "education": [
+    { "title": "학교 · 전공 (예시)", "period": "20XX – 20XX", "desc": "" }
+  ],
+  "skills": ["JavaScript", "Three.js", "HTML / CSS", "Python"],
+  "etc": [
+    { "title": "수상 · 자격증 · 활동 (예시)", "period": "2025", "desc": "없으면 이 칸을 지워도 돼요." }
+  ]
+}

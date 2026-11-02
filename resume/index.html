@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>이력서 · yoon</title>
+<meta name="description" content="yoon57296의 이력서와 포트폴리오.">
+<meta name="theme-color" content="#15120f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* The monitor's screen: same palette as the room, one readable column. Prints as a plain light page. */
+:root{
+  color-scheme:dark;
+  --ink:#15120f;--paper:#efe8dc;--muted:#a39a8c;--line:#3b342c;--lamp:#f2a65a;
+  --serif:"Gowun Batang","Noto Serif KR",Georgia,serif;
+  --sans:"IBM Plex Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--paper);font:400 15px/1.75 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration-color:#f2a65a88;text-underline-offset:3px}
+a:hover{color:var(--lamp)}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:3px}
+main{max-width:760px;margin:0 auto;padding:calc(40px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) 72px max(20px,env(safe-area-inset-left,0px))}
+.bar{display:flex;justify-content:space-between;gap:12px;margin-bottom:36px;font:400 11.5px var(--mono);letter-spacing:.04em;color:var(--muted)}
+.bar a,.bar button{color:var(--muted);text-decoration:none;font:inherit;background:none;border:0;padding:0;cursor:pointer}
+.bar a:hover,.bar button:hover{color:var(--paper)}
+.framed .bar .home{visibility:hidden}
+.rs-example{font:400 12.5px/1.6 var(--mono);color:var(--lamp);border:1px dashed #f2a65a66;border-radius:4px;padding:8px 12px;margin:0 0 28px}
+.rs-name{margin:0;font:700 clamp(34px,7vw,48px)/1.1 var(--serif);letter-spacing:-.02em}
+.rs-role{margin-top:10px;font-size:17px;color:#d8d0c3}
+.rs-links{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;font:400 12.5px/1.6 var(--mono);color:var(--muted)}
+.rs-summary{margin:26px 0 0;font:400 16.5px/1.95 var(--serif);color:#e6ddcf;max-width:62ch}
+.rs-summary+.rs-summary{margin-top:12px}
+.rs-sec{margin-top:44px}
+.rs-h{margin:0 0 4px;font:500 11px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--lamp)}
+.rs-entry{padding:16px 0;border-bottom:1px solid var(--line)}
+.rs-head{display:flex;justify-content:space-between;align-items:baseline;gap:6px 16px;flex-wrap:wrap}
+.rs-title{font:700 18px/1.4 var(--serif)}
+.rs-period{font:400 12px var(--mono);color:var(--muted);white-space:nowrap}
+.rs-org{color:var(--muted);font-size:14px}
+.rs-desc{margin:6px 0 0;color:#d8d0c3}
+.rs-points{margin:8px 0 0;padding-left:1.1em;color:#d8d0c3}
+.rs-points li{margin:2px 0}
+.rs-skills{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0}
+.rs-skills li{font:400 12.5px/1 var(--mono);border:1px solid var(--line);border-radius:3px;padding:7px 10px}
+.status{color:var(--muted)}
+@media print{
+  :root{color-scheme:light;--ink:#fff;--paper:#111;--muted:#555;--line:#ddd;--lamp:#8a4b12}
+  .bar,.rs-example{display:none}
+  main{padding:0;max-width:none}
+  .rs-summary,.rs-desc,.rs-points,.rs-role{color:#222}
+  .rs-entry{break-inside:avoid}
+  a{text-decoration:none}
+}
+</style>
+</head>
+<body>
+<main>
+  <nav class="bar"><a class="home" href="../">← yoon's room</a><button type="button" id="print">인쇄 · PDF로 저장</button></nav>
+  <div id="resume"><p class="status">불러오는 중…</p></div>
+</main>
+<script src="render.js"></script>
+<script>
+'use strict';
+if (window.top !== window) document.body.classList.add('framed');   // shown on the room's monitor: the room has its own back button
+document.getElementById('print').addEventListener('click', () => print());
+const box = document.getElementById('resume');
+fetch('../data/resume.json', { cache: 'no-cache' })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(r => { box.replaceChildren(renderResume(r, { base: '../' })); if (r.name) document.title = '이력서 · ' + r.name; })
+  .catch(() => { box.replaceChildren(Object.assign(document.createElement('p'), { className: 'status', textContent: '이력서를 불러오지 못했어요. 잠시 뒤 다시 열어주세요.' })); });
+</script>
+</body>
+</html>
