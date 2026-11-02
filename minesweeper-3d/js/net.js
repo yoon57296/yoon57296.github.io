@@ -274,10 +274,9 @@
     var foot = '<p class="net-foot">큰 화면 순위표 <a href="board" target="_blank" rel="noopener">' + esc(location.origin) + '/board</a> · ' +
       (addr ? '다른 컴퓨터에서는 <b>' + esc(addr) + '</b>로 들어오면 같이 할 수 있어요.' : '지금은 이 컴퓨터에서만 들어올 수 있게 켜져 있어요.') + '</p>';
     if (REMOTE) {
-      // 인터넷: 이 게임 주소를 알려 주면 누구나 같이 한다
+      // 인터넷: 이 게임 주소를 알려 주면 누구나 같이 한다. 플레이어는 이 창에서 순위를 보고, board.html은 관리용으로만 둔다(링크하지 않음).
       var game = location.href.split(/[?#]/)[0].replace(/index\.html$/, '');
-      foot = '<p class="net-foot">큰 화면 순위표 <a href="board.html" target="_blank" rel="noopener">' + esc(game) + 'board.html</a> · ' +
-        '이 주소를 알려 주면 누구나 같이 할 수 있어요: <b>' + esc(game) + '</b></p>';
+      foot = '<p class="net-foot">이 주소를 알려 주면 누구나 같이 할 수 있어요: <b>' + esc(game) + '</b></p>';
     }
     body.innerHTML =
       '<h3 class="rec-h">오늘의 판 · ' + dayText(cache.day) + ' · 첫 도전 <small>' + lv.dailyCount + '명</small></h3>' +

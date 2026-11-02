@@ -156,7 +156,7 @@ body.fps.aim #crosshair{transform:scale(1.9);background:var(--lamp)}
 </aside>
 
 <div id="tv" hidden>
-  <div class="tv-top"><button class="back" id="tv-back" type="button">← 방으로 돌아가기</button><b id="tv-title"></b><a id="tv-board" target="_blank" rel="noopener">순위표 ↗</a><a class="wide" id="tv-tab" target="_blank" rel="noopener">새 탭 ↗</a></div>
+  <div class="tv-top"><button class="back" id="tv-back" type="button">← 방으로 돌아가기</button><b id="tv-title"></b><a class="wide" id="tv-tab" target="_blank" rel="noopener">새 탭 ↗</a></div>
   <iframe id="tv-frame" title="게임" allow="fullscreen"></iframe>
 </div>
 
@@ -390,7 +390,7 @@ function showRepo(i) {
 }
 /* ---------- Games: cartridges for the console. Each is a page in this site, played full screen on the TV. ---------- */
 const GAMES = [
-  { id: 'minesweeper-3d', title: '지뢰 큐브', desc: '정육면체 칸으로 쌓은 3차원 지뢰찾기. 오늘의 판과 순위표가 있어요.', href: 'minesweeper-3d/', board: 'minesweeper-3d/board.html' }
+  { id: 'minesweeper-3d', title: '지뢰 큐브', desc: '정육면체 칸으로 쌓은 3차원 지뢰찾기. 오늘의 판과 순위표가 있어요.', href: 'minesweeper-3d/' }
 ];
 function showGameList() {
   const rows = el('div', { className: 'rows' });
@@ -416,7 +416,6 @@ function openGame(g) {
   tvOpener = document.activeElement;
   $('#tv-title').textContent = g.title;
   $('#tv-tab').href = g.href;
-  $('#tv-board').hidden = !g.board; if (g.board) $('#tv-board').href = g.board;
   // the same cartridge picks up where it was left; another one starts fresh
   if (tvFrame.dataset.game !== g.id) { tvFrame.dataset.game = g.id; tvFrame.title = g.title; tvFrame.src = g.href; }
   tv.hidden = false; state.tv = true;
