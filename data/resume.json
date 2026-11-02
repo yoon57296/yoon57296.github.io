@@ -90,10 +90,19 @@
     }
   ],
   "skills": [
-    "JavaScript",
-    "Three.js",
-    "HTML / CSS",
-    "Python"
+    "Python",
+    "Unity",
+    "Inventor",
+    "SolidWorks",
+    "Claude",
+    "Codex",
+    "Antigravity"
   ],
-  "etc": []
+  "etc": [
+    {
+      "title": "AICE BASIC 자격증",
+      "period": "",
+      "desc": ""
+    }
+  ]
 }
