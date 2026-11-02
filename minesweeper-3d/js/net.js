@@ -203,6 +203,7 @@
   }
 
   // ---------- 순위표 창 ----------
+  var NOTICE = '그냥 기록을 위해 정보를 모아둡니다.';   // 처음 들어올 때 안내와 순위표 창에 같이 쓰는 한 줄
   var cache = null, tab = null;
   function openBoard(level) {
     var app = MS.app, g = app.game;
@@ -210,7 +211,7 @@
     app.openDialog(
       '<h2 id="dialog-title">순위표</h2>' +
       '<p>' + (REMOTE ? '이 게임 주소로 들어온 사람끼리' : '이 서버로 들어온 사람끼리') + ' 기록을 나눠요. 힌트를 쓰면 1회당 20초가 더해진 시간이에요.</p>' +
-      '<p class="net-note">순위표 서버는 판마다 결과·시간·클릭 순서·판 정보(크기·시드)·화면 설정과 접속한 컴퓨터 주소(IP)·브라우저 정보·브라우저 번호를 기록해요. 이름을 정하면 이름도 함께 남아요. 자동 입력이 의심되는 기록은 순위에 넣지 않아요.</p>' +
+      '<p class="net-note">' + NOTICE + ' 자동 입력이 의심되는 기록은 순위에 넣지 않아요.</p>' +
       '<div class="net-me"><label class="net-name">내 이름<span class="net-row">' +
       '<input type="text" id="net-name" maxlength="' + NAME_MAX + '" autocomplete="nickname" placeholder="순위표에 보일 이름" value="' + esc(me.name) + '">' +
       '<button type="button" class="btn" id="net-save">저장</button></span></label><p class="net-msg" id="net-name-msg"></p></div>' +
@@ -292,14 +293,12 @@
     b.textContent = '순위표';
     b.title = me.name ? '순위표 · ' + me.name : '순위표 · 이름을 정하면 기록이 올라가요';
   }
-  // 처음 들어온 브라우저에는 무엇을 기록하는지 한 번 알린다. 확인을 누르면 다시 띄우지 않는다.
+  // 처음 들어온 브라우저에는 기록을 모은다고 한 번 알린다. 확인을 누르면 다시 띄우지 않는다.
   function showNotice() {
     var bar = document.createElement('div');
     bar.className = 'net-notice';
     bar.setAttribute('role', 'status');
-    bar.innerHTML = '<p><b>이 게임은 플레이 기록을 모아요.</b> 판마다 결과·시간·클릭 순서·화면 설정과 접속한 컴퓨터 주소(IP)·브라우저 정보·브라우저 번호를 남기고, ' +
-      '이름을 정하면 이름도 함께 남아요. 순위표와 게임을 고치는 데만 써요. 이기면 이름을 정해 순위표에 올릴 수 있어요.</p>' +
-      '<button type="button" class="btn">확인</button>';
+    bar.innerHTML = '<p><b>' + NOTICE + '</b></p><button type="button" class="btn">확인</button>';
     bar.querySelector('button').onclick = function () { me.noticed = 1; saveMe(); bar.parentNode.removeChild(bar); };
     document.body.appendChild(bar);
   }
