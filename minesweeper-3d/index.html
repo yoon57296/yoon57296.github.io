@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>지뢰 큐브</title>
+  <meta name="description" content="정육면체 칸으로 이뤄진 3차원 지뢰찾기">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23e65a19' d='M16 3 28 10 16 17 4 10Z'/%3E%3Cpath fill='%237386a8' d='M4 10 16 17V30L4 23Z'/%3E%3Cpath fill='%232a3345' d='M28 10 16 17V30L28 23Z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;600;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/net.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="hud">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <path class="bm-top" d="M16 3 28 10 16 17 4 10Z"/>
+          <path class="bm-left" d="M4 10 16 17V30L4 23Z"/>
+          <path class="bm-right" d="M28 10 16 17V30L28 23Z"/>
+        </svg>
+        <h1>지뢰 큐브</h1>
+      </div>
+
+      <div class="counters">
+        <div class="plate" title="남은 지뢰 = 지뢰 수 − 깃발 수">
+          <span class="plate-k">남은 지뢰</span>
+          <span class="plate-v" id="mines-left">0</span>
+        </div>
+        <button type="button" class="face" id="btn-new" aria-label="새 게임" title="새 게임 (N)">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <g class="face-ready"><path d="M16 5 26 11 16 17 6 11Z"/><path d="M6 11 16 17V28L6 22Z"/><path d="M26 11 16 17V28L26 22Z"/></g>
+            <g class="face-won"><path d="M7 16.5 13.5 23 25.5 9.5"/></g>
+            <g class="face-lost"><path d="M16 4v6M16 22v6M4 16h6M22 16h6M7.5 7.5l4.2 4.2M20.3 20.3l4.2 4.2M24.5 7.5l-4.2 4.2M11.7 20.3l-4.2 4.2"/><circle cx="16" cy="16" r="3.4"/></g>
+          </svg>
+        </button>
+        <div class="plate" title="걸린 시간 (힌트 1회당 +20초)">
+          <span class="plate-k">시간</span>
+          <span class="plate-v" id="timer">0:00</span>
+        </div>
+      </div>
+
+      <div class="picker">
+        <div class="seg spacesw" role="radiogroup" aria-label="차원" id="spacesw">
+          <button type="button" role="radio" data-space="3" id="sp-3">3D</button>
+          <button type="button" role="radio" data-space="4" id="sp-4">4D</button>
+        </div>
+        <div class="levels" role="radiogroup" aria-label="난이도" id="levels">
+          <button type="button" role="radio" data-level="easy" data-space="3" id="lv-easy">초급<small>4×4×4</small></button>
+          <button type="button" role="radio" data-level="normal" data-space="3" id="lv-normal">중급<small>6×6×6</small></button>
+          <button type="button" role="radio" data-level="hard" data-space="3" id="lv-hard">고급<small>8×8×8</small></button>
+          <button type="button" role="radio" data-level="custom" data-space="3" id="lv-custom">사용자<small id="custom-dims">직접 설정</small></button>
+          <button type="button" role="radio" data-level="h4" data-space="4" id="lv-h4" hidden>4D 초급<small>4×4×4×4</small></button>
+          <button type="button" role="radio" data-level="h6" data-space="4" id="lv-h6" hidden>4D 고급<small>6×6×6×6</small></button>
+        </div>
+      </div>
+
+      <div class="hud-meta">
+        <p class="board-line" id="board-line">지뢰 6 · 64칸 · 밀도 9.4%</p>
+        <p class="best-line"><span id="best-k">최고 기록</span> <b id="best">—</b></p>
+      </div>
+      <div class="hud-actions">
+        <button type="button" class="ghost-btn daily-btn" id="btn-daily" aria-pressed="false">오늘의 판</button>
+        <button type="button" class="ghost-btn" id="btn-records">기록</button>
+        <button type="button" class="ghost-btn" id="btn-help">도움말</button>
+      </div>
+    </header>
+
+    <main class="main" id="main" data-view="3d">
+      <div class="stage" id="stage">
+        <section class="view3d" id="view3d" aria-label="3D 판">
+          <canvas id="gl" aria-label="3D 지뢰찾기 판. 드래그로 회전, 클릭으로 칸 열기"></canvas>
+          <div class="overlay" id="overlay" aria-hidden="true"></div>
+          <div class="cellinfo" id="cellinfo" aria-live="polite"></div>
+          <div class="quickhide" id="quickhide" role="group" aria-label="빠른 숨기기">
+            <span class="qh-k">숨기기</span>
+            <button type="button" class="qh" data-hide="hideSettled" aria-pressed="false" title="다 푼 숫자 숨기기 (키 1)">푼 숫자<kbd>1</kbd></button>
+            <button type="button" class="qh" data-hide="hideNumbers" aria-pressed="false" title="숫자 칸 모두 숨기기 (키 2)">숫자<kbd>2</kbd></button>
+            <button type="button" class="qh" data-hide="hideFlags" aria-pressed="false" title="깃발 칸은 윤곽만 (키 3)">깃발<kbd>3</kbd></button>
+          </div>
+          <div class="nogl" id="nogl" hidden>
+            <p><b>이 브라우저에서는 WebGL2를 쓸 수 없어요.</b></p>
+            <p>3D 보기 대신 층별 보기로 플레이할 수 있어요.</p>
+          </div>
+        </section>
+        <section class="flat" id="flat" aria-label="층별 펼쳐 보기" hidden></section>
+        <div class="linkbar" id="linkbar" role="group" aria-label="임시 깃발 묶기" hidden>
+          <span class="lb-text" id="linkbar-text">이을 임시 깃발을 누르세요</span>
+          <button type="button" class="qh" data-link="cut" id="lb-cut">연결 끊기</button>
+          <button type="button" class="qh" data-link="dissolve" id="lb-dissolve">묶음 풀기</button>
+          <button type="button" class="qh" data-link="unmark" id="lb-unmark">임시 깃발 빼기</button>
+          <button type="button" class="qh" data-link="cancel" id="lb-cancel">취소<kbd>Esc</kbd></button>
+        </div>
+      </div>
+
+      <nav class="dock" id="dock" aria-label="플레이 도구">
+        <div class="seg seg-mode" role="radiogroup" aria-label="누를 때 동작">
+          <button type="button" role="radio" data-mode="open" id="mode-open">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3v9.5l2.6-2.2 1.9 4.4 1.9-.8-1.9-4.3h3.4Z"/></svg>열기</button>
+          <button type="button" role="radio" data-mode="flag" id="mode-flag">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h1.6v15H5ZM6.6 3.2l8.6 3.3-8.6 3.3Z"/></svg>깃발</button>
+        </div>
+        <div class="layer-step" id="dock-layer">
+          <button type="button" class="icon-btn" id="dock-layer-dn" aria-label="이전 층">−</button>
+          <button type="button" class="layer-chip" id="dock-layer-out">모든 층</button>
+          <button type="button" class="icon-btn" id="dock-layer-up" aria-label="다음 층">+</button>
+        </div>
+        <div class="layer-step w-step" id="dock-w" hidden>
+          <button type="button" class="icon-btn" id="dock-w-dn" aria-label="이전 W">−</button>
+          <button type="button" class="layer-chip" id="dock-w-out">모든 W</button>
+          <button type="button" class="icon-btn" id="dock-w-up" aria-label="다음 W">+</button>
+        </div>
+        <button type="button" class="tool-btn" id="btn-hint" title="힌트 (H) · 시간 +20초">힌트</button>
+        <button type="button" class="tool-btn" id="btn-view" title="3D 시점 초기화 (R)">시점</button>
+        <button type="button" class="tool-btn tools-toggle" id="btn-tools" aria-expanded="false" aria-controls="tools">도구</button>
+      </nav>
+
+      <aside class="tools" id="tools" aria-label="보기 도구">
+        <div class="tools-head">
+          <h2>보기 도구</h2>
+          <button type="button" class="icon-btn tools-close" id="tools-close" aria-label="닫기">×</button>
+        </div>
+
+        <section class="tg">
+          <h3>화면</h3>
+          <div class="seg" role="radiogroup" aria-label="화면 구성" id="seg-view">
+            <button type="button" role="radio" data-view="3d">3D</button>
+            <button type="button" role="radio" data-view="split">나란히</button>
+            <button type="button" role="radio" data-view="flat">층별</button>
+          </div>
+        </section>
+
+        <section class="tg" id="tg-w" hidden>
+          <h3>4차원 W축</h3>
+          <div class="seg seg-sm" role="radiogroup" aria-label="W 큐브 보기" id="seg-wview">
+            <button type="button" role="radio" data-wview="all">모든 W</button>
+            <button type="button" role="radio" data-wview="near">이 W와 양옆</button>
+          </div>
+          <div class="layer-row">
+            <button type="button" class="icon-btn" id="w-dn" aria-label="이전 W">−</button>
+            <input type="range" id="wfocus" min="0" max="3" step="1" value="0" aria-label="W 선택">
+            <button type="button" class="icon-btn" id="w-up" aria-label="다음 W">+</button>
+            <output id="w-out" for="wfocus">W 1 / 4</output>
+          </div>
+          <p class="tg-note">W값마다 3D 큐브가 하나씩 있어요. 한 칸의 이웃 80칸은 같은 큐브와 바로 옆 W 큐브(w−1, w+1)의 3×3×3 칸이에요.</p>
+        </section>
+
+        <section class="tg">
+          <h3>층 단면</h3>
+          <div class="seg seg-sm" role="radiogroup" aria-label="층을 나누는 축" id="seg-axis">
+            <button type="button" role="radio" data-axis="1">Y 높이</button>
+            <button type="button" role="radio" data-axis="0">X 가로</button>
+            <button type="button" role="radio" data-axis="2">Z 깊이</button>
+          </div>
+          <div class="seg seg-sm" role="radiogroup" aria-label="단면 방식" id="seg-slice">
+            <button type="button" role="radio" data-slice="all">전체</button>
+            <button type="button" role="radio" data-slice="one">한 층만</button>
+            <button type="button" role="radio" data-slice="upto">이 층까지</button>
+          </div>
+          <div class="layer-row">
+            <button type="button" class="icon-btn" id="layer-dn" aria-label="이전 층">−</button>
+            <input type="range" id="layer" min="0" max="7" step="1" value="0" aria-label="층 선택">
+            <button type="button" class="icon-btn" id="layer-up" aria-label="다음 층">+</button>
+            <output id="layer-out" for="layer">1 / 8층</output>
+          </div>
+          <label class="slider" for="explode">
+            <span>층 사이 벌리기 <output id="explode-out">0%</output></span>
+            <input type="range" id="explode" min="0" max="1.5" step="0.05" value="0">
+          </label>
+        </section>
+
+        <section class="tg">
+          <h3>숨기기</h3>
+          <label class="check" for="opt-settled"><input type="checkbox" id="opt-settled">
+            <span>다 푼 숫자 숨기기 <kbd>1</kbd><small>주변이 모두 열렸거나 깃발인 숫자</small></span></label>
+          <label class="check" for="opt-numbers"><input type="checkbox" id="opt-numbers">
+            <span>숫자 칸 모두 숨기기 <kbd>2</kbd><small>안쪽 닫힌 칸만 보고 싶을 때</small></span></label>
+          <label class="check" for="opt-flags"><input type="checkbox" id="opt-flags">
+            <span>깃발 칸은 윤곽만 <kbd>3</kbd><small>깃발 너머를 볼 때</small></span></label>
+          <p class="tg-note">3D 화면 왼쪽 아래 버튼이나 키 1·2·3으로도 바로 켜고 끌 수 있어요.</p>
+        </section>
+
+        <section class="tg">
+          <h3>강조</h3>
+          <label class="check" for="opt-nb"><input type="checkbox" id="opt-nb">
+            <span>주변 칸 강조<small>마우스를 올린 칸의 이웃 (3D 26칸, 4D 80칸)</small></span></label>
+          <div class="nbcolor">
+            <span class="nbc-k" id="nbc-label">주변 칸 색</span>
+            <div class="swatches" role="radiogroup" aria-labelledby="nbc-label" id="nb-swatches">
+              <button type="button" role="radio" class="sw sw-base" data-color="" title="기본 청록" aria-label="기본 청록"></button>
+              <button type="button" role="radio" class="sw" data-color="#e0409a" style="--sw: #e0409a" title="분홍" aria-label="분홍"></button>
+              <button type="button" role="radio" class="sw" data-color="#4cb83a" style="--sw: #4cb83a" title="연두" aria-label="연두"></button>
+              <button type="button" role="radio" class="sw" data-color="#8b5cf6" style="--sw: #8b5cf6" title="보라" aria-label="보라"></button>
+              <button type="button" role="radio" class="sw" data-color="#2f7de1" style="--sw: #2f7de1" title="파랑" aria-label="파랑"></button>
+              <label class="sw sw-custom" for="nb-custom" title="직접 고르기"><input type="color" id="nb-custom" value="#0f9db0" aria-label="주변 칸 색 직접 고르기"></label>
+            </div>
+          </div>
+          <label class="check" for="opt-dim"><input type="checkbox" id="opt-dim">
+            <span>나머지 흐리게</span></label>
+          <label class="check" for="opt-rotate"><input type="checkbox" id="opt-rotate">
+            <span>천천히 자동 회전</span></label>
+        </section>
+
+        <section class="tg">
+          <h3>판 만들기</h3>
+          <label class="check" for="opt-noguess"><input type="checkbox" id="opt-noguess">
+            <span>추측 없는 판<small>논리만으로 끝까지 풀리는 배치만 냄. 다음 판부터 적용</small></span></label>
+        </section>
+
+        <section class="tg keys">
+          <h3>조작</h3>
+          <dl>
+            <dt>왼쪽 클릭</dt><dd>열기 · 숫자 칸은 코드 열기</dd>
+            <dt>오른쪽 클릭</dt><dd>깃발</dd>
+            <dt>휠 클릭</dt><dd>임시 깃발 (T) · 숫자 칸은 코드 열기</dd>
+            <dt>임시 깃발 클릭</dt><dd>열리지 않음 · 다른 임시 깃발을 눌러 묶기</dd>
+            <dt>드래그</dt><dd>회전 (오른쪽·Shift 드래그는 이동)</dd>
+            <dt>휠</dt><dd>확대·축소</dd>
+            <dt>W A S D</dt><dd>카메라 앞뒤·옆 이동 (Q E 아래·위)</dd>
+            <dt>[ ]</dt><dd>층 이동</dd>
+            <dt>, .</dt><dd>4D에서 W 이동</dd>
+            <dt>1 2 3</dt><dd>숨기기: 푼 숫자 · 숫자 · 깃발</dd>
+            <dt>길게 누르기</dt><dd>터치에서 깃발</dd>
+          </dl>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/game.js"></script>
+  <script src="js/solver.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/flat.js"></script>
+  <script>window.MS_BOARD = {"v":"ab3ae53c2f","api":"https://ms3d-board.yoon57296.workers.dev/","verUrl":"version.json"};</script>
+  <script src="js/net.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

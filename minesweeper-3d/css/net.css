@@ -1,0 +1,90 @@
+/* 같은 네트워크 순위표(js/net.js). 순위표 서버가 게임 페이지에 끼워 넣을 때만 실린다. */
+.net-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--raise);
+  border: 1px dashed var(--line);
+}
+.net-line:empty { display: none; }
+.dialog .net-msg { font-size: 13px; color: var(--muted); }
+.dialog .net-msg:empty { display: none; }
+.dialog .net-msg.ok { color: var(--ink); }
+.dialog .net-msg.err { color: var(--bad); }
+.net-msg b { font: 800 15px var(--f-mono); color: var(--accent); }
+.net-who { font-weight: 800; color: var(--ink); }
+.net-line .net-msg { flex: 1 1 200px; min-width: 0; }
+.net-name { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; flex: 1 1 100%; }
+.net-row { display: flex; gap: 6px; }
+.net-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: 600 15px var(--f-body);
+}
+.dialog .net-note { font-size: 12px; }
+.net-me { display: grid; gap: 4px; }
+.net-me .net-row input { background: var(--raise); }
+.net-tabs { display: flex; flex-wrap: wrap; }
+.net-tabs button { flex: 1 1 auto; font-size: 12.5px; padding: 6px 8px; }
+.net-rank tr.me td { background: color-mix(in srgb, var(--accent) 16%, transparent); font-weight: 800; }
+.net-rank td small { color: var(--muted); font-size: 11px; font-weight: 600; }
+.net-rank td:first-child { width: 3em; }
+.rec-h small { color: var(--muted); font-weight: 600; font-size: 12px; }
+.net-empty { font-size: 13px; padding: 8px 0 2px; }
+.dialog .net-foot { font-size: 12px; line-height: 1.5; }
+.net-foot a { color: var(--accent); font-family: var(--f-mono); }
+.net-foot b { font-family: var(--f-mono); color: var(--ink); }
+/* 업데이트 알림: 화면 위 가운데에 떠 있는 띠. 대화상자(z 41)보다 위 */
+.net-update {
+  position: fixed;
+  left: 50%;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  transform: translateX(-50%);
+  z-index: 45;
+  width: min(560px, calc(100vw - 24px));
+  display: flex;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.net-update p { margin: 0; flex: 1; min-width: 0; }
+.net-update .btn { flex: none; background: var(--on-accent); color: var(--accent); border-color: var(--on-accent); }
+/* 처음 들어온 브라우저에 한 번 띄우는 기록 안내. 아래 가운데 */
+.net-notice {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 44;
+  width: min(620px, calc(100vw - 24px));
+  display: flex;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.net-notice p { margin: 0; flex: 1; min-width: 0; color: var(--muted); }
+.net-notice b { color: var(--ink); }
+.net-notice .btn { flex: none; }
+@media (max-width: 520px) { .net-notice, .net-update { flex-direction: column; align-items: stretch; } }

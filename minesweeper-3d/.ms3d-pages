@@ -1,0 +1,1 @@
+node dev/build_pages.js --api https://ms3d-board.yoon57296.workers.dev/

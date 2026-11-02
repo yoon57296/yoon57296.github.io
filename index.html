@@ -102,6 +102,16 @@ input[type=range]{width:100%;accent-color:var(--lamp)}
 .status{font-size:13px;color:var(--muted)}
 .giscus-slot{margin-top:18px;min-height:120px}
 .note{font:400 13px/1.7 var(--sans);color:var(--muted);border-left:2px solid var(--line);padding-left:12px;margin-top:22px}
+.row .side.play{color:var(--lamp)}
+
+/* TV: a game picked from the console list fills the screen; the room waits (paused) behind it */
+#tv{position:fixed;inset:0;z-index:12;display:flex;flex-direction:column;background:var(--ink)}
+#tv[hidden]{display:none}
+.tv-top{display:flex;align-items:center;gap:16px;padding:calc(10px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) 10px max(18px,env(safe-area-inset-left,0px));background:var(--sheet);border-bottom:1px solid var(--line)}
+.tv-top b{flex:1;min-width:0;font:700 16px/1.3 var(--serif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-top a{font:400 11.5px var(--mono);letter-spacing:.04em;color:var(--muted);text-decoration:none;white-space:nowrap}
+.tv-top a:hover{color:var(--paper)}
+#tv iframe{flex:1;display:block;width:100%;min-height:0;border:0;background:#000}
 
 #loader{position:fixed;inset:0;z-index:20;background:var(--ink);display:grid;place-items:center;text-align:center;transition:opacity .9s}
 #loader.done{opacity:0;pointer-events:none}
@@ -114,6 +124,7 @@ input[type=range]{width:100%;accent-color:var(--lamp)}
   #panel{top:auto;left:0;width:100%;height:62%;border-left:0;border-top:1px solid var(--line);border-radius:12px 12px 0 0;transform:translateY(102%);padding:18px 22px calc(26px + env(safe-area-inset-bottom,0px))}
   .hud-tr .pill.weather{display:none}
   .hud-bc{bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+  .tv-top .wide{display:none}
 }
 @media (prefers-reduced-motion:reduce){#panel,#loader,.hud-bc{transition:none}}
 /* walking: the crosshair shows while the mouse is captured */
@@ -144,6 +155,11 @@ body.fps.aim #crosshair{transform:scale(1.9);background:var(--lamp)}
   <div id="panel-body"></div>
 </aside>
 
+<div id="tv" hidden>
+  <div class="tv-top"><button class="back" id="tv-back" type="button">← 방으로 돌아가기</button><b id="tv-title"></b><a id="tv-board" target="_blank" rel="noopener">순위표 ↗</a><a class="wide" id="tv-tab" target="_blank" rel="noopener">새 탭 ↗</a></div>
+  <iframe id="tv-frame" title="게임" allow="fullscreen"></iframe>
+</div>
+
 <div id="nogl"><div><b style="font:700 26px var(--serif)">yoon's room</b><p class="status">이 브라우저에서는 3D 방을 그릴 수 없어요.<br>왼쪽 아래 '물건 목록'에서 내용을 볼 수 있어요.</p></div></div>
 <div id="loader"><div><b>yoon's room</b><span>불 켜는 중</span></div></div>
 
@@ -153,12 +169,6 @@ body.fps.aim #crosshair{transform:scale(1.9);background:var(--lamp)}
   <p>하루의 대부분을 보내는 자리예요. 지금은 이 방을 만들고 있어요. 물건 하나하나를 코드로 깎고, 빛과 날씨를 붙이는 중이에요.</p>
   <p>완성된 것과 진행 중인 것들은 책상 옆 <strong>프로젝트 책장</strong>에 상자로 꽂혀 있어요.</p>
   <div class="btns"><button class="cta" type="button" data-go="projects">프로젝트 책장 보기</button></div>
-</template>
-<template id="tpl-console">
-  <div class="kicker">TV · Game console</div>
-  <h2 id="panel-title">Games</h2>
-  <p>쉴 때는 게임을 해요. 잘 만든 게임은 제가 아는 가장 정교한 인터랙션이라, 놀다가도 이건 어떻게 만들었을까 자주 생각해요.</p>
-  <p class="note">좋아하는 게임 목록은 곧 채울게요.</p>
 </template>
 <template id="tpl-piano">
   <div class="kicker">Keyboard</div>
@@ -223,7 +233,7 @@ const hash = s => { let h = 2166136261; for (const c of String(s)) h = Math.imul
 
 
 /* ---------- State ---------- */
-const state = { live: true, minutes: 0, weatherMode: 'live', liveWeather: 'clear', liveWeatherOk: false, lamp: null, ceil: null, focus: null };
+const state = { live: true, minutes: 0, weatherMode: 'live', liveWeather: 'clear', liveWeatherOk: false, lamp: null, ceil: null, focus: null, tv: false };
 const seoulMinutes = () => {
   const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
   return (+p.find(x => x.type === 'hour').value % 24) * 60 + +p.find(x => x.type === 'minute').value;
@@ -252,7 +262,7 @@ const OBJECTS = {
   reading:  { label: '책장', sub: 'Books & reviews', pos: [-1.3, 1.4, -2.15], look: [-2.85, 1.2, -2.38] },
   projects: { label: '프로젝트 진열장', sub: 'GitHub projects', pos: [2.3, 1.35, -1.45], look: [2.5, 1.2, -3.0] },
   monitor:  { label: '모니터', sub: 'Now building', tpl: 'tpl-monitor', pos: [1.0, 1.22, -1.7], look: [1.0, 1.05, -2.8] },
-  console:  { label: '게임기', sub: 'Games', tpl: 'tpl-console', pos: [1.25, 1.25, -0.4], look: [2.9, 0.95, -0.4] },
+  console:  { label: '게임기', sub: 'Games', pos: [1.25, 1.25, -0.4], look: [2.9, 0.95, -0.4] },
   piano:    { label: '키보드', sub: 'Music', tpl: 'tpl-piano', pos: [-1.45, 1.35, -0.1], look: [-2.75, 0.85, -0.1] },
   guestbook: { label: '방명록', sub: 'Guestbook', tpl: 'tpl-guestbook', pos: [-1.2, 1.5, 1.92], look: [-3.0, 1.5, 1.92] },
   hobby:    { label: '취미 선반', sub: 'Little things', tpl: 'tpl-hobby', pos: [1.55, 1.8, -0.4], look: [2.9, 1.8, -0.4] },
@@ -277,6 +287,7 @@ function showPanel(nodes, backLabel, backFn) {
 function openPanel(key) {
   if (key === 'reading') return showBookList();
   if (key === 'projects') return showRepoList();
+  if (key === 'console') return showGameList();
   showPanel([$('#' + OBJECTS[key].tpl).content.cloneNode(true)]);
   if (key === 'clock') bindClock();
   if (key === 'window') bindWeather();
@@ -377,6 +388,51 @@ function showRepo(i) {
     .then(t => { t = t.length > 1800 ? t.slice(0, 1800) + '\n…' : t; readmeCache[r.name] = t; show(t); })
     .catch(() => show('README를 불러오지 못했어요. GitHub에서 직접 볼 수 있어요.'));
 }
+/* ---------- Games: cartridges for the console. Each is a page in this site, played full screen on the TV. ---------- */
+const GAMES = [
+  { id: 'minesweeper-3d', title: '지뢰 큐브', desc: '정육면체 칸으로 쌓은 3차원 지뢰찾기. 오늘의 판과 순위표가 있어요.', href: 'minesweeper-3d/', board: 'minesweeper-3d/board.html' }
+];
+function showGameList() {
+  const rows = el('div', { className: 'rows' });
+  GAMES.forEach(g => {
+    const row = el('button', { className: 'row', type: 'button' },
+      el('span', {}, el('b', { textContent: g.title }), el('small', { textContent: g.desc })),
+      el('span', { className: 'side play', textContent: '▶ PLAY' }));
+    row.addEventListener('click', () => openGame(g));
+    rows.append(row);
+  });
+  showPanel([
+    el('div', { className: 'kicker', textContent: 'TV · Game console · ' + GAMES.length + (GAMES.length === 1 ? ' game' : ' games') }),
+    el('h2', { id: 'panel-title', textContent: 'Games' }),
+    el('p', { textContent: '쉴 때는 게임을 해요. 잘 만든 게임은 제가 아는 가장 정교한 인터랙션이라, 놀다가도 이건 어떻게 만들었을까 자주 생각해요.' }),
+    el('p', { textContent: '직접 만든 게임을 꽂아 두었어요. 누르면 TV에서 바로 시작해요.' }),
+    rows
+  ]);
+}
+const tv = $('#tv'), tvFrame = $('#tv-frame');
+let tvOpener = null;
+function openGame(g) {
+  if (document.pointerLockElement) document.exitPointerLock();
+  tvOpener = document.activeElement;
+  $('#tv-title').textContent = g.title;
+  $('#tv-tab').href = g.href;
+  $('#tv-board').hidden = !g.board; if (g.board) $('#tv-board').href = g.board;
+  // the same cartridge picks up where it was left; another one starts fresh
+  if (tvFrame.dataset.game !== g.id) { tvFrame.dataset.game = g.id; tvFrame.title = g.title; tvFrame.src = g.href; }
+  tv.hidden = false; state.tv = true;
+  if (!(history.state && history.state.tv)) history.pushState({ tv: g.id }, '');   // phone back gesture returns to the room
+  tvFrame.focus();
+}
+function hideGame() {
+  tv.hidden = true; state.tv = false;
+  if (tvOpener && tvOpener.isConnected) tvOpener.focus();
+}
+const closeGame = () => (history.state && history.state.tv) ? history.back() : hideGame();   // back pops the entry openGame pushed
+$('#tv-back').addEventListener('click', closeGame);
+addEventListener('popstate', () => { if (!tv.hidden) hideGame(); });
+if (history.state && history.state.tv) history.replaceState(null, '');   // reloaded while a game was on: start in the room
+addEventListener('keydown', e => { if (e.key === 'Escape' && !tv.hidden) { e.stopImmediatePropagation(); closeGame(); } }, true);
+
 // overridden by the 3D scene so the camera also moves; these work without WebGL
 let openBook = i => { hooks.onItem('book', i); showBook(i); };
 let openRepo = i => { hooks.onItem('repo', i); showRepo(i); };
@@ -1034,6 +1090,7 @@ vec3 lmDec(vec4 t, float s) { return pow(t.rgb, vec3(lmGamma)) * s; }`;
   let last = performance.now(), blinkT = 0, tvT = 0, first = true, hoverT = 0, lastDraw = 0;
   const FRAME_MIN = touchMode ? 1000 / 30 - 2 : 0;   // phones: 30 fps is plenty for a room that mostly holds still
   function frame(now) {
+    if (state.tv) { last = now; requestAnimationFrame(frame); return; }   // a game is on the TV, full screen: let the room rest
     if (FRAME_MIN && now - lastDraw < FRAME_MIN) { requestAnimationFrame(frame); return; }
     lastDraw = now;
     // rAF time can precede the first performance.now(), so never let dt go negative

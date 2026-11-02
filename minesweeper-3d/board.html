@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>지뢰 큐브 순위표</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23e65a19' d='M16 3 28 10 16 17 4 10Z'/%3E%3Cpath fill='%237386a8' d='M4 10 16 17V30L4 23Z'/%3E%3Cpath fill='%232a3345' d='M28 10 16 17V30L28 23Z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;600;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+  <style>
+    /* 큰 화면(남는 모니터)에 띄워 두는 순위표. 게임의 타이머 판(어두운 판 위 주황 숫자)을 그대로 키운 한 가지 모습으로 간다. */
+    :root {
+      color-scheme: dark;
+      --bg: #0a0d12; --panel: #111720; --raise: #18202b; --line: #232d3b; --ink: #e6ebf2; --muted: #8b96a8;
+      --plate: #05080c; --plate-ink: #ff8a3d; --accent: #ff7433; --cube: #4e6288; --edge: #2a3345;
+      --gold: #ffcc33; --silver: #c4ccd9; --bronze: #d9925a; --good: #38c774; --bad: #ff4c5c;
+      --f-display: "Do Hyeon", "Gothic A1", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      --f-body: "Gothic A1", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+      --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+      --u: clamp(12px, 0.62vw + 6px, 20px);   /* 화면 크기에 맞춰 커지는 기본 글자 크기 */
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink); font: 400 var(--u)/1.45 var(--f-body);
+      display: grid; grid-template-rows: auto auto 1fr auto; gap: calc(var(--u) * 0.9);
+      padding: calc(var(--u) * 1.1) max(16px, calc(var(--u) * 1.4));
+    }
+    button { font: inherit; color: inherit; }
+
+    .top { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--u) * 0.8) calc(var(--u) * 2); }
+    .brand { display: flex; align-items: center; gap: calc(var(--u) * 0.6); }
+    .brand svg { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); }
+    .brand h1 { margin: 0; font: 400 calc(var(--u) * 2.3)/1 var(--f-display); letter-spacing: 0.01em; white-space: nowrap; }
+    .join {
+      display: grid; gap: 2px; padding: calc(var(--u) * 0.45) calc(var(--u) * 0.9);
+      background: var(--plate); border-radius: 10px; box-shadow: inset 0 1px 4px rgb(0 0 0 / 0.6); min-width: 0;
+    }
+    .join span, .clock span, .k { font-size: calc(var(--u) * 0.72); letter-spacing: 0.08em; color: var(--muted); }
+    .join b { font: 800 calc(var(--u) * 1.5)/1.1 var(--f-mono); color: var(--plate-ink); overflow-wrap: anywhere; }
+    .join small { font: 500 calc(var(--u) * 0.7) var(--f-mono); color: var(--muted); }
+    .clock { margin-left: auto; display: grid; justify-items: end; gap: 2px; }
+    .clock b { font: 800 calc(var(--u) * 1.9)/1 var(--f-mono); font-variant-numeric: tabular-nums; }
+
+    .banner {
+      display: flex; align-items: center; gap: calc(var(--u) * 0.8);
+      padding: calc(var(--u) * 0.6) calc(var(--u) * 1);
+      border-radius: 12px; background: var(--accent); color: #1b1206; font-weight: 800; font-size: calc(var(--u) * 1.15);
+      animation: drop 0.35s ease-out;
+    }
+    .banner .tag { font: 400 calc(var(--u) * 1.3)/1 var(--f-display); background: #1b1206; color: var(--accent); padding: 4px 10px; border-radius: 8px; }
+    .banner b { font-family: var(--f-mono); }
+    @keyframes drop { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 20em); gap: calc(var(--u) * 1); min-height: 0; }
+    .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(12.5em, 1fr)); gap: calc(var(--u) * 0.8); align-content: stretch; min-width: 0; min-height: 0; }
+    .card, .side section {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      padding: calc(var(--u) * 0.8) calc(var(--u) * 0.9); min-width: 0;
+    }
+    .card { display: grid; gap: calc(var(--u) * 0.45); align-content: start; overflow: hidden; }
+    .card header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 8px; }
+    .card h2 { white-space: nowrap; }
+    .card h2, .side h2 { margin: 0; font: 400 calc(var(--u) * 1.6)/1.1 var(--f-display); }
+    .card.four h2 { color: var(--accent); }
+    .dims { font: 500 calc(var(--u) * 0.72) var(--f-mono); color: var(--muted); white-space: nowrap; }
+    .card h3 { margin: calc(var(--u) * 0.4) 0 0; font-size: calc(var(--u) * 0.75); letter-spacing: 0.06em; color: var(--muted); font-weight: 800; display: flex; justify-content: space-between; }
+    .card h3 .cnt { font-weight: 600; letter-spacing: 0; }
+
+    .rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+    .rank li {
+      display: grid; grid-template-columns: 1.8em minmax(0, 1fr) auto; align-items: center; gap: 2px 0.5em;
+      padding: calc(var(--u) * 0.32) calc(var(--u) * 0.5); border-radius: 8px; background: var(--raise);
+    }
+    .rank .pos { font: 800 calc(var(--u) * 0.95) var(--f-mono); color: var(--muted); text-align: center; }
+    .rank li:nth-child(1) .pos { color: var(--gold); }
+    .rank li:nth-child(2) .pos { color: var(--silver); }
+    .rank li:nth-child(3) .pos { color: var(--bronze); }
+    .rank li:nth-child(1) { box-shadow: inset 3px 0 0 var(--gold); }
+    .rank .nm { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rank .nm small { font-weight: 600; color: var(--muted); font-size: 0.78em; margin-left: 0.3em; }
+    .rank .tm { font: 800 calc(var(--u) * 1.05) var(--f-mono); color: var(--plate-ink); font-variant-numeric: tabular-nums; }
+    .x { display: none; }
+    .admin .x {
+      display: inline-grid; place-items: center; border: 1px solid var(--line); background: transparent; border-radius: 6px;
+      color: var(--muted); font-size: 0.8em; padding: 0 0.4em; cursor: pointer;
+    }
+    .admin .x.armed { background: var(--bad); border-color: var(--bad); color: #fff; }
+    /* 관리 화면(?admin, 서버 컴퓨터): 기록마다 자리(IP) 표. 같은 자리는 같은 색 */
+    .rank .sub { grid-column: 2 / -1; display: flex; align-items: center; gap: 0.4em; min-width: 0; }
+    .rank .sub .x { margin-left: auto; }
+    .seat {
+      font: 700 0.72em var(--f-mono); white-space: nowrap; padding: 0.05em 0.45em; border-radius: 99px;
+      color: hsl(var(--h) 80% 72%); border: 1px solid hsl(var(--h) 60% 55% / 0.75);
+    }
+    .empty { color: var(--muted); font-size: calc(var(--u) * 0.8); padding: calc(var(--u) * 0.3) 0.2em; }
+    .fresh { animation: fresh 4s ease-out; }
+    @keyframes fresh { 0%, 30% { background: color-mix(in srgb, var(--accent) 45%, var(--raise)); } 100% { background: var(--raise); } }
+
+    .side { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: calc(var(--u) * 0.8); min-height: 0; min-width: 0; }
+    .admin .side { grid-template-rows: auto auto minmax(0, 1fr); }
+    .seats { display: grid; gap: calc(var(--u) * 0.45); }
+    .side .seats h2 { font-size: calc(var(--u) * 1.2); }
+    .seats h2 small { font: 600 calc(var(--u) * 0.65) var(--f-body); color: var(--muted); margin-left: 0.4em; }
+    .seats ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 12em; overflow-y: auto; }
+    .seats li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3em 0.5em; font-size: calc(var(--u) * 0.8); padding: 0.3em 0.5em; border-radius: 8px; background: var(--raise); }
+    .seats .who { font-weight: 800; min-width: 0; overflow-wrap: anywhere; }
+    .seats li.multi .who { color: var(--gold); }
+    .seats .n { color: var(--muted); margin-left: auto; white-space: nowrap; }
+    /* 인터넷 순위판의 관리 키 입력(?admin) */
+    .keybox { display: grid; gap: calc(var(--u) * 0.4); }
+    .keybox .row { display: flex; gap: 6px; }
+    .keybox input {
+      flex: 1; min-width: 0; font: 500 calc(var(--u) * 0.85) var(--f-mono); color: var(--ink);
+      background: var(--plate); border: 1px solid var(--line); border-radius: 8px; padding: 0.35em 0.6em;
+    }
+    .keybox button { border: 0; border-radius: 8px; background: var(--accent); color: #1b1206; font-weight: 800; padding: 0.35em 0.9em; cursor: pointer; }
+    .keybox p { margin: 0; font-size: calc(var(--u) * 0.72); color: var(--muted); }
+    .keybox p.err { color: var(--bad); }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .stats div { display: grid; gap: 2px; background: var(--plate); border-radius: 10px; padding: calc(var(--u) * 0.45) calc(var(--u) * 0.6); }
+    .stats b { font: 800 calc(var(--u) * 1.5)/1 var(--f-mono); color: var(--plate-ink); }
+    .feed { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: calc(var(--u) * 0.5); min-height: 0; overflow: hidden; }
+    .feed ol {
+      list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; align-content: start; overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent); mask-image: linear-gradient(to bottom, #000 82%, transparent);
+    }
+    .feed li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 0.6em; padding: calc(var(--u) * 0.4) calc(var(--u) * 0.55); border-radius: 8px; background: var(--raise); }
+    .feed .nm { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .feed .tm { font: 800 calc(var(--u) * 1) var(--f-mono); color: var(--plate-ink); }
+    .feed .meta { grid-column: 1 / -1; font-size: calc(var(--u) * 0.72); color: var(--muted); display: flex; gap: 0.5em; align-items: center; }
+    .pill { font-size: 0.9em; font-weight: 800; padding: 0 0.5em; border-radius: 99px; background: var(--edge); color: var(--ink); }
+    .pill.daily { background: var(--accent); color: #1b1206; }
+    .pill.sus { background: color-mix(in srgb, var(--gold) 30%, var(--edge)); cursor: help; }
+    .pill.sus.out { background: var(--bad); color: #fff; }
+
+    .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; color: var(--muted); font-size: calc(var(--u) * 0.72); }
+    .live::before { content: ""; display: inline-block; width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--bad); margin-right: 0.45em; vertical-align: 0.05em; }
+    .live.on::before { background: var(--good); }
+    .err-box { grid-column: 1 / -1; padding: 2em; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; }
+
+    @media (max-width: 900px) {
+      html, body { height: auto; }
+      body { min-height: 100%; grid-template-rows: auto; }
+      .grid { grid-template-columns: minmax(0, 1fr); }
+      .levels { align-content: start; }
+      .clock { margin-left: 0; justify-items: start; }
+      .feed ol { -webkit-mask-image: none; mask-image: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .banner, .fresh { animation: none; } }
+  </style>
+  <script>window.MS_BOARD = {"v":"ab3ae53c2f","api":"https://ms3d-board.yoon57296.workers.dev/","verUrl":"version.json"};</script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <path fill="#ff7433" d="M16 3 28 10 16 17 4 10Z"/><path fill="#4e6288" d="M4 10 16 17V30L4 23Z"/><path fill="#2a3345" d="M28 10 16 17V30L28 23Z"/>
+      </svg>
+      <h1>지뢰 큐브 순위표</h1>
+    </div>
+    <div class="join"><span id="join-label">같이 하기 · 같은 네트워크에서 이 주소로</span><b id="join">…</b><small id="join-more"></small></div>
+    <div class="clock"><span id="date"></span><b id="time">--:--</b></div>
+  </header>
+  <div class="banner" id="banner" role="status" aria-live="polite" hidden></div>
+  <main class="grid">
+    <section class="levels" id="levels" aria-label="난이도별 순위"></section>
+    <aside class="side">
+      <section aria-label="오늘">
+        <div class="stats" id="stats"></div>
+      </section>
+      <section class="seats" id="seats-box" aria-label="자리별 기록" hidden>
+        <h2>자리별<small id="seats-note">IP · 서버 컴퓨터에서만 보여요</small></h2>
+        <form class="keybox" id="keybox" hidden>
+          <label for="key-in" class="k">관리 키</label>
+          <div class="row"><input type="password" id="key-in" autocomplete="current-password"><button type="submit">열기</button></div>
+          <p id="key-msg"></p>
+        </form>
+        <ol id="seats"></ol>
+      </section>
+      <section class="feed" aria-label="방금 클리어">
+        <h2>방금 클리어</h2>
+        <ol id="feed"></ol>
+      </section>
+    </aside>
+  </main>
+  <footer class="foot">
+    <span id="live" class="live">연결 중</span>
+    <span>오늘의 판은 하루 첫 도전만 순위에 들어요 · 힌트는 1회당 20초가 더해진 시간 · F11 전체 화면</span>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+      var $ = function (id) { return document.getElementById(id); };
+      var ADMIN = /(^|[?&])admin\b/.test(location.search.slice(1));
+      // 순위표 서버가 다른 주소(인터넷, Cloudflare Worker)에 있으면 github.io 빌드가 MS_BOARD.api에 적어 둔다.
+      // 그때는 실시간 연결 대신 15초마다 읽고, 관리 화면(?admin)은 서버 컴퓨터가 아니라 관리 키로 연다.
+      var CFG = window.MS_BOARD || {};
+      var API = CFG.api ? String(CFG.api).replace(/\/*$/, '/') : '';
+      var REMOTE = !!API, POLL = 15000;
+      var GAME_URL = new URL('./', location.href).href;   // 게임 주소(순위판 옆)
+      var adminKey = '';
+      try { adminKey = localStorage.getItem('ms3d.adminKey') || ''; } catch (e) { adminKey = ''; }
+      // 한 목록에 보일 줄 수: 화면이 높을수록 많이
+      var N = innerHeight >= 1000 ? 8 : innerHeight >= 780 ? 6 : 4;
+      var data = null, freshId = null, lastSeen = null, banners = [], bannerOn = false, ver = '', known = null;
+      if (ADMIN) document.body.classList.add('admin');
+      if (REMOTE) {
+        $('join-label').textContent = '같이 하기 · 이 주소로 들어오세요';
+        $('seats-note').textContent = 'IP · 관리 키로만 보여요';
+      }
+
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+      }
+      function fmt(ms) {
+        var s = Math.max(0, ms) / 1000, m = Math.floor(s / 60), r = (s - m * 60).toFixed(1);
+        return m + ':' + (+r < 10 ? '0' : '') + r;
+      }
+      function ago(t) {
+        var s = Math.max(0, (Date.now() - t) / 1000);
+        if (s < 60) return '방금';
+        if (s < 3600) return Math.floor(s / 60) + '분 전';
+        if (s < 86400) return Math.floor(s / 3600) + '시간 전';
+        return Math.floor(s / 86400) + '일 전';
+      }
+      function dayText(day) {
+        var m = /^\d+-(\d+)-(\d+)$/.exec(day || '');
+        return m ? (+m[1]) + '월 ' + (+m[2]) + '일' : '';
+      }
+      function levelName(key) {
+        if (!data) return key;
+        var l = data.levels.filter(function (x) { return x.key === key; })[0];
+        return l ? l.name : key;
+      }
+
+      // 자리(IP) 표: 끝의 두 자리(예: 107.182)만 적고, 마지막 숫자로 색을 고른다(이웃 번호끼리 색이 멀어지게 황금각).
+      function seatLabel(ip) {
+        if (ip === '127.0.0.1') return '서버';
+        var m = /(\d+\.\d+)$/.exec(ip) || /([0-9a-f]*:[0-9a-f]+)$/i.exec(ip);   // IPv6는 끝의 두 묶음
+        return m ? m[1] : ip;
+      }
+      function seatHue(ip) {
+        var m = /(\d+)$/.exec(ip), h = 0;
+        if (m) return Math.round((+m[1] * 137.508) % 360);
+        for (var i = 0; i < ip.length; i++) h = (h * 31 + ip.charCodeAt(i)) % 360;
+        return h;
+      }
+      function seat(r) {
+        if (!ADMIN) return '';
+        if (!r.ip) return '';   // IP를 남기기 전의 기록
+        return '<span class="seat" style="--h:' + seatHue(r.ip) + '" title="' + esc(r.ip) + '">' + esc(seatLabel(r.ip)) + '</span>';
+      }
+
+      // 관리 화면: 자동 입력 의심 점수. 기준 이상이면 순위에서 빠진 기록이다. 이유는 마우스를 올리면 보인다.
+      function susPill(r) {
+        if (!ADMIN || !r.sus) return '';
+        var out = data && r.sus >= (data.susLimit || 60);
+        return ' <span class="pill sus' + (out ? ' out' : '') + '" title="' + esc(r.why || '') + '">' + (out ? '순위 제외 ' : '의심 ') + r.sus + '</span>';
+      }
+
+      function rows(list, empty) {
+        if (!list.length) return '<p class="empty">' + empty + '</p>';
+        return '<ol class="rank">' + list.map(function (r, i) {
+          return '<li data-id="' + esc(r.id) + '"' + (r.id === freshId ? ' class="fresh"' : '') + '>' +
+            '<span class="pos">' + (i + 1) + '</span>' +
+            '<span class="nm">' + esc(r.name) + (r.hints ? '<small>힌트 ' + r.hints + '</small>' : '') + '</span>' +
+            '<span class="tm">' + fmt(r.ms) + '</span>' +
+            // 관리 화면에서만 이름 아래 줄에 자리(IP)와 숨기기 버튼
+            (ADMIN ? '<span class="sub">' + seat(r) + '<button type="button" class="x" data-hide="' + esc(r.id) + '" title="이 기록 숨기기">✕</button></span>' : '') + '</li>';
+        }).join('') + '</ol>';
+      }
+      function render() {
+        if (!data) return;
+        $('levels').innerHTML = data.levels.map(function (l) {
+          return '<article class="card' + (l.dims.split('×').length > 3 ? ' four' : '') + '">' +
+            '<header><h2>' + esc(l.name) + '</h2><span class="dims">' + esc(l.dims) + ' · 지뢰 ' + l.mines + '</span></header>' +
+            '<h3>오늘의 판 · 첫 도전<span class="cnt">' + l.dailyCount + '명</span></h3>' + rows(l.daily, '첫 기록을 기다려요') +
+            '<h3>역대 최고<span class="cnt">' + l.bestCount + '명</span></h3>' + rows(l.best, '아직 기록이 없어요') +
+            '</article>';
+        }).join('');
+        $('feed').innerHTML = data.recent.length ? data.recent.map(function (r) {
+          var tag = r.daily ? '<span class="pill daily">' + (r.first ? '오늘의 판 첫 도전' : '오늘의 판 재도전') + '</span>' : '<span class="pill">일반</span>';
+          return '<li data-id="' + esc(r.id) + '"' + (r.id === freshId ? ' class="fresh"' : '') + '>' +
+            '<span class="nm">' + esc(r.name) + '</span><span class="tm">' + fmt(r.ms) + '</span>' +
+            '<span class="meta">' + esc(levelName(r.level)) + ' ' + tag + (r.hints ? ' 힌트 ' + r.hints : '') + ' · ' + ago(r.t) + ' ' + seat(r) + susPill(r) +
+            ' <button type="button" class="x" data-hide="' + esc(r.id) + '" title="이 기록 숨기기">✕</button></span></li>';
+        }).join('') : '<li class="empty">아직 아무도 깨지 않았어요. 첫 클리어를 기다려요.</li>';
+        if (ADMIN) {
+          $('seats-box').hidden = false;
+          $('seats').innerHTML = !data.seats ? '<li>' + (REMOTE ? '관리 키를 넣으면 자리(IP)가 보여요.' : '자리(IP)는 서버 컴퓨터에서 localhost 주소로 열어야 보여요.') + '</li>' :
+            !data.seats.length ? '<li>아직 IP가 남은 기록이 없어요.</li>' :
+            data.seats.map(function (st) {
+              return '<li' + (st.names.length > 1 ? ' class="multi" title="한 자리에서 이름 ' + st.names.length + '개"' : '') + '>' + seat(st) +
+                '<span class="who">' + st.names.map(esc).join(', ') + '</span><span class="n">' + st.clears + '판 · ' + ago(st.last) + '</span></li>';
+            }).join('');
+        }
+        var s = data.stats;
+        $('stats').innerHTML = '<div><span class="k">오늘 클리어</span><b>' + s.todayClears + '</b></div>' +
+          '<div><span class="k">참가자</span><b>' + s.players + '</b></div>' +
+          '<div><span class="k">전체 클리어</span><b>' + s.clears + '</b></div>';
+        if (REMOTE) {
+          $('join').textContent = GAME_URL.replace(/^https?:\/\//, '');
+          $('join-more').textContent = '';
+          return;
+        }
+        // 이 화면을 서버 컴퓨터(localhost)에서 열었으면 다른 컴퓨터가 들어올 내부망 주소를 보여 준다.
+        var local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+        var addrs = local ? (data.addrs || []) : [location.origin];
+        $('join').textContent = addrs[0] || location.origin;
+        $('join-more').textContent = local && !addrs.length ? '지금은 이 컴퓨터에서만 들어올 수 있어요' : addrs.slice(1).join(' · ');
+      }
+
+      function load() {
+        var asAdmin = ADMIN && (!REMOTE || !!adminKey);
+        return fetch(API + 'api/board?n=' + N + (asAdmin ? '&admin=1' : ''), { cache: 'no-store', headers: asAdmin ? authHeaders() : {} }).then(function (r) {
+          if (r.status === 401 && REMOTE) {   // 관리 키가 틀렸다: 지우고 다시 묻는다(순위는 일반 화면으로 읽는다)
+            adminKey = ''; saveKey('');
+            askKey('관리 키가 맞지 않아요. 다시 넣어 주세요.');
+            return load().then(function () { return null; });
+          }
+          return r.json();
+        }).then(function (o) {
+          if (!o || !o.levels) return;
+          // 서버의 게임 파일이 바뀌었으면(업데이트) 이 화면도 새로 불러온다. 걸어 두는 화면이라 사람이 누를 필요가 없다.
+          if (ver && o.v && o.v !== ver) { location.reload(); return; }
+          ver = ver || o.v || '';
+          if (REMOTE) {
+            announceNew(o);
+            $('live').className = 'live on'; $('live').textContent = Math.round(POLL / 1000) + '초마다 새로 읽어요';
+          }
+          data = o;
+          render();
+          if (REMOTE) freshId = null;   // 새 기록 반짝임은 한 번만(15초마다 다시 그린다)
+        }, function () {
+          if (REMOTE) { $('live').className = 'live'; $('live').textContent = '순위표 서버에 닿지 않아요 · 다시 읽는 중…'; }
+          if (!data) $('levels').innerHTML = '<p class="err-box">' + (REMOTE ? '순위표 서버에 닿지 않아요. 잠시 뒤에 다시 읽어요.' : '순위표 서버에 닿지 않아요. 서버 창이 켜져 있는지 확인해 주세요.') + '</p>';
+        });
+      }
+      // github.io 빌드: 게임 옆의 version.json이 이 화면의 버전과 다르면(업데이트) 새로 불러온다.
+      function checkVer() {
+        if (!CFG.verUrl || !CFG.v) return;
+        fetch(CFG.verUrl + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (o) {
+          if (o && o.v && o.v !== CFG.v) location.reload();
+        }, function () { /* 다음에 다시 */ });
+      }
+
+      // ---------- 관리 키(인터넷 순위판) ----------
+      // 키는 이 브라우저에만 저장한다. 틀리면 지우고 다시 묻는다.
+      function authHeaders() { return REMOTE && adminKey ? { Authorization: 'Bearer ' + adminKey } : {}; }
+      function saveKey(k) {
+        try { if (k) localStorage.setItem('ms3d.adminKey', k); else localStorage.removeItem('ms3d.adminKey'); } catch (e) { /* 이번 창에서만 기억 */ }
+      }
+      function askKey(msg) {
+        $('seats-box').hidden = false;
+        $('keybox').hidden = false;
+        $('key-msg').textContent = msg || '관리 키를 넣으면 자리(IP)와 의심 기록이 보이고 기록을 숨길 수 있어요. 키는 이 브라우저에만 저장돼요.';
+        $('key-msg').className = msg ? 'err' : '';
+      }
+      $('keybox').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var k = $('key-in').value.trim();
+        if (!k) { $('key-in').focus(); return; }
+        adminKey = k; saveKey(k);
+        $('key-in').value = '';
+        $('keybox').hidden = true;
+        load();
+      });
+
+      // 인터넷 순위판: 앞서 읽은 '방금 클리어'에 없던 기록을 알림 줄로 띄운다(실시간 연결의 score 알림 대신).
+      function announceNew(o) {
+        var ids = o.recent.map(function (r) { return r.id; });
+        if (known) {
+          o.recent.slice().reverse().forEach(function (r) {
+            if (known.indexOf(r.id) >= 0 || (r.sus || 0) >= (o.susLimit || 60)) return;
+            var lv = o.levels.filter(function (l) { return l.key === r.level; })[0];
+            var pos = function (list) { for (var i = 0; i < list.length; i++) if (list[i].id === r.id) return i + 1; return 0; };
+            var ev = { rec: r, board: 'retry' };
+            if (lv && r.daily && r.first) ev = { rec: r, board: 'daily', rank: pos(lv.daily), total: lv.dailyCount };
+            else if (lv && !r.daily) { var k = pos(lv.best); ev = { rec: r, board: 'best', rank: k, total: lv.bestCount, isBest: k > 0 }; }
+            freshId = r.id;
+            announce(ev);
+          });
+        }
+        known = ids;
+      }
+
+      // ---------- 새 기록 알림 ----------
+      function announce(ev) {
+        var r = ev.rec, lv = levelName(r.level), text;
+        if (ev.board === 'daily') text = '<span class="tag">' + (ev.rank === 1 ? '오늘 1위' : '오늘의 판') + '</span> ' + esc(r.name) + ' · ' + esc(lv) + ' 첫 도전 <b>' + fmt(r.ms) + '</b>' + (ev.rank ? ' · ' + ev.rank + '위 / ' + ev.total + '명' : '');
+        else if (ev.board === 'best') text = '<span class="tag">' + (ev.isBest && ev.rank === 1 ? '신기록' : '클리어') + '</span> ' + esc(r.name) + ' · ' + esc(lv) + ' <b>' + fmt(r.ms) + '</b>' + (ev.isBest ? ' · ' + lv + ' ' + ev.rank + '위' : '');
+        else text = '<span class="tag">재도전</span> ' + esc(r.name) + ' · 오늘의 판 ' + esc(lv) + ' <b>' + fmt(r.ms) + '</b>';
+        banners.push(text);
+        if (!bannerOn) nextBanner();
+      }
+      function nextBanner() {
+        var b = $('banner'), text = banners.shift();
+        if (!text) { b.hidden = true; bannerOn = false; return; }
+        bannerOn = true;
+        b.hidden = true; void b.offsetWidth;
+        b.innerHTML = text;
+        b.hidden = false;
+        setTimeout(nextBanner, 6000);
+      }
+
+      var reloadTimer = 0;
+      function soon() { clearTimeout(reloadTimer); reloadTimer = setTimeout(load, 250); }
+      function connect() {
+        if (REMOTE) { setInterval(load, POLL); return; }   // 인터넷: 실시간 연결 없이 15초마다 읽는다
+        if (!window.EventSource) return;
+        var es = new EventSource('api/events');
+        es.onopen = function () { $('live').className = 'live on'; $('live').textContent = '실시간 연결됨'; load(); };
+        es.onerror = function () { $('live').className = 'live'; $('live').textContent = '서버와 다시 연결하는 중…'; };
+        es.addEventListener('score', function (e) {
+          var ev = JSON.parse(e.data);
+          if (ev.rec.id === lastSeen) return;
+          lastSeen = freshId = ev.rec.id;
+          announce(ev);
+          soon();
+        });
+        es.addEventListener('hide', soon);
+        es.addEventListener('suspect', function () { if (ADMIN) soon(); });   // 순위에서 뺀 기록은 관리 화면에만 보인다
+      }
+
+      // ---------- 숨기기(?admin, 서버 컴퓨터나 관리 키) — 한 번 누르면 빨개지고 한 번 더 누르면 숨긴다 ----------
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest && e.target.closest('[data-hide]');
+        if (!b || !ADMIN) return;
+        if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = '숨기기?'; return; }
+        fetch(API + 'api/admin/hide', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()), body: JSON.stringify({ id: b.getAttribute('data-hide') }) })
+          .then(function (r) {
+            if (r.status === 403) alertBox('서버 컴퓨터에서 localhost 주소로 열어야 숨길 수 있어요.');
+            if (r.status === 401) alertBox('관리 키가 있어야 숨길 수 있어요.');
+            load();
+          });
+      });
+      function alertBox(msg) { banners.push('<span class="tag">안내</span> ' + esc(msg)); if (!bannerOn) nextBanner(); }
+
+      function tick() {
+        var d = new Date();
+        $('date').textContent = d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+        $('time').textContent = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+      tick();
+      setInterval(tick, 1000);
+      // 실시간 연결이 끊겨도 1분마다 새로 읽는다(날짜가 바뀌면 오늘의 판도 바뀐다).
+      setInterval(function () { freshId = null; if (!REMOTE) load(); checkVer(); }, 60000);
+      if (ADMIN && REMOTE && !adminKey) askKey();
+      load();
+      connect();
+    })();
+  </script>
+</body>
+</html>
