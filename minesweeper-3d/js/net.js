@@ -203,7 +203,7 @@
   }
 
   // ---------- 순위표 창 ----------
-  var NOTICE = '그냥 기록을 위해 정보를 모아둡니다.';   // 처음 들어올 때 안내와 순위표 창에 같이 쓰는 한 줄
+  var NOTICE = '기록을 위해 정보를 모아둡니다.';   // 처음 들어올 때 안내와 순위표 창에 같이 쓰는 한 줄
   var cache = null, tab = null;
   function openBoard(level) {
     var app = MS.app, g = app.game;
