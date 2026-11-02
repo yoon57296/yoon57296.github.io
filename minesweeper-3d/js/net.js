@@ -210,8 +210,8 @@
     tab = LEVELS.indexOf(level) >= 0 ? level : g && LEVELS.indexOf(g.key) >= 0 ? g.key : tab || 'easy';
     app.openDialog(
       '<h2 id="dialog-title">순위표</h2>' +
-      '<p>' + (REMOTE ? '이 게임 주소로 들어온 사람끼리' : '이 서버로 들어온 사람끼리') + ' 기록을 나눠요. 힌트를 쓰면 1회당 20초가 더해진 시간이에요.</p>' +
-      '<p class="net-note">' + NOTICE + ' 자동 입력이 의심되는 기록은 순위에 넣지 않아요.</p>' +
+      '<p>' + (REMOTE ? '이 게임 주소로 들어온 사람끼리' : '이 서버로 들어온 사람끼리') + ' 기록을 나눕니다. 힌트를 쓰면 1회당 20초가 더해진 시간입니다.</p>' +
+      '<p class="net-note">' + NOTICE + ' 자동 입력이 의심되는 기록은 순위에 넣지 않습니다.</p>' +
       '<div class="net-me"><label class="net-name">내 이름<span class="net-row">' +
       '<input type="text" id="net-name" maxlength="' + NAME_MAX + '" autocomplete="nickname" placeholder="순위표에 보일 이름" value="' + esc(me.name) + '">' +
       '<button type="button" class="btn" id="net-save">저장</button></span></label><p class="net-msg" id="net-name-msg"></p></div>' +
