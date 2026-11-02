@@ -26,7 +26,8 @@
     hideSettled: true, hideNumbers: false, hideFlags: false, neighbors: true, dim: true, autoRotate: false,
     noGuess: true, mode: 'open', daily: false,
     level3: 'easy', level4: 'h4', wView: 'all', wFocus: 0,  // 3D/4D를 오갈 때 돌아갈 난이도, 4D W 보기
-    nbColor: ''                                             // 주변 칸 강조 색. 빈 값이면 테마 기본색
+    nbColor: '',                                            // 주변 칸 강조 색. 빈 값이면 테마 기본색
+    theme: 'auto'                                           // auto(기기 설정) · light · dark
   };
   var HIDES = [
     { key: 'hideSettled', hotkey: '1', name: '다 푼 숫자 숨기기' },
@@ -49,6 +50,7 @@
     if ([0, 1, 2].indexOf(p.axis) < 0) p.axis = 1;
     if (['all', 'one', 'upto'].indexOf(p.slice) < 0) p.slice = 'all';
     if (p.mode !== 'flag') p.mode = 'open';
+    if (['auto', 'light', 'dark'].indexOf(p.theme) < 0) p.theme = 'auto';
     var c = p.custom, L = MS.LIMITS;
     if (!c || [c.X, c.Y, c.Z, c.mines].some(function (v) { return typeof v !== 'number' || !isFinite(v); })) c = p.custom = { X: 5, Y: 5, Z: 5, mines: 12 };
     c.X = clampInt(c.X, L.min, L.max); c.Y = clampInt(c.Y, L.min, L.max); c.Z = clampInt(c.Z, L.min, L.max);
@@ -708,6 +710,7 @@
     var c = prefs.custom;
     els.customDims.textContent = prefs.level === 'custom' ? c.X + '×' + c.Y + '×' + c.Z : '직접 설정';
     setChecked(els.segView, 'data-view', prefs.view);
+    setChecked(els.segTheme, 'data-tm', prefs.theme);
     setChecked(els.segAxis, 'data-axis', prefs.axis);
     setChecked(els.segSlice, 'data-slice', prefs.slice);
     setChecked(els.dock, 'data-mode', prefs.mode);
@@ -1079,6 +1082,14 @@
       var b = e.target.closest('[data-view]');
       if (b && !b.disabled) setView(b.getAttribute('data-view'));
     });
+    els.segTheme.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-tm]');
+      if (!b) return;
+      prefs.theme = b.getAttribute('data-tm');
+      applyTheme();
+      syncControls();
+      savePrefs();
+    });
     els.segAxis.addEventListener('click', function (e) {
       var b = e.target.closest('[data-axis]');
       if (!b) return;
@@ -1194,6 +1205,13 @@
   function readTheme() {
     if (renderer && renderer.ok) renderer.setTheme(getComputedStyle(document.documentElement));
   }
+  // 테마: 자동이면 기기 설정을 따른다(아티팩트 뷰어처럼 바깥이 data-theme를 정해 두었으면 그 값). 밝게·어둡게는 직접 정한다.
+  // data-theme가 바뀌면 위의 MutationObserver가 readTheme로 3D 색도 바꾼다.
+  var hostTheme = null;
+  function applyTheme() {
+    var t = prefs.theme === 'auto' ? hostTheme : prefs.theme, root = document.documentElement;
+    if (t) root.setAttribute('data-theme', t); else root.removeAttribute('data-theme');
+  }
 
   // ---------- 시작 ----------
   function start(data) {
@@ -1202,13 +1220,15 @@
     if (data.prefs) saved = data.prefs;
     prefs = loadPrefs(saved);
     if (!prefs.view) prefs.view = window.innerWidth >= 1280 ? 'split' : '3d';
+    hostTheme = document.documentElement.getAttribute('data-theme');
+    applyTheme();
 
     els = {
       main: $('main'), view3d: $('view3d'), flat: $('flat'), cellinfo: $('cellinfo'), toast: $('toast'),
       minesLeft: $('mines-left'), timer: $('timer'), face: $('btn-new'), boardLine: $('board-line'), best: $('best'), bestK: $('best-k'),
       daily: $('btn-daily'),
       levels: $('levels'), customDims: $('custom-dims'), dock: $('dock'), dockLayerOut: $('dock-layer-out'),
-      segView: $('seg-view'), segAxis: $('seg-axis'), segSlice: $('seg-slice'), layer: $('layer'), layerOut: $('layer-out'),
+      segView: $('seg-view'), segAxis: $('seg-axis'), segSlice: $('seg-slice'), segTheme: $('seg-theme'), layer: $('layer'), layerOut: $('layer-out'),
       explode: $('explode'), explodeOut: $('explode-out'), optSettled: $('opt-settled'), optNumbers: $('opt-numbers'),
       optFlags: $('opt-flags'), optNb: $('opt-nb'), optDim: $('opt-dim'), optRotate: $('opt-rotate'), optNoguess: $('opt-noguess'),
       dialog: $('dialog'), scrim: $('scrim'), tools: $('tools'),
