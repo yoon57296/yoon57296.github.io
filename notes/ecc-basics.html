@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ECC 기초 개념 · yoon</title>
+<meta name="description" content="ECC를 공부하기 앞서 정리한 그뢰브너 기저, 무한 원점, 점의 가산과 스칼라 배산, Double-and-Add.">
+<meta name="theme-color" content="#15120f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+/* A study note pulled from the room's bookshelf: same palette as the room, one readable column. */
+:root{
+  color-scheme:dark;
+  --ink:#15120f;--paper:#efe8dc;--muted:#a39a8c;--line:#3b342c;--lamp:#f2a65a;
+  --serif:"Gowun Batang","Noto Serif KR",Georgia,serif;
+  --sans:"IBM Plex Sans KR",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--paper);font:400 15px/1.75 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration-color:#f2a65a88;text-underline-offset:3px}
+a:hover{color:var(--lamp)}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:3px}
+main{max-width:720px;margin:0 auto;padding:calc(40px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) 80px max(20px,env(safe-area-inset-left,0px))}
+.bar{display:flex;justify-content:space-between;gap:12px;margin-bottom:40px;font:400 11.5px var(--mono);letter-spacing:.04em;color:var(--muted)}
+.bar a{color:var(--muted);text-decoration:none}
+.bar a:hover{color:var(--paper)}
+.kicker{font:400 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--lamp)}
+h1{margin:14px 0 10px;font:700 clamp(30px,6.4vw,42px)/1.15 var(--serif);letter-spacing:-.02em;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font:400 11.5px/1.6 var(--mono);color:var(--muted)}
+.lead{margin:28px 0 0;font:400 17px/1.95 var(--serif);color:#e6ddcf}
+h2{margin:52px 0 6px;font:700 23px/1.35 var(--serif);letter-spacing:-.01em}
+h2 .n{font:500 12px var(--mono);color:var(--lamp);margin-right:10px;vertical-align:3px}
+h2 small{display:block;font:400 12px/1.6 var(--mono);color:var(--muted);letter-spacing:.02em;margin-top:2px}
+h3{margin:30px 0 8px;font:500 11px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--lamp)}
+p{margin:14px 0 0;font:400 16px/1.95 var(--serif);color:#e6ddcf}
+strong{color:var(--paper)}
+ol,ul{margin:12px 0 0;padding-left:1.3em;font:400 16px/1.95 var(--serif);color:#e6ddcf}
+li{margin:6px 0}
+li::marker{color:var(--muted);font-family:var(--mono);font-size:.85em}
+.math{margin:16px 0 0;padding:16px 18px;border:1px solid var(--line);border-radius:4px;background:#0f0d0b;overflow-x:auto;text-align:center}
+.steps{list-style:none;padding:0;border-top:1px solid var(--line)}
+.steps li{display:grid;grid-template-columns:7.5em 1fr;gap:12px;margin:0;padding:10px 0;border-bottom:1px solid var(--line)}
+.steps b{font:500 12.5px/2.2 var(--mono);color:var(--muted)}
+code{font:400 .88em var(--mono);color:var(--lamp);background:#f2a65a14;border-radius:3px;padding:1px 5px}
+.note{margin-top:20px;padding:12px 16px;border-left:2px solid var(--lamp);background:#f2a65a0d;font:400 14.5px/1.85 var(--sans);color:#d8d0c3}
+.note p{font:inherit;color:inherit;margin:0}
+.katex{font-size:1.06em}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font:400 11.5px var(--mono);color:var(--muted)}
+@media (max-width:520px){.steps li{grid-template-columns:1fr;gap:0}}
+@media print{
+  :root{color-scheme:light;--ink:#fff;--paper:#111;--muted:#555;--line:#ddd;--lamp:#8a4b12}
+  .bar,footer{display:none}
+  p,ol,ul,.lead,.note{color:#222}
+  .math{background:none}
+}
+</style>
+</head>
+<body>
+<main>
+  <nav class="bar"><a href="../">← yoon's room · 책장</a><span>Study note</span></nav>
+
+  <article>
+    <div class="kicker">Study note · Cryptography</div>
+    <h1>ECC를 공부하기 전에: 꼭 알아야 할 네 가지 개념</h1>
+    <div class="meta"><span>2026-11</span><span>그뢰브너 기저 · 무한 원점 · 점의 가산 · Double-and-Add</span></div>
+
+    <p class="lead">ECC를 공부하기 앞서 ECC의 필수 개념인 그뢰브너 기저, 무한 원점, 타원 곡선의 점의 가산, 스칼라 배산에 대해서 공부를 하였다.</p>
+
+    <h2><span class="n">01</span>그뢰브너 기저<small>Gröbner Basis</small></h2>
+    <p>그뢰브너 기저는 간단하게 말하면 그냥 <strong>비선형 연립방정식을 푸는 정리 정돈 기술</strong> 같은 느낌이다. 변수 우선순위(예: \(x &gt; y\))를 정한 뒤, 각 식의 대장 항(선두항)을 부딪혀 소거하면서 변수를 하나씩 줄여나간다.</p>
+
+    <h3>풀이 예시</h3>
+    <div class="math">\[\begin{cases} f_1 = x^2 - y - 3 \\ f_2 = xy - 2 \end{cases}\]</div>
+    <ol>
+      <li>\(f_1\)의 \(x^2\)과 \(f_2\)의 \(xy\)를 없애기 위해 \(y \cdot f_1 - x \cdot f_2\)를 계산하면 \(f_3 = 2x - y^2 - 3y\)가 나온다.</li>
+      <li>다시 \(f_2\)와 \(f_3\)의 대장 항(\(xy\)와 \(2x\))을 소거하기 위해 \(2f_2 - y \cdot f_3\)를 계산하면 \(f_4 = y^3 + 3y^2 - 4\)가 된다.</li>
+    </ol>
+    <p>이와 같이 \(f_1\)과 \(f_2\)에서 \(x\)를 연쇄적으로 제거하고, 마지막에 남은 \(y\)에 대한 단일 방정식 \(y^3 + 3y^2 - 4 = (y-1)(y+2)^2 = 0\)을 인수분해하여 \(y = 1, -2\)를 구한 뒤, 거꾸로 대입해 모든 해 \((2, 1), (-1, -2)\)를 정리하는 것이다.</p>
+
+    <h2><span class="n">02</span>무한 원점<small>Point at Infinity, 𝒪</small></h2>
+    <p>무한 원점이란 타원 곡선 위 임의의 점 \(P(x, y)\)에 대하여 \(x\)축으로 반전된 점 \(-P(x, -y)\), <strong>이 두 점을 이은 수직선이 무한히 뻗어나가 만나는 가상의 점(\(\mathcal{O}\))</strong>이다.</p>
+    <p>타원 곡선 위의 점들로 덧셈 연산 체계를 만들려면 일반 숫자 계산의 \(0\)처럼 더해도 자기 자신이 나오는 항등원이 반드시 필요한데, 무한 원점이 바로 그 기준점 역할을 한다.</p>
+    <div class="math">\[P + \mathcal{O} = P, \qquad P + (-P) = \mathcal{O}\]</div>
+
+    <h2><span class="n">03</span>점의 가산과 스칼라 배산<small>Point Addition &amp; Scalar Multiplication</small></h2>
+    <p>타원 곡선의 점의 가산이란 곡선 위의 임의의 두 점 \(P, Q\)를 직선으로 이어 세 번째 교점을 찾고, 이를 \(x\)축 대칭시켜 새로운 점 \(R\)을 구하는 연산이다. 그리고 이 점의 가산을 \(k\)번 반복해서 곡선 위에 점들을 징검다리처럼 찍어 나가는 것이 <strong>스칼라 배산(\(kP\))</strong>이다.</p>
+
+    <h3>공식과 예시 풀이</h3>
+    <p>\(y^2 = x^3 + 17\) 위의 두 점 \(P(-2, 3),\ Q(2, -5)\)를 더해 보자.</p>
+    <div class="math">\[\begin{aligned}
+      \lambda &amp;= \frac{y_2 - y_1}{x_2 - x_1} = \frac{-5 - 3}{2 - (-2)} = -2 \\[4pt]
+      x_3 &amp;= \lambda^2 - x_1 - x_2 = (-2)^2 - (-2) - 2 = 4 \\[4pt]
+      y_3 &amp;= \lambda(x_1 - x_3) - y_1 = -2(-2 - 4) - 3 = 9
+    \end{aligned}\]</div>
+    <p>결과적으로 새로운 점 \(R = (4, 9)\)를 얻을 수 있다. 실제로 \(9^2 = 81 = 4^3 + 17\)이니 곡선 위의 점이 맞다.</p>
+    <div class="note"><p>같은 점 \(P\)를 두 번 더하는 \(2P\)의 경우에는 두 점을 잇는 직선 대신 접선을 쓰므로, 기울기로 \(\lambda = \dfrac{3x_1^2 + a}{2y_1}\)를 사용한다. (곡선 \(y^2 = x^3 + ax + b\) 기준)</p></div>
+
+    <h2><span class="n">04</span>Double-and-Add 알고리즘</h2>
+    <p>하지만 점의 가산을 수없이 반복하는 스칼라 배산을 정직하게 한 번씩 다 계산할 경우, 아무리 컴퓨터라도 오래 걸릴 수밖에 없다. 그걸 방지하기 위해 나온 방식이 Double-and-Add이다.</p>
+    <p>스칼라 배산을 통해 \(kP\)를 구하고 싶을 때, 수 \(k\)를 이진수로 바꾼 뒤 가장 앞자리 <code>1</code>을 시작점 \(P\)로 두고, 다음 비트부터 <code>1</code>일 때는 2배(Double) 후 \(+P\)(Add)를, <code>0</code>일 때는 2배(Double)만 하는 방식으로 시간 복잡도를 최적화한다.</p>
+
+    <h3>예시 풀이: 13P 구하기</h3>
+    <p>\(13\)을 이진수로 변환하면 \(1101_{(2)}\)이다.</p>
+    <ul class="steps">
+      <li><b>1 · 첫 번째</b><span>시작점 \(P\)</span></li>
+      <li><b>1 · 두 번째</b><span>Double \(2P\) → Add \(+P\) = \(3P\)</span></li>
+      <li><b>0 · 세 번째</b><span>Double \(6P\) = \(6P\) (0이므로 더하기 생략)</span></li>
+      <li><b>1 · 네 번째</b><span>Double \(12P\) → Add \(+P\) = \(13P\)</span></li>
+    </ul>
+
+    <h3>시간 복잡도 비교</h3>
+    <p>일일이 더하는 방식은 \(O(k)\)만큼 걸리지만(예: \(k \approx 2^{256}\)이면 약 \(2^{256}\)번 연산), Double-and-Add를 사용하면 비트 수만큼만 반복하므로 \(O(\log_2 k)\)로 줄어든다. 256비트 \(k\)라면 Double 256번에 평균 128번 정도의 Add, 즉 <strong>평균 약 380번 연산</strong>으로 단축된다.</p>
+  </article>
+
+  <footer>yoon's room · 책장에 꽂아둔 공부 노트</footer>
+</main>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+addEventListener('DOMContentLoaded', () => {
+  if (window.renderMathInElement) renderMathInElement(document.querySelector('article'), {
+    delimiters: [{ left: '\\[', right: '\\]', display: true }, { left: '\\(', right: '\\)', display: false }],
+    throwOnError: false
+  });
+});
+</script>
+</body>
+</html>

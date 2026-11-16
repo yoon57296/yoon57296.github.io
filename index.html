@@ -344,14 +344,14 @@ function showBookList() {
   books.forEach((b, i) => {
     const r = el('button', { className: 'row', type: 'button' },
       el('span', {}, el('b', {}, b.title, b.example ? el('span', { className: 'tag', textContent: 'EXAMPLE' }) : ''), el('small', { textContent: b.author || '' })),
-      el('span', { className: 'side' }, el('span', { className: 'stars', textContent: stars(b.rating || 0) })));
+      el('span', { className: 'side' }, b.rating ? el('span', { className: 'stars', textContent: stars(b.rating) }) : (b.kind === 'note' ? 'NOTE' : '')));
     r.addEventListener('click', () => openBook(i));
     rows.append(r);
   });
   showPanel([
     el('div', { className: 'kicker', textContent: 'Bookshelf · ' + books.length + ' books' }),
     el('h2', { id: 'panel-title', textContent: '읽은 책들' }),
-    el('p', { textContent: '읽은 책과 짧은 독후감을 꽂아두는 책장이에요. 책을 누르면 독후감이 열려요.' }),
+    el('p', { textContent: '읽은 책과 독후감, 공부하며 정리한 노트를 꽂아두는 책장이에요. 책을 누르면 내용이 열려요.' }),
     books.length ? rows : el('p', { className: 'status', textContent: '아직 꽂힌 책이 없어요.' })
   ]);
 }
@@ -359,10 +359,11 @@ function showBook(i) {
   const b = data.books[i];
   const paras = String(b.review || '').split(/\n\s*\n/).map(t => el('p', { textContent: t.trim() }));
   showPanel([
-    el('div', { className: 'kicker', textContent: 'Book review' + (b.example ? ' · example' : '') }),
+    el('div', { className: 'kicker', textContent: (b.kind === 'note' ? 'Study note' : 'Book review') + (b.example ? ' · example' : '') }),
     el('h2', { id: 'panel-title', textContent: b.title }),
-    el('div', { className: 'meta' }, el('span', { textContent: b.author || '' }), b.read ? el('span', { textContent: 'Read ' + b.read }) : '', el('span', { className: 'stars', textContent: stars(b.rating || 0) })),
-    el('div', { className: 'review' }, ...paras)
+    el('div', { className: 'meta' }, el('span', { textContent: b.author || '' }), b.read ? el('span', { textContent: (b.kind === 'note' ? 'Written ' : 'Read ') + b.read }) : '', b.rating ? el('span', { className: 'stars', textContent: stars(b.rating) }) : ''),
+    el('div', { className: 'review' }, ...paras),
+    b.url ? el('div', { className: 'btns' }, el('a', { className: 'cta', href: b.url, textContent: b.kind === 'note' ? '노트 전체 읽기 →' : '전체 글 읽기 →' })) : ''
   ], '← 책장 전체', () => { hooks.onItem(null); showBookList(); });
 }
 function showRepoList() {
